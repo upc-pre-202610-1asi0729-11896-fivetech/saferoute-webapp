@@ -1,0 +1,59 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "subscription.domain.model" {
+  class Subscription {
+    + id: string
+    + organizationId: string
+    + planId: string
+    + state: string
+    + startDate: string
+    + endDate: string
+  }
+  class Plan {
+    + id: string
+    + planTier: string
+    + maxRoutes: number
+    + maxDrivers: number
+    + price: number
+  }
+}
+
+package "subscription.presentation.components" {
+  class PlanSelector <<component>> {
+    - selectedPlan: Plan
+    - errorMessage: string
+    - store: SubscriptionStore
+    + selectPlan(plan: Plan)
+    + confirmSelection()
+    + clearSelection()
+  }
+  class SubscriptionStatus <<component>> {
+    + subscription: Subscription (input)
+    + plan: Plan (input)
+    + getStatusLabel(): string
+    + getRemainingDays(): number
+    + isActive(): boolean
+  }
+}
+
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "subscription.application" {
+  class SubscriptionStore {
+  }
+}
+
+App --> PlanSelector : «composes»
+App --> SubscriptionStatus : «composes»
+PlanSelector --> SubscriptionStore : «uses»
+PlanSelector --> Plan : «uses»
+SubscriptionStatus --> Subscription : «input»
+SubscriptionStatus --> Plan : «input»
+
+@enduml

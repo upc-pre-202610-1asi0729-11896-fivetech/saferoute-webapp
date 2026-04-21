@@ -1,12 +1,6 @@
 @startuml
 skinparam monochrome false
 
-package "app" {
-  class App <<component>> {
-    + title: Signal<string>
-  }
-}
-
 package "notifications.application" {
   class NotificationsStore {
     - notificationsSignal: Signal<Notification[]>
@@ -16,38 +10,13 @@ package "notifications.application" {
     + notifications: Signal<Notification[]>
     + alerts: Signal<Alert[]>
     + announcements: Signal<Announcement[]>
-    + loadNotificationsByParent(parentId: string): void
-    + loadAlerts(notificationId: string): void
-    + loadAnnouncementsByRoute(routeId: string): void
-    + createNotification(request: CreateNotificationRequest): void
-    + triggerAlert(notificationId: string): void
-    + createAnnouncement(request: CreateAnnouncementRequest): void
-    + markAsRead(notificationId: string): void
-  }
-}
-
-package "notifications.domain.model" {
-  class Notification {
-    + id: string
-    + organizationId: string
-    + parentId: string
-    + tripId: string
-    + category: string
-    + deliveryState: string
-    + message: string
-    + sentAt: string
-  }
-  class Alert {
-    + id: string
-    + notificationId: string
-    + triggeredAt: string
-  }
-  class Announcement {
-    + id: string
-    + notificationId: string
-    + routeId: string
-    + message: string
-    + publishedAt: string
+    + loadNotificationsByParent(parentId: string)
+    + loadAlerts(notificationId: string)
+    + loadAnnouncementsByRoute(routeId: string)
+    + createNotification(request: CreateNotificationRequest)
+    + triggerAlert(notificationId: string)
+    + createAnnouncement(request: CreateAnnouncementRequest)
+    + markAsRead(notificationId: string)
   }
 }
 
@@ -114,39 +83,16 @@ package "notifications.infrastructure" {
   }
 }
 
-package "notifications.presentation.components" {
-  class NotificationList <<component>> {
-    - notifications: Notification[] (input)
-    - unreadCount: number
-    + markAsRead(notificationId: string): void
-    + filterByCategory(category: string): Notification[]
-    + getUnreadCount(): number
-    ' outputs
-    + notificationRead: string (output)
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "notifications.domain.model" {
+  class Notification {
   }
-  class AlertPanel <<component>> {
-    - alerts: Alert[] (input)
-    - hasActivePanic: boolean
-    + triggerPanic(): void
-    + dismissAlert(alertId: string): void
-    ' outputs
-    + panicTriggered (output)
-    + alertDismissed: string (output)
+  class Alert {
   }
-  class AnnouncementForm <<component>> {
-    - message: string
-    - routeId: string
-    - errorMessage: string
-    + submitAnnouncement(): void
-    + clearFields(): void
-    ' outputs
-    + announcementPublished: Announcement (output)
+  class Announcement {
   }
 }
 
-App --> NotificationList : «composes»
-App --> AlertPanel : «composes»
-App --> AnnouncementForm : «composes»
 NotificationsStore --> NotificationsApi : «uses»
 NotificationsStore --> Notification : «uses»
 NotificationsStore --> Alert : «uses»
@@ -154,16 +100,17 @@ NotificationsStore --> Announcement : «uses»
 NotificationsApi --> NotificationAssembler : «uses»
 NotificationsApi --> AlertAssembler : «uses»
 NotificationsApi --> AnnouncementAssembler : «uses»
+NotificationsApi ..> CreateNotificationRequest : «uses»
+NotificationsApi ..> CreateAlertRequest : «uses»
+NotificationsApi ..> CreateAnnouncementRequest : «uses»
+NotificationsApi ..> NotificationResource : «returns»
+NotificationsApi ..> AlertResource : «returns»
+NotificationsApi ..> AnnouncementResource : «returns»
 NotificationAssembler --> Notification : «creates»
 NotificationAssembler ..> NotificationResource : «transforms»
 AlertAssembler --> Alert : «creates»
 AlertAssembler ..> AlertResource : «transforms»
 AnnouncementAssembler --> Announcement : «creates»
 AnnouncementAssembler ..> AnnouncementResource : «transforms»
-NotificationList --> NotificationsStore : «uses»
-NotificationList --> Notification : «input»
-AlertPanel --> NotificationsStore : «uses»
-AlertPanel --> Alert : «input»
-AnnouncementForm --> NotificationsStore : «uses»
 
 @enduml

@@ -1,0 +1,92 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "stakeholder.domain.model" {
+  class Parent {
+    + id: string
+    + fullName: string
+    + email: string
+    + phoneNumber: string
+    + organizationId: string
+  }
+  class Driver {
+    + id: string
+    + fullName: string
+    + email: string
+    + phoneNumber: string
+    + licenseNumber: string
+    + organizationId: string
+  }
+  class Child {
+    + id: string
+    + fullName: string
+    + age: number
+    + enrollmentState: string
+    + parentId: string
+  }
+  class StudentGroup {
+    + id: string
+    + name: string
+    + organizationId: string
+    + childIds: string[]
+    + isFinalized: boolean
+  }
+}
+
+package "stakeholder.presentation.components" {
+  class ParentList <<component>> {
+    - searchQuery: string
+    - store: StakeholderStore
+    + filterParents(): Parent[]
+    + selectParent(parent: Parent)
+    + deleteParent(parentId: string)
+  }
+  class DriverList <<component>> {
+    - searchQuery: string
+    - store: StakeholderStore
+    + filterDrivers(): Driver[]
+    + selectDriver(driver: Driver)
+    + deleteDriver(driverId: string)
+  }
+  class ChildList <<component>> {
+    - searchQuery: string
+    - store: StakeholderStore
+    + filterChildren(): Child[]
+    + selectChild(child: Child)
+    + deleteChild(childId: string)
+  }
+  class StudentGroupList <<component>> {
+    - searchQuery: string
+    - store: StakeholderStore
+    + filterGroups(): StudentGroup[]
+    + selectGroup(group: StudentGroup)
+    + finalizeGroup(groupId: string)
+  }
+}
+
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "stakeholder.application" {
+  class StakeholderStore {
+  }
+}
+
+App --> ParentList : «composes»
+App --> DriverList : «composes»
+App --> ChildList : «composes»
+App --> StudentGroupList : «composes»
+ParentList --> StakeholderStore : «uses»
+ParentList --> Parent : «uses»
+DriverList --> StakeholderStore : «uses»
+DriverList --> Driver : «uses»
+ChildList --> StakeholderStore : «uses»
+ChildList --> Child : «uses»
+StudentGroupList --> StakeholderStore : «uses»
+StudentGroupList --> StudentGroup : «uses»
+
+@enduml

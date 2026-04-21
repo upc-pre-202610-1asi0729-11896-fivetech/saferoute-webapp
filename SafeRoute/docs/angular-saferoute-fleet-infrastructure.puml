@@ -1,12 +1,6 @@
 @startuml
 skinparam monochrome false
 
-package "app" {
-  class App <<component>> {
-    + title: Signal<string>
-  }
-}
-
 package "fleet.application" {
   class FleetStore {
     - routesSignal: Signal<Route[]>
@@ -18,47 +12,13 @@ package "fleet.application" {
     + stops: Signal<Stop[]>
     + vehicles: Signal<Vehicle[]>
     + assignments: Signal<Assignment[]>
-    + loadRoutes(organizationId: string): void
-    + loadStops(routeId: string): void
-    + loadVehicles(organizationId: string): void
-    + createRoute(request: CreateRouteRequest): void
-    + activateRoute(id: string): void
-    + createVehicle(request: CreateVehicleRequest): void
-    + createAssignment(request: CreateAssignmentRequest): void
-  }
-}
-
-package "fleet.domain.model" {
-  class Route {
-    + id: string
-    + name: string
-    + organizationId: string
-    + routeState: string
-    + departureTime: string
-    + serviceDays: string[]
-    + vehicleId: string
-  }
-  class Stop {
-    + id: string
-    + routeId: string
-    + name: string
-    + latitude: number
-    + longitude: number
-    + stopOrder: number
-  }
-  class Vehicle {
-    + id: string
-    + organizationId: string
-    + plate: string
-    + model: string
-    + brand: string
-    + capacity: number
-  }
-  class Assignment {
-    + id: string
-    + routeId: string
-    + driverId: string
-    + childIds: string[]
+    + loadRoutes(organizationId: string)
+    + loadStops(routeId: string)
+    + loadVehicles(organizationId: string)
+    + createRoute(request: CreateRouteRequest)
+    + activateRoute(id: string)
+    + createVehicle(request: CreateVehicleRequest)
+    + createAssignment(request: CreateAssignmentRequest)
   }
 }
 
@@ -149,53 +109,18 @@ package "fleet.infrastructure" {
   }
 }
 
-package "fleet.presentation.components" {
-  class RouteForm <<component>> {
-    - name: string
-    - departureTime: string
-    - serviceDays: string[]
-    - errorMessage: string
-    + submitRoute(): void
-    + clearFields(): void
-    ' outputs
-    + routeCreated: Route (output)
-    + routeUpdated: Route (output)
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "fleet.domain.model" {
+  class Route {
   }
-  class StopList <<component>> {
-    - stops: Stop[] (input)
-    + reorderStops(stops: Stop[]): void
-    + selectStop(stop: Stop): void
-    ' outputs
-    + stopSelected: Stop (output)
-    + stopRemoved: string (output)
-    + stopsReordered: Stop[] (output)
+  class Stop {
   }
-  class VehicleList <<component>> {
-    - vehicles: Vehicle[] (input)
-    - searchQuery: string
-    + filterVehicles(): Vehicle[]
-    + selectVehicle(vehicle: Vehicle): void
-    ' outputs
-    + vehicleSelected: Vehicle (output)
-    + vehicleDeleted: string (output)
+  class Vehicle {
   }
-  class AssignmentForm <<component>> {
-    - selectedDriver: Driver
-    - selectedChildren: Child[]
-    - errorMessage: string
-    + assignDriver(driverId: string): void
-    + addChild(childId: string): void
-    + removeChild(childId: string): void
-    + submitAssignment(): void
-    ' outputs
-    + assignmentSubmitted: Assignment (output)
+  class Assignment {
   }
 }
 
-App --> RouteForm : «composes»
-App --> StopList : «composes»
-App --> VehicleList : «composes»
-App --> AssignmentForm : «composes»
 FleetStore --> FleetApi : «uses»
 FleetStore --> Route : «uses»
 FleetStore --> Stop : «uses»
@@ -205,6 +130,14 @@ FleetApi --> RouteAssembler : «uses»
 FleetApi --> StopAssembler : «uses»
 FleetApi --> VehicleAssembler : «uses»
 FleetApi --> AssignmentAssembler : «uses»
+FleetApi ..> CreateRouteRequest : «uses»
+FleetApi ..> CreateStopRequest : «uses»
+FleetApi ..> CreateVehicleRequest : «uses»
+FleetApi ..> CreateAssignmentRequest : «uses»
+FleetApi ..> RouteResource : «returns»
+FleetApi ..> StopResource : «returns»
+FleetApi ..> VehicleResource : «returns»
+FleetApi ..> AssignmentResource : «returns»
 RouteAssembler --> Route : «creates»
 RouteAssembler ..> RouteResource : «transforms»
 StopAssembler --> Stop : «creates»
@@ -213,11 +146,5 @@ VehicleAssembler --> Vehicle : «creates»
 VehicleAssembler ..> VehicleResource : «transforms»
 AssignmentAssembler --> Assignment : «creates»
 AssignmentAssembler ..> AssignmentResource : «transforms»
-RouteForm --> FleetStore : «uses»
-StopList --> FleetStore : «uses»
-StopList --> Stop : «input»
-VehicleList --> FleetStore : «uses»
-VehicleList --> Vehicle : «input»
-AssignmentForm --> FleetStore : «uses»
 
 @enduml

@@ -1,0 +1,76 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "notifications.domain.model" {
+  class Notification {
+    + id: string
+    + organizationId: string
+    + parentId: string
+    + tripId: string
+    + category: string
+    + deliveryState: string
+    + message: string
+    + sentAt: string
+  }
+  class Alert {
+    + id: string
+    + notificationId: string
+    + triggeredAt: string
+  }
+  class Announcement {
+    + id: string
+    + notificationId: string
+    + routeId: string
+    + message: string
+    + publishedAt: string
+  }
+}
+
+package "notifications.presentation.components" {
+  class NotificationList <<component>> {
+    + notifications: Notification[] (input)
+    - store: NotificationsStore
+    + markAsRead(notificationId: string)
+    + filterByCategory(category: string): Notification[]
+    + getUnreadCount(): number
+  }
+  class AlertPanel <<component>> {
+    + alerts: Alert[] (input)
+    - store: NotificationsStore
+    + triggerPanic()
+    + dismissAlert(alertId: string)
+    + hasActivePanic(): boolean
+  }
+  class AnnouncementForm <<component>> {
+    - message: string
+    - routeId: string
+    - errorMessage: string
+    - store: NotificationsStore
+    + submitAnnouncement()
+    + clearFields()
+  }
+}
+
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "notifications.application" {
+  class NotificationsStore {
+  }
+}
+
+App --> NotificationList : «composes»
+App --> AlertPanel : «composes»
+App --> AnnouncementForm : «composes»
+NotificationList --> NotificationsStore : «uses»
+NotificationList --> Notification : «input»
+AlertPanel --> NotificationsStore : «uses»
+AlertPanel --> Alert : «input»
+AnnouncementForm --> NotificationsStore : «uses»
+AnnouncementForm --> Announcement : «uses»
+
+@enduml

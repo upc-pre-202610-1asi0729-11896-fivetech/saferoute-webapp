@@ -1,0 +1,91 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "iam.domain.model" {
+  class User {
+    + id: string
+    + firstName: string
+    + lastName: string
+    + email: string
+    + roleTier: string
+    + organizationId: string
+  }
+  class Organization {
+    + id: string
+    + name: string
+    + status: string
+    + createdAt: string
+  }
+}
+
+package "iam.presentation.components" {
+  class AdminLoginForm <<component>> {
+    - email: string
+    - password: string
+    - errorMessage: string
+    - store: IamStore
+    + submitLogin()
+    + clearFields()
+  }
+  class AdminRegisterForm <<component>> {
+    - firstName: string
+    - lastName: string
+    - email: string
+    - password: string
+    - confirmPassword: string
+    - errorMessage: string
+    - store: IamStore
+    + submitRegister()
+    + clearFields()
+    + passwordsMatch(): boolean
+  }
+  class UserLoginForm <<component>> {
+    - email: string
+    - password: string
+    - errorMessage: string
+    - store: IamStore
+    + submitLogin()
+    + clearFields()
+  }
+  class OrganizationForm <<component>> {
+    - name: string
+    - errorMessage: string
+    - store: IamStore
+    + submitOrganization()
+    + clearFields()
+  }
+  class OrganizationProfile <<component>> {
+    + organization: Organization (input)
+    + getStatusLabel(): string
+    + isActive(): boolean
+  }
+}
+
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "iam.application" {
+  class IamStore {
+  }
+}
+
+App --> AdminLoginForm : «composes»
+App --> AdminRegisterForm : «composes»
+App --> UserLoginForm : «composes»
+App --> OrganizationForm : «composes»
+App --> OrganizationProfile : «composes»
+AdminLoginForm --> IamStore : «uses»
+AdminRegisterForm --> IamStore : «uses»
+UserLoginForm --> IamStore : «uses»
+OrganizationForm --> IamStore : «uses»
+OrganizationProfile --> Organization : «input»
+AdminLoginForm --> User : «uses»
+AdminRegisterForm --> User : «uses»
+UserLoginForm --> User : «uses»
+OrganizationForm --> Organization : «uses»
+
+@enduml

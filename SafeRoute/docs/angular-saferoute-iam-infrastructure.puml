@@ -1,12 +1,6 @@
 @startuml
 skinparam monochrome false
 
-package "app" {
-  class App <<component>> {
-    + title: Signal<string>
-  }
-}
-
 package "iam.application" {
   class IamStore {
     - currentUserSignal: Signal<User>
@@ -15,27 +9,11 @@ package "iam.application" {
     + currentUser: Signal<User>
     + organization: Signal<Organization>
     + isAuthenticated: Signal<boolean>
-    + signIn(email: string, password: string): void
-    + signOut(): void
-    + registerAdmin(request: RegisterUserRequest): void
-    + loadOrganization(id: string): void
-  }
-}
-
-package "iam.domain.model" {
-  class User {
-    + id: string
-    + firstName: string
-    + lastName: string
-    + email: string
-    + roleTier: string
-    + organizationId: string
-  }
-  class Organization {
-    + id: string
-    + name: string
-    + status: string
-    + createdAt: string
+    + signIn(email: string, password: string)
+    + signOut()
+    + registerAdmin(request: RegisterUserRequest)
+    + loadOrganization(id: string)
+    + createOrganization(request: CreateOrganizationRequest)
   }
 }
 
@@ -50,6 +28,7 @@ package "iam.infrastructure" {
   }
   class UserAssembler {
     + toEntityFromResource(resource: UserResource): User
+    + toEntitiesFromResponse(resources: UserResource[]): User[]
   }
   class OrganizationAssembler {
     + toEntityFromResource(resource: OrganizationResource): Organization
@@ -85,63 +64,27 @@ package "iam.infrastructure" {
   }
 }
 
-package "iam.presentation.components" {
-  class AdminLoginForm <<component>> {
-    - email: string
-    - password: string
-    - errorMessage: string
-    + submitLogin(): void
-    + clearFields(): void
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "iam.domain.model" {
+  class User {
   }
-  class AdminRegisterForm <<component>> {
-    - firstName: string
-    - lastName: string
-    - email: string
-    - password: string
-    - confirmPassword: string
-    - errorMessage: string
-    + submitRegister(): void
-    + clearFields(): void
-    + passwordsMatch(): boolean
-  }
-  class UserLoginForm <<component>> {
-    - email: string
-    - password: string
-    - errorMessage: string
-    + submitLogin(): void
-    + clearFields(): void
-  }
-  class OrganizationForm <<component>> {
-    - name: string
-    - errorMessage: string
-    + submitOrganization(): void
-    + clearFields(): void
-  }
-  class OrganizationProfile <<component>> {
-    + organization: Organization (input)
-    + isActive(): boolean
-    + getStatusLabel(): string
+  class Organization {
   }
 }
 
-App --> AdminLoginForm : «composes»
-App --> AdminRegisterForm : «composes»
-App --> UserLoginForm : «composes»
-App --> OrganizationForm : «composes»
-App --> OrganizationProfile : «composes»
 IamStore --> IamApi : «uses»
 IamStore --> User : «uses»
 IamStore --> Organization : «uses»
 IamApi --> UserAssembler : «uses»
 IamApi --> OrganizationAssembler : «uses»
+IamApi ..> RegisterUserRequest : «uses»
+IamApi ..> CreateOrganizationRequest : «uses»
+IamApi ..> SignInResponse : «returns»
+IamApi ..> UserResource : «returns»
+IamApi ..> OrganizationResource : «returns»
 UserAssembler --> User : «creates»
 UserAssembler ..> UserResource : «transforms»
 OrganizationAssembler --> Organization : «creates»
 OrganizationAssembler ..> OrganizationResource : «transforms»
-AdminLoginForm --> IamStore : «uses»
-AdminRegisterForm --> IamStore : «uses»
-UserLoginForm --> IamStore : «uses»
-OrganizationForm --> IamStore : «uses»
-OrganizationProfile --> Organization : «input»
 
 @enduml

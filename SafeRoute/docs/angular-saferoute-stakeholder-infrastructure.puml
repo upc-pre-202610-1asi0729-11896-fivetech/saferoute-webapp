@@ -1,12 +1,6 @@
 @startuml
 skinparam monochrome false
 
-package "app" {
-  class App <<component>> {
-    + title: Signal<string>
-  }
-}
-
 package "stakeholder.application" {
   class StakeholderStore {
     - parentsSignal: Signal<Parent[]>
@@ -18,47 +12,15 @@ package "stakeholder.application" {
     + drivers: Signal<Driver[]>
     + children: Signal<Child[]>
     + groups: Signal<StudentGroup[]>
-    + loadParents(organizationId: string): void
-    + loadDrivers(organizationId: string): void
-    + loadChildren(parentId: string): void
-    + loadGroups(organizationId: string): void
-    + createParent(request: CreateParentRequest): void
-    + createDriver(request: CreateDriverRequest): void
-    + createChild(request: CreateChildRequest): void
-    + createGroup(request: CreateStudentGroupRequest): void
-    + finalizeGroup(groupId: string): void
-  }
-}
-
-package "stakeholder.domain.model" {
-  class Parent {
-    + id: string
-    + fullName: string
-    + email: string
-    + phoneNumber: string
-    + organizationId: string
-  }
-  class Driver {
-    + id: string
-    + fullName: string
-    + email: string
-    + phoneNumber: string
-    + licenseNumber: string
-    + organizationId: string
-  }
-  class Child {
-    + id: string
-    + fullName: string
-    + age: number
-    + enrollmentState: string
-    + parentId: string
-  }
-  class StudentGroup {
-    + id: string
-    + name: string
-    + organizationId: string
-    + childIds: string[]
-    + isFinalized: boolean
+    + loadParents(organizationId: string)
+    + loadDrivers(organizationId: string)
+    + loadChildren(parentId: string)
+    + loadGroups(organizationId: string)
+    + createParent(request: CreateParentRequest)
+    + createDriver(request: CreateDriverRequest)
+    + createChild(request: CreateChildRequest)
+    + createGroup(request: CreateStudentGroupRequest)
+    + finalizeGroup(groupId: string)
   }
 }
 
@@ -150,49 +112,18 @@ package "stakeholder.infrastructure" {
   }
 }
 
-package "stakeholder.presentation.components" {
-  class ParentList <<component>> {
-    - parents: Parent[] (input)
-    - searchQuery: string
-    + filterParents(): Parent[]
-    + selectParent(parent: Parent): void
-    ' outputs
-    + parentSelected: Parent (output)
-    + parentDeleted: string (output)
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "stakeholder.domain.model" {
+  class Parent {
   }
-  class DriverList <<component>> {
-    - drivers: Driver[] (input)
-    - searchQuery: string
-    + filterDrivers(): Driver[]
-    + selectDriver(driver: Driver): void
-    ' outputs
-    + driverSelected: Driver (output)
-    + driverDeleted: string (output)
+  class Driver {
   }
-  class ChildList <<component>> {
-    - children: Child[] (input)
-    - searchQuery: string
-    + filterChildren(): Child[]
-    + selectChild(child: Child): void
-    ' outputs
-    + childSelected: Child (output)
-    + childDeleted: string (output)
+  class Child {
   }
-  class StudentGroupList <<component>> {
-    - groups: StudentGroup[] (input)
-    - searchQuery: string
-    + filterGroups(): StudentGroup[]
-    + selectGroup(group: StudentGroup): void
-    ' outputs
-    + groupSelected: StudentGroup (output)
-    + groupFinalized: string (output)
+  class StudentGroup {
   }
 }
 
-App --> ParentList : «composes»
-App --> DriverList : «composes»
-App --> ChildList : «composes»
-App --> StudentGroupList : «composes»
 StakeholderStore --> StakeholderApi : «uses»
 StakeholderStore --> Parent : «uses»
 StakeholderStore --> Driver : «uses»
@@ -202,6 +133,14 @@ StakeholderApi --> ParentAssembler : «uses»
 StakeholderApi --> DriverAssembler : «uses»
 StakeholderApi --> ChildAssembler : «uses»
 StakeholderApi --> StudentGroupAssembler : «uses»
+StakeholderApi ..> CreateParentRequest : «uses»
+StakeholderApi ..> CreateDriverRequest : «uses»
+StakeholderApi ..> CreateChildRequest : «uses»
+StakeholderApi ..> CreateStudentGroupRequest : «uses»
+StakeholderApi ..> ParentResource : «returns»
+StakeholderApi ..> DriverResource : «returns»
+StakeholderApi ..> ChildResource : «returns»
+StakeholderApi ..> StudentGroupResource : «returns»
 ParentAssembler --> Parent : «creates»
 ParentAssembler ..> ParentResource : «transforms»
 DriverAssembler --> Driver : «creates»
@@ -210,13 +149,5 @@ ChildAssembler --> Child : «creates»
 ChildAssembler ..> ChildResource : «transforms»
 StudentGroupAssembler --> StudentGroup : «creates»
 StudentGroupAssembler ..> StudentGroupResource : «transforms»
-ParentList --> StakeholderStore : «uses»
-ParentList --> Parent : «input»
-DriverList --> StakeholderStore : «uses»
-DriverList --> Driver : «input»
-ChildList --> StakeholderStore : «uses»
-ChildList --> Child : «input»
-StudentGroupList --> StakeholderStore : «uses»
-StudentGroupList --> StudentGroup : «input»
 
 @enduml

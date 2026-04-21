@@ -1,0 +1,75 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "trip.domain.model" {
+  class Trip {
+    + id: string
+    + organizationId: string
+    + routeId: string
+    + driverId: string
+    + tripState: string
+    + startTime: string
+    + endTime: string
+  }
+  class Attendance {
+    + id: string
+    + tripId: string
+    + childId: string
+    + boardingState: string
+    + boardedAt: string
+  }
+  class Incident {
+    + id: string
+    + tripId: string
+    + description: string
+    + reportedAt: string
+  }
+}
+
+package "trip.presentation.components" {
+  class TripDashboard <<component>> {
+    + trip: Trip (input)
+    - store: TripStore
+    + startTrip()
+    + completeTrip()
+    + getTripState(): string
+  }
+  class AttendanceChecklist <<component>> {
+    + attendances: Attendance[] (input)
+    - store: TripStore
+    + updateBoardingState(childId: string, state: string)
+    + getPendingCount(): number
+    + isAllBoarded(): boolean
+  }
+  class IncidentForm <<component>> {
+    - description: string
+    - errorMessage: string
+    - store: TripStore
+    + submitIncident()
+    + clearFields()
+  }
+}
+
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "trip.application" {
+  class TripStore {
+  }
+}
+
+App --> TripDashboard : «composes»
+App --> AttendanceChecklist : «composes»
+App --> IncidentForm : «composes»
+TripDashboard --> TripStore : «uses»
+TripDashboard --> Trip : «input»
+AttendanceChecklist --> TripStore : «uses»
+AttendanceChecklist --> Attendance : «input»
+IncidentForm --> TripStore : «uses»
+IncidentForm --> Incident : «uses»
+
+@enduml

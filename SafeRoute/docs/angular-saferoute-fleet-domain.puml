@@ -1,0 +1,97 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "fleet.domain.model" {
+  class Route {
+    + id: string
+    + name: string
+    + organizationId: string
+    + routeState: string
+    + departureTime: string
+    + serviceDays: string[]
+    + vehicleId: string
+  }
+  class Stop {
+    + id: string
+    + routeId: string
+    + name: string
+    + latitude: number
+    + longitude: number
+    + stopOrder: number
+  }
+  class Vehicle {
+    + id: string
+    + organizationId: string
+    + plate: string
+    + model: string
+    + brand: string
+    + capacity: number
+  }
+  class Assignment {
+    + id: string
+    + routeId: string
+    + driverId: string
+    + childIds: string[]
+  }
+}
+
+package "fleet.presentation.components" {
+  class RouteForm <<component>> {
+    - name: string
+    - departureTime: string
+    - serviceDays: string[]
+    - errorMessage: string
+    - store: FleetStore
+    + submitRoute()
+    + addStop(stop: Stop)
+    + removeStop(stopId: string)
+    + clearFields()
+  }
+  class StopList <<component>> {
+    + stops: Stop[] (input)
+    + reorderStops(stops: Stop[])
+    + selectStop(stop: Stop)
+    + removeStop(stopId: string)
+  }
+  class VehicleList <<component>> {
+    - searchQuery: string
+    - store: FleetStore
+    + filterVehicles(): Vehicle[]
+    + selectVehicle(vehicle: Vehicle)
+    + deleteVehicle(vehicleId: string)
+  }
+  class AssignmentForm <<component>> {
+    - errorMessage: string
+    - store: FleetStore
+    + assignDriver(driverId: string)
+    + addChild(childId: string)
+    + removeChild(childId: string)
+    + submitAssignment()
+  }
+}
+
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "fleet.application" {
+  class FleetStore {
+  }
+}
+
+App --> RouteForm : «composes»
+App --> StopList : «composes»
+App --> VehicleList : «composes»
+App --> AssignmentForm : «composes»
+RouteForm --> FleetStore : «uses»
+RouteForm --> Route : «uses»
+StopList --> Stop : «input»
+VehicleList --> FleetStore : «uses»
+VehicleList --> Vehicle : «uses»
+AssignmentForm --> FleetStore : «uses»
+AssignmentForm --> Assignment : «uses»
+
+@enduml

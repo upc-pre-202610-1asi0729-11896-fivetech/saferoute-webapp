@@ -1,12 +1,6 @@
 @startuml
 skinparam monochrome false
 
-package "app" {
-  class App <<component>> {
-    + title: Signal<string>
-  }
-}
-
 package "subscription.application" {
   class SubscriptionStore {
     - subscriptionSignal: Signal<Subscription>
@@ -14,29 +8,11 @@ package "subscription.application" {
     - subscriptionApi: SubscriptionApi
     + subscription: Signal<Subscription>
     + plans: Signal<Plan[]>
-    + loadPlans(): void
-    + loadSubscription(organizationId: string): void
-    + createSubscription(request: CreateSubscriptionRequest): void
-    + upgradeSubscription(id: string, planId: string): void
-    + cancelSubscription(id: string): void
-  }
-}
-
-package "subscription.domain.model" {
-  class Subscription {
-    + id: string
-    + organizationId: string
-    + planId: string
-    + state: string
-    + startDate: string
-    + endDate: string
-  }
-  class Plan {
-    + id: string
-    + planTier: string
-    + maxRoutes: number
-    + maxDrivers: number
-    + price: number
+    + loadPlans()
+    + loadSubscription(organizationId: string)
+    + createSubscription(request: CreateSubscriptionRequest)
+    + upgradeSubscription(id: string, planId: string)
+    + cancelSubscription(id: string)
   }
 }
 
@@ -78,43 +54,25 @@ package "subscription.infrastructure" {
   }
 }
 
-package "subscription.presentation.components" {
-  class PlanSelector <<component>> {
-    - plans: Plan[] (input)
-    - selectedPlan: Plan
-    - errorMessage: string
-    + selectPlan(plan: Plan): void
-    + confirmSelection(): void
-    ' outputs
-    + planSelected: Plan (output)
+' ─── Referencias a otros paquetes ────────────────────────────────────────────
+package "subscription.domain.model" {
+  class Subscription {
   }
-  class SubscriptionStatus <<component>> {
-    - subscription: Subscription (input)
-    - plan: Plan (input)
-    + getStatusLabel(): string
-    + getRemainingDays(): number
-    + isActive(): boolean
-    ' outputs
-    + upgradeRequested (output)
-    + cancelRequested (output)
+  class Plan {
   }
 }
 
-App --> PlanSelector : «composes»
-App --> SubscriptionStatus : «composes»
 SubscriptionStore --> SubscriptionApi : «uses»
 SubscriptionStore --> Subscription : «uses»
 SubscriptionStore --> Plan : «uses»
 SubscriptionApi --> SubscriptionAssembler : «uses»
 SubscriptionApi --> PlanAssembler : «uses»
+SubscriptionApi ..> CreateSubscriptionRequest : «uses»
+SubscriptionApi ..> SubscriptionResource : «returns»
+SubscriptionApi ..> PlanResource : «returns»
 SubscriptionAssembler --> Subscription : «creates»
 SubscriptionAssembler ..> SubscriptionResource : «transforms»
 PlanAssembler --> Plan : «creates»
 PlanAssembler ..> PlanResource : «transforms»
-PlanSelector --> SubscriptionStore : «uses»
-PlanSelector --> Plan : «input»
-SubscriptionStatus --> SubscriptionStore : «uses»
-SubscriptionStatus --> Subscription : «input»
-SubscriptionStatus --> Plan : «input»
 
 @enduml
