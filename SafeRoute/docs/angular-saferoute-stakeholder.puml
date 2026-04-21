@@ -1,0 +1,222 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "stakeholder.application" {
+  class StakeholderStore {
+    - parentsSignal: Signal<Parent[]>
+    - driversSignal: Signal<Driver[]>
+    - childrenSignal: Signal<Child[]>
+    - groupsSignal: Signal<StudentGroup[]>
+    - stakeholderApi: StakeholderApi
+    + parents: Signal<Parent[]>
+    + drivers: Signal<Driver[]>
+    + children: Signal<Child[]>
+    + groups: Signal<StudentGroup[]>
+    + loadParents(organizationId: string): void
+    + loadDrivers(organizationId: string): void
+    + loadChildren(parentId: string): void
+    + loadGroups(organizationId: string): void
+    + createParent(request: CreateParentRequest): void
+    + createDriver(request: CreateDriverRequest): void
+    + createChild(request: CreateChildRequest): void
+    + createGroup(request: CreateStudentGroupRequest): void
+    + finalizeGroup(groupId: string): void
+  }
+}
+
+package "stakeholder.domain.model" {
+  class Parent {
+    + id: string
+    + fullName: string
+    + email: string
+    + phoneNumber: string
+    + organizationId: string
+  }
+  class Driver {
+    + id: string
+    + fullName: string
+    + email: string
+    + phoneNumber: string
+    + licenseNumber: string
+    + organizationId: string
+  }
+  class Child {
+    + id: string
+    + fullName: string
+    + age: number
+    + enrollmentState: string
+    + parentId: string
+  }
+  class StudentGroup {
+    + id: string
+    + name: string
+    + organizationId: string
+    + childIds: string[]
+    + isFinalized: boolean
+  }
+}
+
+package "stakeholder.infrastructure" {
+  class StakeholderApi {
+    - baseUrl: string
+    - http: HttpClient
+    + createParent(request: CreateParentRequest): Observable<ParentResource>
+    + getParentsByOrganization(organizationId: string): Observable<ParentResource[]>
+    + createDriver(request: CreateDriverRequest): Observable<DriverResource>
+    + getDriversByOrganization(organizationId: string): Observable<DriverResource[]>
+    + createChild(request: CreateChildRequest): Observable<ChildResource>
+    + getChildrenByParent(parentId: string): Observable<ChildResource[]>
+    + createStudentGroup(request: CreateStudentGroupRequest): Observable<StudentGroupResource>
+    + getGroupsByOrganization(organizationId: string): Observable<StudentGroupResource[]>
+    + finalizeGroup(groupId: string): Observable<StudentGroupResource>
+  }
+  class ParentAssembler {
+    + toEntityFromResource(resource: ParentResource): Parent
+    + toEntitiesFromResponse(resources: ParentResource[]): Parent[]
+  }
+  class DriverAssembler {
+    + toEntityFromResource(resource: DriverResource): Driver
+    + toEntitiesFromResponse(resources: DriverResource[]): Driver[]
+  }
+  class ChildAssembler {
+    + toEntityFromResource(resource: ChildResource): Child
+    + toEntitiesFromResponse(resources: ChildResource[]): Child[]
+  }
+  class StudentGroupAssembler {
+    + toEntityFromResource(resource: StudentGroupResource): StudentGroup
+    + toEntitiesFromResponse(resources: StudentGroupResource[]): StudentGroup[]
+  }
+  interface ParentResource {
+    + id: string
+    + fullName: string
+    + email: string
+    + phoneNumber: string
+    + organizationId: string
+  }
+  interface DriverResource {
+    + id: string
+    + fullName: string
+    + email: string
+    + phoneNumber: string
+    + licenseNumber: string
+    + organizationId: string
+  }
+  interface ChildResource {
+    + id: string
+    + fullName: string
+    + age: number
+    + enrollmentState: string
+    + parentId: string
+  }
+  interface StudentGroupResource {
+    + id: string
+    + name: string
+    + organizationId: string
+    + childIds: string[]
+    + isFinalized: boolean
+  }
+  interface CreateParentRequest {
+    + firstName: string
+    + lastName: string
+    + email: string
+    + phoneNumber: string
+    + organizationId: string
+    + userId: string
+  }
+  interface CreateDriverRequest {
+    + firstName: string
+    + lastName: string
+    + email: string
+    + phoneNumber: string
+    + licenseNumber: string
+    + organizationId: string
+    + userId: string
+  }
+  interface CreateChildRequest {
+    + firstName: string
+    + lastName: string
+    + age: number
+    + parentId: string
+  }
+  interface CreateStudentGroupRequest {
+    + name: string
+    + organizationId: string
+  }
+}
+
+package "stakeholder.presentation.components" {
+  class ParentList <<component>> {
+    - parents: Parent[] (input)
+    - searchQuery: string
+    + filterParents(): Parent[]
+    + selectParent(parent: Parent): void
+    ' outputs
+    + parentSelected: Parent (output)
+    + parentDeleted: string (output)
+  }
+  class DriverList <<component>> {
+    - drivers: Driver[] (input)
+    - searchQuery: string
+    + filterDrivers(): Driver[]
+    + selectDriver(driver: Driver): void
+    ' outputs
+    + driverSelected: Driver (output)
+    + driverDeleted: string (output)
+  }
+  class ChildList <<component>> {
+    - children: Child[] (input)
+    - searchQuery: string
+    + filterChildren(): Child[]
+    + selectChild(child: Child): void
+    ' outputs
+    + childSelected: Child (output)
+    + childDeleted: string (output)
+  }
+  class StudentGroupList <<component>> {
+    - groups: StudentGroup[] (input)
+    - searchQuery: string
+    + filterGroups(): StudentGroup[]
+    + selectGroup(group: StudentGroup): void
+    ' outputs
+    + groupSelected: StudentGroup (output)
+    + groupFinalized: string (output)
+  }
+}
+
+App --> ParentList : «composes»
+App --> DriverList : «composes»
+App --> ChildList : «composes»
+App --> StudentGroupList : «composes»
+StakeholderStore --> StakeholderApi : «uses»
+StakeholderStore --> Parent : «uses»
+StakeholderStore --> Driver : «uses»
+StakeholderStore --> Child : «uses»
+StakeholderStore --> StudentGroup : «uses»
+StakeholderApi --> ParentAssembler : «uses»
+StakeholderApi --> DriverAssembler : «uses»
+StakeholderApi --> ChildAssembler : «uses»
+StakeholderApi --> StudentGroupAssembler : «uses»
+ParentAssembler --> Parent : «creates»
+ParentAssembler ..> ParentResource : «transforms»
+DriverAssembler --> Driver : «creates»
+DriverAssembler ..> DriverResource : «transforms»
+ChildAssembler --> Child : «creates»
+ChildAssembler ..> ChildResource : «transforms»
+StudentGroupAssembler --> StudentGroup : «creates»
+StudentGroupAssembler ..> StudentGroupResource : «transforms»
+ParentList --> StakeholderStore : «uses»
+ParentList --> Parent : «input»
+DriverList --> StakeholderStore : «uses»
+DriverList --> Driver : «input»
+ChildList --> StakeholderStore : «uses»
+ChildList --> Child : «input»
+StudentGroupList --> StakeholderStore : «uses»
+StudentGroupList --> StudentGroup : «input»
+
+@enduml

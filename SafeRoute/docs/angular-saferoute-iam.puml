@@ -1,0 +1,147 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "iam.application" {
+  class IamStore {
+    - currentUserSignal: Signal<User>
+    - organizationSignal: Signal<Organization>
+    - iamApi: IamApi
+    + currentUser: Signal<User>
+    + organization: Signal<Organization>
+    + isAuthenticated: Signal<boolean>
+    + signIn(email: string, password: string): void
+    + signOut(): void
+    + registerAdmin(request: RegisterUserRequest): void
+    + loadOrganization(id: string): void
+  }
+}
+
+package "iam.domain.model" {
+  class User {
+    + id: string
+    + firstName: string
+    + lastName: string
+    + email: string
+    + roleTier: string
+    + organizationId: string
+  }
+  class Organization {
+    + id: string
+    + name: string
+    + status: string
+    + createdAt: string
+  }
+}
+
+package "iam.infrastructure" {
+  class IamApi {
+    - baseUrl: string
+    - http: HttpClient
+    + signIn(email: string, password: string): Observable<SignInResponse>
+    + registerUser(request: RegisterUserRequest): Observable<UserResource>
+    + createOrganization(request: CreateOrganizationRequest): Observable<OrganizationResource>
+    + getOrganizationById(id: string): Observable<OrganizationResource>
+  }
+  class UserAssembler {
+    + toEntityFromResource(resource: UserResource): User
+  }
+  class OrganizationAssembler {
+    + toEntityFromResource(resource: OrganizationResource): Organization
+  }
+  interface UserResource {
+    + id: string
+    + fullName: string
+    + email: string
+    + roleTier: string
+    + organizationId: string
+  }
+  interface OrganizationResource {
+    + id: string
+    + name: string
+    + status: string
+    + createdAt: string
+  }
+  interface RegisterUserRequest {
+    + firstName: string
+    + lastName: string
+    + email: string
+    + password: string
+    + roleTier: string
+    + organizationId: string
+  }
+  interface CreateOrganizationRequest {
+    + name: string
+  }
+  interface SignInResponse {
+    + token: string
+    + userId: string
+    + roleTier: string
+  }
+}
+
+package "iam.presentation.components" {
+  class AdminLoginForm <<component>> {
+    - email: string
+    - password: string
+    - errorMessage: string
+    + submitLogin(): void
+    + clearFields(): void
+  }
+  class AdminRegisterForm <<component>> {
+    - firstName: string
+    - lastName: string
+    - email: string
+    - password: string
+    - confirmPassword: string
+    - errorMessage: string
+    + submitRegister(): void
+    + clearFields(): void
+    + passwordsMatch(): boolean
+  }
+  class UserLoginForm <<component>> {
+    - email: string
+    - password: string
+    - errorMessage: string
+    + submitLogin(): void
+    + clearFields(): void
+  }
+  class OrganizationForm <<component>> {
+    - name: string
+    - errorMessage: string
+    + submitOrganization(): void
+    + clearFields(): void
+  }
+  class OrganizationProfile <<component>> {
+    + organization: Organization (input)
+    + isActive(): boolean
+    + getStatusLabel(): string
+  }
+}
+
+App --> AdminLoginForm : «composes»
+App --> AdminRegisterForm : «composes»
+App --> UserLoginForm : «composes»
+App --> OrganizationForm : «composes»
+App --> OrganizationProfile : «composes»
+IamStore --> IamApi : «uses»
+IamStore --> User : «uses»
+IamStore --> Organization : «uses»
+IamApi --> UserAssembler : «uses»
+IamApi --> OrganizationAssembler : «uses»
+UserAssembler --> User : «creates»
+UserAssembler ..> UserResource : «transforms»
+OrganizationAssembler --> Organization : «creates»
+OrganizationAssembler ..> OrganizationResource : «transforms»
+AdminLoginForm --> IamStore : «uses»
+AdminRegisterForm --> IamStore : «uses»
+UserLoginForm --> IamStore : «uses»
+OrganizationForm --> IamStore : «uses»
+OrganizationProfile --> Organization : «input»
+
+@enduml

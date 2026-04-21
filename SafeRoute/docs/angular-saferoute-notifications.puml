@@ -1,0 +1,169 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "notifications.application" {
+  class NotificationsStore {
+    - notificationsSignal: Signal<Notification[]>
+    - alertsSignal: Signal<Alert[]>
+    - announcementsSignal: Signal<Announcement[]>
+    - notificationsApi: NotificationsApi
+    + notifications: Signal<Notification[]>
+    + alerts: Signal<Alert[]>
+    + announcements: Signal<Announcement[]>
+    + loadNotificationsByParent(parentId: string): void
+    + loadAlerts(notificationId: string): void
+    + loadAnnouncementsByRoute(routeId: string): void
+    + createNotification(request: CreateNotificationRequest): void
+    + triggerAlert(notificationId: string): void
+    + createAnnouncement(request: CreateAnnouncementRequest): void
+    + markAsRead(notificationId: string): void
+  }
+}
+
+package "notifications.domain.model" {
+  class Notification {
+    + id: string
+    + organizationId: string
+    + parentId: string
+    + tripId: string
+    + category: string
+    + deliveryState: string
+    + message: string
+    + sentAt: string
+  }
+  class Alert {
+    + id: string
+    + notificationId: string
+    + triggeredAt: string
+  }
+  class Announcement {
+    + id: string
+    + notificationId: string
+    + routeId: string
+    + message: string
+    + publishedAt: string
+  }
+}
+
+package "notifications.infrastructure" {
+  class NotificationsApi {
+    - baseUrl: string
+    - http: HttpClient
+    + createNotification(request: CreateNotificationRequest): Observable<NotificationResource>
+    + getNotificationsByParent(parentId: string): Observable<NotificationResource[]>
+    + dispatchNotification(id: string): Observable<NotificationResource>
+    + triggerAlert(request: CreateAlertRequest): Observable<AlertResource>
+    + getAlertsByNotification(notificationId: string): Observable<AlertResource[]>
+    + createAnnouncement(request: CreateAnnouncementRequest): Observable<AnnouncementResource>
+    + getAnnouncementsByRoute(routeId: string): Observable<AnnouncementResource[]>
+  }
+  class NotificationAssembler {
+    + toEntityFromResource(resource: NotificationResource): Notification
+    + toEntitiesFromResponse(resources: NotificationResource[]): Notification[]
+  }
+  class AlertAssembler {
+    + toEntityFromResource(resource: AlertResource): Alert
+    + toEntitiesFromResponse(resources: AlertResource[]): Alert[]
+  }
+  class AnnouncementAssembler {
+    + toEntityFromResource(resource: AnnouncementResource): Announcement
+    + toEntitiesFromResponse(resources: AnnouncementResource[]): Announcement[]
+  }
+  interface NotificationResource {
+    + id: string
+    + organizationId: string
+    + parentId: string
+    + tripId: string
+    + category: string
+    + deliveryState: string
+    + message: string
+    + sentAt: string
+  }
+  interface AlertResource {
+    + id: string
+    + notificationId: string
+    + triggeredAt: string
+  }
+  interface AnnouncementResource {
+    + id: string
+    + notificationId: string
+    + routeId: string
+    + message: string
+    + publishedAt: string
+  }
+  interface CreateNotificationRequest {
+    + organizationId: string
+    + parentId: string
+    + tripId: string
+    + category: string
+    + message: string
+  }
+  interface CreateAlertRequest {
+    + notificationId: string
+  }
+  interface CreateAnnouncementRequest {
+    + notificationId: string
+    + routeId: string
+    + message: string
+  }
+}
+
+package "notifications.presentation.components" {
+  class NotificationList <<component>> {
+    - notifications: Notification[] (input)
+    - unreadCount: number
+    + markAsRead(notificationId: string): void
+    + filterByCategory(category: string): Notification[]
+    + getUnreadCount(): number
+    ' outputs
+    + notificationRead: string (output)
+  }
+  class AlertPanel <<component>> {
+    - alerts: Alert[] (input)
+    - hasActivePanic: boolean
+    + triggerPanic(): void
+    + dismissAlert(alertId: string): void
+    ' outputs
+    + panicTriggered (output)
+    + alertDismissed: string (output)
+  }
+  class AnnouncementForm <<component>> {
+    - message: string
+    - routeId: string
+    - errorMessage: string
+    + submitAnnouncement(): void
+    + clearFields(): void
+    ' outputs
+    + announcementPublished: Announcement (output)
+  }
+}
+
+App --> NotificationList : «composes»
+App --> AlertPanel : «composes»
+App --> AnnouncementForm : «composes»
+NotificationsStore --> NotificationsApi : «uses»
+NotificationsStore --> Notification : «uses»
+NotificationsStore --> Alert : «uses»
+NotificationsStore --> Announcement : «uses»
+NotificationsApi --> NotificationAssembler : «uses»
+NotificationsApi --> AlertAssembler : «uses»
+NotificationsApi --> AnnouncementAssembler : «uses»
+NotificationAssembler --> Notification : «creates»
+NotificationAssembler ..> NotificationResource : «transforms»
+AlertAssembler --> Alert : «creates»
+AlertAssembler ..> AlertResource : «transforms»
+AnnouncementAssembler --> Announcement : «creates»
+AnnouncementAssembler ..> AnnouncementResource : «transforms»
+NotificationList --> NotificationsStore : «uses»
+NotificationList --> Notification : «input»
+AlertPanel --> NotificationsStore : «uses»
+AlertPanel --> Alert : «input»
+AnnouncementForm --> NotificationsStore : «uses»
+
+@enduml

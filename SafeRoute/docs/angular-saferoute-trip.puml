@@ -1,0 +1,164 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "trip.application" {
+  class TripStore {
+    - currentTripSignal: Signal<Trip>
+    - attendancesSignal: Signal<Attendance[]>
+    - incidentsSignal: Signal<Incident[]>
+    - tripApi: TripApi
+    + currentTrip: Signal<Trip>
+    + attendances: Signal<Attendance[]>
+    + incidents: Signal<Incident[]>
+    + startTrip(request: StartTripRequest): void
+    + completeTrip(id: string): void
+    + updateBoardingStatus(tripId: string, childId: string, state: string): void
+    + reportIncident(tripId: string, description: string): void
+    + loadAttendances(tripId: string): void
+    + loadIncidents(tripId: string): void
+  }
+}
+
+package "trip.domain.model" {
+  class Trip {
+    + id: string
+    + organizationId: string
+    + routeId: string
+    + driverId: string
+    + tripState: string
+    + startTime: string
+    + endTime: string
+  }
+  class Attendance {
+    + id: string
+    + tripId: string
+    + childId: string
+    + boardingState: string
+    + boardedAt: string
+  }
+  class Incident {
+    + id: string
+    + tripId: string
+    + description: string
+    + reportedAt: string
+  }
+}
+
+package "trip.infrastructure" {
+  class TripApi {
+    - baseUrl: string
+    - http: HttpClient
+    + startTrip(request: StartTripRequest): Observable<TripResource>
+    + getTripById(id: string): Observable<TripResource>
+    + completeTrip(id: string): Observable<TripResource>
+    + updateBoardingStatus(tripId: string, request: UpdateBoardingRequest): Observable<AttendanceResource>
+    + getAttendancesByTrip(tripId: string): Observable<AttendanceResource[]>
+    + reportIncident(tripId: string, request: ReportIncidentRequest): Observable<IncidentResource>
+    + getIncidentsByTrip(tripId: string): Observable<IncidentResource[]>
+  }
+  class TripAssembler {
+    + toEntityFromResource(resource: TripResource): Trip
+  }
+  class AttendanceAssembler {
+    + toEntityFromResource(resource: AttendanceResource): Attendance
+    + toEntitiesFromResponse(resources: AttendanceResource[]): Attendance[]
+  }
+  class IncidentAssembler {
+    + toEntityFromResource(resource: IncidentResource): Incident
+    + toEntitiesFromResponse(resources: IncidentResource[]): Incident[]
+  }
+  interface TripResource {
+    + id: string
+    + organizationId: string
+    + routeId: string
+    + driverId: string
+    + tripState: string
+    + startTime: string
+    + endTime: string
+  }
+  interface AttendanceResource {
+    + id: string
+    + tripId: string
+    + childId: string
+    + boardingState: string
+    + boardedAt: string
+  }
+  interface IncidentResource {
+    + id: string
+    + tripId: string
+    + description: string
+    + reportedAt: string
+  }
+  interface StartTripRequest {
+    + routeId: string
+    + driverId: string
+    + organizationId: string
+  }
+  interface UpdateBoardingRequest {
+    + childId: string
+    + boardingState: string
+  }
+  interface ReportIncidentRequest {
+    + description: string
+  }
+}
+
+package "trip.presentation.components" {
+  class TripDashboard <<component>> {
+    - trip: Trip (input)
+    - tripState: string
+    + startTrip(): void
+    + completeTrip(): void
+    + getTripState(): string
+    ' outputs
+    + tripStarted: Trip (output)
+    + tripCompleted: Trip (output)
+  }
+  class AttendanceChecklist <<component>> {
+    - attendances: Attendance[] (input)
+    - pendingCount: number
+    + updateBoardingState(childId: string, state: string): void
+    + getPendingCount(): number
+    + isAllBoarded(): boolean
+    ' outputs
+    + boardingUpdated: Attendance (output)
+  }
+  class IncidentForm <<component>> {
+    - description: string
+    - errorMessage: string
+    + submitIncident(): void
+    + clearFields(): void
+    ' outputs
+    + incidentReported: Incident (output)
+  }
+}
+
+App --> TripDashboard : «composes»
+App --> AttendanceChecklist : «composes»
+App --> IncidentForm : «composes»
+TripStore --> TripApi : «uses»
+TripStore --> Trip : «uses»
+TripStore --> Attendance : «uses»
+TripStore --> Incident : «uses»
+TripApi --> TripAssembler : «uses»
+TripApi --> AttendanceAssembler : «uses»
+TripApi --> IncidentAssembler : «uses»
+TripAssembler --> Trip : «creates»
+TripAssembler ..> TripResource : «transforms»
+AttendanceAssembler --> Attendance : «creates»
+AttendanceAssembler ..> AttendanceResource : «transforms»
+IncidentAssembler --> Incident : «creates»
+IncidentAssembler ..> IncidentResource : «transforms»
+TripDashboard --> TripStore : «uses»
+TripDashboard --> Trip : «input»
+AttendanceChecklist --> TripStore : «uses»
+AttendanceChecklist --> Attendance : «input»
+IncidentForm --> TripStore : «uses»
+
+@enduml

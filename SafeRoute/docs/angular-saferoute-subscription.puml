@@ -1,0 +1,120 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "subscription.application" {
+  class SubscriptionStore {
+    - subscriptionSignal: Signal<Subscription>
+    - plansSignal: Signal<Plan[]>
+    - subscriptionApi: SubscriptionApi
+    + subscription: Signal<Subscription>
+    + plans: Signal<Plan[]>
+    + loadPlans(): void
+    + loadSubscription(organizationId: string): void
+    + createSubscription(request: CreateSubscriptionRequest): void
+    + upgradeSubscription(id: string, planId: string): void
+    + cancelSubscription(id: string): void
+  }
+}
+
+package "subscription.domain.model" {
+  class Subscription {
+    + id: string
+    + organizationId: string
+    + planId: string
+    + state: string
+    + startDate: string
+    + endDate: string
+  }
+  class Plan {
+    + id: string
+    + planTier: string
+    + maxRoutes: number
+    + maxDrivers: number
+    + price: number
+  }
+}
+
+package "subscription.infrastructure" {
+  class SubscriptionApi {
+    - baseUrl: string
+    - http: HttpClient
+    + createSubscription(request: CreateSubscriptionRequest): Observable<SubscriptionResource>
+    + getSubscriptionByOrganization(organizationId: string): Observable<SubscriptionResource>
+    + upgradeSubscription(id: string, planId: string): Observable<SubscriptionResource>
+    + cancelSubscription(id: string): Observable<void>
+    + getAllPlans(): Observable<PlanResource[]>
+  }
+  class SubscriptionAssembler {
+    + toEntityFromResource(resource: SubscriptionResource): Subscription
+  }
+  class PlanAssembler {
+    + toEntityFromResource(resource: PlanResource): Plan
+    + toEntitiesFromResponse(resources: PlanResource[]): Plan[]
+  }
+  interface SubscriptionResource {
+    + id: string
+    + organizationId: string
+    + planId: string
+    + state: string
+    + startDate: string
+    + endDate: string
+  }
+  interface PlanResource {
+    + id: string
+    + planTier: string
+    + maxRoutes: number
+    + maxDrivers: number
+    + price: number
+  }
+  interface CreateSubscriptionRequest {
+    + organizationId: string
+    + planId: string
+  }
+}
+
+package "subscription.presentation.components" {
+  class PlanSelector <<component>> {
+    - plans: Plan[] (input)
+    - selectedPlan: Plan
+    - errorMessage: string
+    + selectPlan(plan: Plan): void
+    + confirmSelection(): void
+    ' outputs
+    + planSelected: Plan (output)
+  }
+  class SubscriptionStatus <<component>> {
+    - subscription: Subscription (input)
+    - plan: Plan (input)
+    + getStatusLabel(): string
+    + getRemainingDays(): number
+    + isActive(): boolean
+    ' outputs
+    + upgradeRequested (output)
+    + cancelRequested (output)
+  }
+}
+
+App --> PlanSelector : «composes»
+App --> SubscriptionStatus : «composes»
+SubscriptionStore --> SubscriptionApi : «uses»
+SubscriptionStore --> Subscription : «uses»
+SubscriptionStore --> Plan : «uses»
+SubscriptionApi --> SubscriptionAssembler : «uses»
+SubscriptionApi --> PlanAssembler : «uses»
+SubscriptionAssembler --> Subscription : «creates»
+SubscriptionAssembler ..> SubscriptionResource : «transforms»
+PlanAssembler --> Plan : «creates»
+PlanAssembler ..> PlanResource : «transforms»
+PlanSelector --> SubscriptionStore : «uses»
+PlanSelector --> Plan : «input»
+SubscriptionStatus --> SubscriptionStore : «uses»
+SubscriptionStatus --> Subscription : «input»
+SubscriptionStatus --> Plan : «input»
+
+@enduml

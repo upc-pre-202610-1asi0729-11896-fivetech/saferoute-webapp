@@ -1,0 +1,223 @@
+@startuml
+skinparam monochrome false
+
+package "app" {
+  class App <<component>> {
+    + title: Signal<string>
+  }
+}
+
+package "fleet.application" {
+  class FleetStore {
+    - routesSignal: Signal<Route[]>
+    - stopsSignal: Signal<Stop[]>
+    - vehiclesSignal: Signal<Vehicle[]>
+    - assignmentsSignal: Signal<Assignment[]>
+    - fleetApi: FleetApi
+    + routes: Signal<Route[]>
+    + stops: Signal<Stop[]>
+    + vehicles: Signal<Vehicle[]>
+    + assignments: Signal<Assignment[]>
+    + loadRoutes(organizationId: string): void
+    + loadStops(routeId: string): void
+    + loadVehicles(organizationId: string): void
+    + createRoute(request: CreateRouteRequest): void
+    + activateRoute(id: string): void
+    + createVehicle(request: CreateVehicleRequest): void
+    + createAssignment(request: CreateAssignmentRequest): void
+  }
+}
+
+package "fleet.domain.model" {
+  class Route {
+    + id: string
+    + name: string
+    + organizationId: string
+    + routeState: string
+    + departureTime: string
+    + serviceDays: string[]
+    + vehicleId: string
+  }
+  class Stop {
+    + id: string
+    + routeId: string
+    + name: string
+    + latitude: number
+    + longitude: number
+    + stopOrder: number
+  }
+  class Vehicle {
+    + id: string
+    + organizationId: string
+    + plate: string
+    + model: string
+    + brand: string
+    + capacity: number
+  }
+  class Assignment {
+    + id: string
+    + routeId: string
+    + driverId: string
+    + childIds: string[]
+  }
+}
+
+package "fleet.infrastructure" {
+  class FleetApi {
+    - baseUrl: string
+    - http: HttpClient
+    + createRoute(request: CreateRouteRequest): Observable<RouteResource>
+    + getRoutesByOrganization(organizationId: string): Observable<RouteResource[]>
+    + activateRoute(id: string): Observable<RouteResource>
+    + addStop(request: CreateStopRequest): Observable<StopResource>
+    + getStopsByRoute(routeId: string): Observable<StopResource[]>
+    + createVehicle(request: CreateVehicleRequest): Observable<VehicleResource>
+    + getVehiclesByOrganization(organizationId: string): Observable<VehicleResource[]>
+    + createAssignment(request: CreateAssignmentRequest): Observable<AssignmentResource>
+    + getAssignmentByRoute(routeId: string): Observable<AssignmentResource>
+  }
+  class RouteAssembler {
+    + toEntityFromResource(resource: RouteResource): Route
+    + toEntitiesFromResponse(resources: RouteResource[]): Route[]
+  }
+  class StopAssembler {
+    + toEntityFromResource(resource: StopResource): Stop
+    + toEntitiesFromResponse(resources: StopResource[]): Stop[]
+  }
+  class VehicleAssembler {
+    + toEntityFromResource(resource: VehicleResource): Vehicle
+    + toEntitiesFromResponse(resources: VehicleResource[]): Vehicle[]
+  }
+  class AssignmentAssembler {
+    + toEntityFromResource(resource: AssignmentResource): Assignment
+  }
+  interface RouteResource {
+    + id: string
+    + name: string
+    + organizationId: string
+    + routeState: string
+    + departureTime: string
+    + serviceDays: string[]
+    + vehicleId: string
+  }
+  interface StopResource {
+    + id: string
+    + routeId: string
+    + name: string
+    + latitude: number
+    + longitude: number
+    + stopOrder: number
+  }
+  interface VehicleResource {
+    + id: string
+    + organizationId: string
+    + plate: string
+    + model: string
+    + brand: string
+    + capacity: number
+  }
+  interface AssignmentResource {
+    + id: string
+    + routeId: string
+    + driverId: string
+    + childIds: string[]
+  }
+  interface CreateRouteRequest {
+    + name: string
+    + organizationId: string
+    + departureTime: string
+    + serviceDays: string[]
+  }
+  interface CreateStopRequest {
+    + routeId: string
+    + name: string
+    + latitude: number
+    + longitude: number
+    + stopOrder: number
+  }
+  interface CreateVehicleRequest {
+    + organizationId: string
+    + plate: string
+    + model: string
+    + brand: string
+    + capacity: number
+  }
+  interface CreateAssignmentRequest {
+    + routeId: string
+    + driverId: string
+    + childIds: string[]
+  }
+}
+
+package "fleet.presentation.components" {
+  class RouteForm <<component>> {
+    - name: string
+    - departureTime: string
+    - serviceDays: string[]
+    - errorMessage: string
+    + submitRoute(): void
+    + clearFields(): void
+    ' outputs
+    + routeCreated: Route (output)
+    + routeUpdated: Route (output)
+  }
+  class StopList <<component>> {
+    - stops: Stop[] (input)
+    + reorderStops(stops: Stop[]): void
+    + selectStop(stop: Stop): void
+    ' outputs
+    + stopSelected: Stop (output)
+    + stopRemoved: string (output)
+    + stopsReordered: Stop[] (output)
+  }
+  class VehicleList <<component>> {
+    - vehicles: Vehicle[] (input)
+    - searchQuery: string
+    + filterVehicles(): Vehicle[]
+    + selectVehicle(vehicle: Vehicle): void
+    ' outputs
+    + vehicleSelected: Vehicle (output)
+    + vehicleDeleted: string (output)
+  }
+  class AssignmentForm <<component>> {
+    - selectedDriver: Driver
+    - selectedChildren: Child[]
+    - errorMessage: string
+    + assignDriver(driverId: string): void
+    + addChild(childId: string): void
+    + removeChild(childId: string): void
+    + submitAssignment(): void
+    ' outputs
+    + assignmentSubmitted: Assignment (output)
+  }
+}
+
+App --> RouteForm : «composes»
+App --> StopList : «composes»
+App --> VehicleList : «composes»
+App --> AssignmentForm : «composes»
+FleetStore --> FleetApi : «uses»
+FleetStore --> Route : «uses»
+FleetStore --> Stop : «uses»
+FleetStore --> Vehicle : «uses»
+FleetStore --> Assignment : «uses»
+FleetApi --> RouteAssembler : «uses»
+FleetApi --> StopAssembler : «uses»
+FleetApi --> VehicleAssembler : «uses»
+FleetApi --> AssignmentAssembler : «uses»
+RouteAssembler --> Route : «creates»
+RouteAssembler ..> RouteResource : «transforms»
+StopAssembler --> Stop : «creates»
+StopAssembler ..> StopResource : «transforms»
+VehicleAssembler --> Vehicle : «creates»
+VehicleAssembler ..> VehicleResource : «transforms»
+AssignmentAssembler --> Assignment : «creates»
+AssignmentAssembler ..> AssignmentResource : «transforms»
+RouteForm --> FleetStore : «uses»
+StopList --> FleetStore : «uses»
+StopList --> Stop : «input»
+VehicleList --> FleetStore : «uses»
+VehicleList --> Vehicle : «input»
+AssignmentForm --> FleetStore : «uses»
+
+@enduml
