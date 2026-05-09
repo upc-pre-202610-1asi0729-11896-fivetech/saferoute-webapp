@@ -1,0 +1,31 @@
+<h1 class="title">{{ (isEdit ? 'stop.edit-title' : 'stop.new-title') | translate }}</h1>
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-form-field>
+    <mat-label>{{ 'stop.location' | translate }}</mat-label>
+    <input matInput formControlName="location" required>
+    @if (form.get('location')!.touched && form.get('location')!.hasError('required')) {
+      <mat-error>{{ 'stop.error.location-required' | translate }}</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'stop.time' | translate }}</mat-label>
+    <input matInput formControlName="time" required>
+    @if (form.get('time')!.touched && form.get('time')!.hasError('required')) {
+      <mat-error>{{ 'stop.error.time-required' | translate }}</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ 'stop.route' | translate}}</mat-label>
+    <mat-select formControlName="routeId" required>
+      @for (route of routes(); track route.id) {
+        <mat-option [value]="route.id">{{ route.title }}</mat-option>
+      }
+    </mat-select>
+    @if (form.get('routeId')!.touched && form.get('routeId')!.hasError('required')) {
+      <mat-error>{{ 'stop.error.route-required' | translate }}</mat-error>
+    }
+  </mat-form-field>
+  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+    {{ (isEdit ? 'stop.update' : 'stop.create') | translate }}
+  </button>
+</form>

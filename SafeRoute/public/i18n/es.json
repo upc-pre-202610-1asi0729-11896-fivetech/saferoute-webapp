@@ -1,0 +1,75 @@
+{
+  "option": {
+    "home": "Inicio",
+    "about": "Acerca de",
+    "routes": "Rutas",
+    "stops": "Paradas"
+  },
+  "about": {
+    "title": "Acerca de nosotros",
+    "content": "SafeRoute es una plataforma especializada en el enrutamiento y gestión de flotas."
+  },
+  "home": {
+    "title": "Bienvenido",
+    "content": "Bienvenido a SafeRoute."
+  },
+  "page-not-found": {
+    "title": "Página no encontrada",
+    "content": "La ruta <strong>{{ invalid_path }}</strong> es inválida.",
+    "go-home": "Ir a Inicio"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados.",
+    "powered-by": "Desarrollado con",
+    "and": "y"
+  },
+  "routes": {
+    "list-title": "Rutas",
+    "id": "ID",
+    "title": "Título",
+    "description": "Descripción",
+    "actions": "Acciones",
+    "new": "Nueva Ruta",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "route": {
+    "new-title": "Crear Nueva Ruta",
+    "edit-title": "Editar Ruta",
+    "title": "Título",
+    "description": "Descripción",
+    "create": "Crear Ruta",
+    "update": "Actualizar Ruta",
+    "cancel": "Cancelar",
+    "error": {
+      "title-required": "El título es obligatorio",
+      "description-required": "La descripción es obligatoria"
+    }
+  },
+  "stops": {
+    "list-title": "Paradas",
+    "id": "ID",
+    "location": "Ubicación",
+    "time": "Hora",
+    "route": "Ruta",
+    "actions": "Acciones",
+    "new": "Nueva Parada",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "stop": {
+    "new-title": "Crear Nueva Parada",
+    "edit-title": "Editar Parada",
+    "location": "Ubicación",
+    "time": "Hora",
+    "route": "Ruta",
+    "create": "Crear Parada",
+    "update": "Actualizar Parada",
+    "cancel": "Cancelar",
+    "error": {
+      "location-required": "La ubicación es obligatoria",
+      "time-required": "La hora es obligatoria",
+      "route-required": "La ruta es obligatoria"
+    }
+  }
+}

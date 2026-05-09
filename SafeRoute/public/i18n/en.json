@@ -1,0 +1,75 @@
+{
+  "option": {
+    "home": "Home",
+    "about": "About Us",
+    "routes": "Routes",
+    "stops": "Stops"
+  },
+  "about": {
+    "title": "About us",
+    "content": "SafeRoute is a specialized platform for routing and fleet management."
+  },
+  "home": {
+    "title": "Welcome",
+    "content": "Welcome to SafeRoute."
+  },
+  "page-not-found": {
+    "title": "Page not found",
+    "content": "The path <strong>{{ invalid_path }}</strong> is not valid.",
+    "go-home": "Go Home"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "powered-by": "Powered by",
+    "and": "and"
+  },
+  "routes": {
+    "list-title": "Routes",
+    "id": "ID",
+    "title": "Title",
+    "description": "Description",
+    "actions": "Actions",
+    "new": "New Route",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "route": {
+    "new-title": "Create New Route",
+    "edit-title": "Edit Route",
+    "title": "Title",
+    "description": "Description",
+    "create": "Create Route",
+    "update": "Update Route",
+    "cancel": "Cancel",
+    "error": {
+      "title-required": "Title is required",
+      "description-required": "Description is required"
+    }
+  },
+  "stops": {
+    "list-title": "Stops",
+    "id": "ID",
+    "location": "Location",
+    "time": "Time",
+    "route": "Route",
+    "actions": "Actions",
+    "new": "New Stop",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "stop": {
+    "new-title": "Create New Stop",
+    "edit-title": "Edit Stop",
+    "location": "Location",
+    "time": "Time",
+    "route": "Route",
+    "create": "Create Stop",
+    "update": "Update Stop",
+    "cancel": "Cancel",
+    "error": {
+      "location-required": "Location is required",
+      "time-required": "Time is required",
+      "route-required": "Route is required"
+    }
+  }
+}
