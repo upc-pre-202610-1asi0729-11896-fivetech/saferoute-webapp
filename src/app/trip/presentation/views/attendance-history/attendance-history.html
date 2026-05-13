@@ -1,0 +1,137 @@
+<div class="ah-shell">
+
+  <!-- ══ HEADER ══ -->
+  <div class="ah-header">
+    <div>
+      <h1 class="ah-title">Attendance History</h1>
+      <p class="ah-sub">View student check-in and check-out records</p>
+    </div>
+  </div>
+
+  <!-- ══ SUMMARY STATS ══ -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-label">Total Trips</div>
+        <div class="stat-value">{{ totalTrips() }}</div>
+        <div class="stat-note">This month</div>
+      </div>
+      <mat-icon class="stat-icon icon-blue">calendar_today</mat-icon>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-label">Present Rate</div>
+        <div class="stat-value stat-green">{{ presentRate() }}</div>
+        <div class="stat-note">+2.1% vs last month</div>
+      </div>
+      <mat-icon class="stat-icon icon-green">check_circle</mat-icon>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-label">Late Check-ins</div>
+        <div class="stat-value stat-amber">{{ lateCheckIns() }}</div>
+        <div class="stat-note">This month</div>
+      </div>
+      <mat-icon class="stat-icon icon-amber">schedule</mat-icon>
+    </div>
+    <div class="stat-card">
+      <div class="stat-left">
+        <div class="stat-label">Absences</div>
+        <div class="stat-value stat-red">{{ absences() }}</div>
+        <div class="stat-note">This month</div>
+      </div>
+      <mat-icon class="stat-icon icon-red">cancel</mat-icon>
+    </div>
+  </div>
+
+  <!-- ══ BODY: Calendar + Detail ══ -->
+  <div class="ah-body">
+
+    <!-- ── Calendar ── -->
+    <div class="calendar-card">
+      <div class="cal-nav">
+        <span class="cal-month">{{ monthName() }}</span>
+        <div class="cal-arrows">
+          <button class="arrow-btn" (click)="prevMonth()"><mat-icon>chevron_left</mat-icon></button>
+          <button class="arrow-btn" (click)="nextMonth()"><mat-icon>chevron_right</mat-icon></button>
+        </div>
+      </div>
+
+      <div class="cal-grid-header">
+        @for (d of weekDayNames; track d) {
+          <div class="cal-day-name">{{ d }}</div>
+        }
+      </div>
+
+      <div class="cal-grid">
+        @for (cell of calendarDays(); track $index) {
+          @if (cell === null) {
+            <div class="cal-cell empty"></div>
+          } @else {
+            <div class="cal-cell"
+                 [class.today]="isToday(cell)"
+                 [class.selected]="isSelected(cell)"
+                 (click)="selectDay(cell)">
+              <span class="cal-day-num">{{ dayNumber(cell) }}</span>
+              @if (cell.dot) {
+                <span class="cal-dot" [class]="'dot-' + cell.dot"></span>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <div class="cal-legend">
+        <span class="legend-title">Legend</span>
+        <div class="legend-items">
+          <div class="legend-item"><span class="leg-dot dot-green"></span> All Present</div>
+          <div class="legend-item"><span class="leg-dot dot-amber"></span> Late Check-in</div>
+          <div class="legend-item"><span class="leg-dot dot-red"></span> Absence Recorded</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Daily Detail ── -->
+    <div class="detail-card">
+      <div class="detail-header">
+        <div>
+          <div class="detail-date">Daily Attendance - {{ selectedDate() }}</div>
+          @if (routeLabel()) {
+            <div class="detail-route">{{ routeLabel() }}</div>
+          }
+        </div>
+        <button class="btn-export">Export Report</button>
+      </div>
+
+      <table class="attend-table">
+        <thead>
+          <tr>
+            <th>STUDENT NAME</th>
+            <th>CHECK-IN</th>
+            <th>CHECK-OUT</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (rec of dailyRecords(); track rec.studentName) {
+            <tr>
+              <td class="student-name">{{ rec.studentName }}</td>
+              <td class="time-cell">{{ rec.checkIn ?? '—' }}</td>
+              <td class="time-cell">{{ rec.checkOut ?? '—' }}</td>
+              <td>
+                <span class="status-chip" [class]="'chip-' + rec.status">
+                  <mat-icon class="chip-ico">{{ rec.status === 'present' ? 'check_circle' : rec.status === 'late' ? 'schedule' : 'cancel' }}</mat-icon>
+                  {{ statusLabel(rec.status) }}
+                </span>
+              </td>
+            </tr>
+          }
+          @if (!dailyRecords().length) {
+            <tr><td colspan="4" class="no-data">Sin registros para este día</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

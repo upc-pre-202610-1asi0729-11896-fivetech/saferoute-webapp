@@ -1,0 +1,29 @@
+mat-button-toggle-group {
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  background: transparent !important;
+}
+
+mat-button-toggle-group ::ng-deep .mat-button-toggle {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+mat-button-toggle-group ::ng-deep .mat-button-toggle-checked {
+  background: rgba(245, 158, 11, 0.18) !important;
+  color: #F59E0B !important;
+}
+
+mat-button-toggle-group ::ng-deep .mat-button-toggle-button {
+  padding: 0 14px;
+  height: 32px;
+  line-height: 32px;
+}
+
+mat-button-toggle-group ::ng-deep .mat-button-toggle + .mat-button-toggle {
+  border-left: 1px solid rgba(255, 255, 255, 0.18) !important;
+}

@@ -1,0 +1,113 @@
+<div class="rm-shell">
+
+  <!-- Top header -->
+  <div class="rm-header">
+    <div>
+      <h1 class="rm-title">Gestión de Rutas</h1>
+      <p class="rm-sub">Configura y asigna rutas escolares</p>
+    </div>
+    <button mat-raised-button class="btn-new" (click)="goNew()">
+      <mat-icon>add</mat-icon> Nueva Ruta
+    </button>
+  </div>
+
+  <!-- Split view -->
+  <div class="rm-body">
+
+    <!-- Left: scrollable route cards -->
+    <div class="rm-list">
+      @if (store.loading()) {
+        <div class="rm-loading"><mat-spinner diameter="36"/></div>
+      }
+      @if (store.routes().length === 0 && !store.loading()) {
+        <div class="rm-empty">
+          <mat-icon>route</mat-icon>
+          <p>Sin rutas creadas</p>
+          <button mat-raised-button color="primary" (click)="goNew()">Nueva Ruta</button>
+        </div>
+      }
+      @for (r of store.routes(); track r.id) {
+        <div class="rmc" [class.rmc-selected]="selectedRoute()?.id === r.id" (click)="selectRoute(r)">
+
+          <!-- Name + status dot -->
+          <div class="rmc-head">
+            <span class="rmc-name">{{ r.name }}</span>
+            <span class="rmc-dot" [class]="r.status === 'ACTIVE' ? 'dot-active' : 'dot-inactive'"></span>
+          </div>
+
+          <!-- Type chip + time -->
+          <div class="rmc-meta">
+            <span class="rmc-type" [class]="r.type === 'RETURN' ? 'type-return' : 'type-outbound'">
+              {{ typeIcon(r.type) }} {{ typeLabel(r.type) }}
+            </span>
+            <span class="rmc-time"><mat-icon class="rmc-icon">schedule</mat-icon> {{ r.scheduledStartTime || '—' }}</span>
+          </div>
+
+          <!-- Origin / Destination -->
+          <div class="rmc-stops">
+            <div class="rmc-stop-row">
+              <span class="rmc-stop-dot origin"></span>
+              <span class="rmc-stop-name">{{ originName(r) }}</span>
+            </div>
+            <div class="rmc-stop-line"></div>
+            <div class="rmc-stop-row">
+              <span class="rmc-stop-dot dest"></span>
+              <span class="rmc-stop-name">{{ destName(r) }}</span>
+            </div>
+          </div>
+
+          <!-- Driver / Vehicle / Students -->
+          <div class="rmc-detail">
+            <mat-icon class="rmc-icon">person</mat-icon>
+            <span>{{ r.driverName || '— Sin conductor —' }}</span>
+          </div>
+          <div class="rmc-detail">
+            <mat-icon class="rmc-icon">school</mat-icon>
+            <span>{{ studentCount(r) }} alumno{{ studentCount(r) !== 1 ? 's' : '' }} asignado{{ studentCount(r) !== 1 ? 's' : '' }}</span>
+          </div>
+
+          <!-- Waypoints summary -->
+          @if (r.waypoints && r.waypoints.length) {
+            <div class="rmc-detail rmc-detail-stops">
+              <mat-icon class="rmc-icon">location_on</mat-icon>
+              <span>{{ r.waypoints.length }} parada{{ r.waypoints.length !== 1 ? 's' : '' }}</span>
+            </div>
+          }
+
+          <!-- Actions -->
+          <div class="rmc-actions">
+            <button mat-button class="btn-schedule" (click)="scheduleTrip(r, $event)" title="Crear viaje para hoy">
+              <mat-icon>add_road</mat-icon>
+              Crear Viaje
+            </button>
+            <button mat-icon-button class="btn-edit" (click)="goEdit(r, $event)" title="Editar ruta">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-delete" (click)="delete(r, $event)" title="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Right: map -->
+    <div class="rm-map-wrap">
+      <div #mapEl class="rm-map"></div>
+      @if (mapLoading()) {
+        <div class="rm-map-loading"><mat-spinner diameter="36"/></div>
+      }
+      @if (selectedRoute()) {
+        <div class="rm-map-footer">
+          <mat-icon style="font-size:1rem;width:1rem;height:1rem;color:var(--amber)">route</mat-icon>
+          <span class="rm-map-footer-name">{{ selectedRoute()!.name }}</span>
+          <span class="rmc-type" [class]="selectedRoute()!.type === 'RETURN' ? 'type-return' : 'type-outbound'">
+            {{ typeIcon(selectedRoute()!.type) }} {{ typeLabel(selectedRoute()!.type) }}
+          </span>
+          <span class="rm-map-footer-stops">{{ selectedRoute()!.waypoints.length }} paradas</span>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

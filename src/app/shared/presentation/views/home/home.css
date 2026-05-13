@@ -1,0 +1,81 @@
+.welcome-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.welcome-header .page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  color: var(--dark);
+}
+
+.role-badge-icon {
+  font-size: 1rem !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  margin-right: 0.35rem;
+  color: var(--amber);
+  vertical-align: middle;
+}
+
+.actions-title {
+  font-family: var(--heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 1.5rem 0 1rem;
+}
+
+.dashboard-card {
+  text-align: center;
+  padding: 1rem;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem !important;
+}
+
+.card-icon {
+  font-size: 2.25rem !important;
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  color: var(--navy);
+  margin-bottom: 0.4rem;
+}
+
+.card-title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dark);
+  font-family: var(--heading);
+}
+
+.card-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.welcome-section {
+  text-align: center;
+  padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.welcome-text {
+  font-size: 1.125rem;
+  color: var(--muted);
+  max-width: 480px;
+}

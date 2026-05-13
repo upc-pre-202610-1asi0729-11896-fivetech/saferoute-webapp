@@ -1,0 +1,134 @@
+.sidenav-container {
+  height: 100vh;
+  display: flex;
+}
+
+.sidenav {
+  width: 240px;
+  min-width: 240px;
+  background-color: var(--navy);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+::ng-deep .mat-drawer-inner-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 20px 18px;
+}
+
+/* Shield SVG sits flush with the text */
+.sidebar-brand svg {
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+}
+
+.brand-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--amber);
+  font-family: var(--heading);
+  letter-spacing: -0.3px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 6px 10px;
+}
+
+.sidebar-nav a {
+  color: rgba(255, 255, 255, 0.72);
+  border-radius: 10px;
+  margin: 2px 0;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-nav a:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: white;
+}
+
+.active-nav-item {
+  background: rgba(255, 183, 77, 0.18) !important;
+  color: var(--amber) !important;
+}
+
+.sidebar-footer {
+  padding: 10px 10px 14px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px 6px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.user-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: var(--amber);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #fff;
+}
+
+.user-role {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: capitalize;
+}
+
+.lang-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px 8px 8px;
+}
+
+.sign-out-btn,
+.sign-in-btn {
+  width: 100%;
+  color: rgba(255, 255, 255, 0.72);
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.sign-out-btn:hover,
+.sign-in-btn:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  background-color: var(--bg);
+}
+
+.page-content {
+  min-height: 100vh;
+  background-color: var(--bg);
+  padding: 0;
+}

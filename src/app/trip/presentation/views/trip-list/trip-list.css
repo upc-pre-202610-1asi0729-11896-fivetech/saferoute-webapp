@@ -1,0 +1,3 @@
+.loading-center { display: flex; justify-content: center; padding: 48px; }
+.error-card mat-card-content { display: flex; align-items: center; gap: 8px; }
+.full-width { width: 100%; }

@@ -1,0 +1,134 @@
+<div class="trip-monitor">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Trip Monitor</h1>
+      <p class="page-sub">Real-time overview of active trips</p>
+    </div>
+    <button mat-stroked-button (click)="refresh()">
+      <mat-icon>refresh</mat-icon> Refresh
+    </button>
+  </div>
+
+  <div class="monitor-grid">
+
+    <div class="trips-panel">
+      @if (store.loading()) {
+        <div class="state-msg"><mat-spinner diameter="20"/> Cargando…</div>
+      }
+
+      @for (trip of store.trips(); track trip.id) {
+        <div class="trip-card" [class.active]="selectedId() === trip.id" (click)="selectTrip(trip)">
+          <div class="trip-top">
+            <span class="trip-name">{{ trip.routeName || 'Viaje #' + trip.id }}</span>
+            <span class="status-badge"
+                  [style.background]="status(trip.status).bg"
+                  [style.color]="status(trip.status).text">
+              <mat-icon class="badge-icon">{{ status(trip.status).icon }}</mat-icon>
+              {{ status(trip.status).label }}
+            </span>
+          </div>
+
+          <div class="trip-meta">
+            <div class="meta-row"><mat-icon class="meta-icon">person</mat-icon>{{ trip.driverName || trip.driverId }}</div>
+            <div class="meta-row"><mat-icon class="meta-icon">group</mat-icon>{{ trip.studentsBoarded }} / {{ trip.studentsTotal }} alumnos</div>
+            @if (trip.currentStop) {
+              <div class="meta-row"><mat-icon class="meta-icon">location_on</mat-icon>{{ trip.currentStop }}</div>
+            }
+          </div>
+
+          @if (trip.studentsTotal) {
+            <div class="mini-progress">
+              <div class="mini-fill"
+                   [style.width.%]="progressPct(trip)"
+                   [style.background]="trip.status === 'COMPLETED' ? 'var(--green)' : 'var(--amber)'"></div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!store.loading() && store.trips().length === 0) {
+        <div class="state-msg">No hay viajes registrados.</div>
+      }
+    </div>
+
+    <div class="map-detail-col">
+      <div class="map-wrap">
+        <app-trip-map
+          [waypoints]="waypoints()"
+          [currentStop]="selected()?.currentStop ?? null"
+          [driverName]="selected()?.driverName ?? null"
+          [lineColor]="selected()?.status === 'COMPLETED' ? '#94a3b8' : '#ffb74d'"/>
+      </div>
+
+      @if (selected(); as sel) {
+        <div class="detail-card">
+          <div class="detail-header">
+            <h3 class="detail-title">{{ sel.routeName || 'Viaje #' + sel.id }}</h3>
+            <span class="status-badge"
+                  [style.background]="status(sel.status).bg"
+                  [style.color]="status(sel.status).text">
+              {{ status(sel.status).label }}
+            </span>
+          </div>
+
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Conductor</span>
+              <span class="detail-val">{{ sel.driverName || sel.driverId }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tipo</span>
+              <span class="detail-val">
+                <span class="type-chip" [class.outbound]="sel.tripType === 'OUTBOUND'" [class.return]="sel.tripType === 'RETURN'">
+                  {{ sel.tripType === 'OUTBOUND' ? 'Recojo' : sel.tripType === 'RETURN' ? 'Retorno' : (sel.tripType || '—') }}
+                </span>
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Alumnos</span>
+              <span class="detail-val">{{ sel.studentsBoarded }} / {{ sel.studentsTotal }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Parada actual</span>
+              <span class="detail-val">{{ sel.currentStop || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Inicio</span>
+              <span class="detail-val">{{ fmtTime(sel.startTime) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Fin</span>
+              <span class="detail-val">{{ fmtTime(sel.endTime) }}</span>
+            </div>
+          </div>
+
+          @if (selectedRoute()?.waypoints?.length) {
+            <div class="wps-mini">
+              <p class="wps-mini-title"><mat-icon class="meta-icon">location_on</mat-icon>Paradas de la ruta</p>
+              <div class="wps-mini-list">
+                @for (wp of selectedRoute()!.waypoints!; track wp.order; let i = $index; let last = $last) {
+                  <div class="wp-mini-item" [class.wp-current]="wp.name === sel.currentStop">
+                    <span class="wp-mini-num"
+                          [style.background]="i === 0 ? '#16a34a' : last ? '#dc2626' : '#16305a'">
+                      {{ i + 1 }}
+                    </span>
+                    <span class="wp-mini-name">{{ wp.name }}</span>
+                    @if (wp.name === sel.currentStop) {
+                      <mat-icon class="wp-here">directions_bus</mat-icon>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="placeholder-msg">
+          <mat-icon>touch_app</mat-icon>
+          Selecciona un viaje para ver el detalle
+        </div>
+      }
+    </div>
+
+  </div>
+</div>
