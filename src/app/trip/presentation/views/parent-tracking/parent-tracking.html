@@ -1,0 +1,86 @@
+<div class="parent-tracking">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Track My Child's Bus</h1>
+      <p class="page-sub">Seguimiento en tiempo real del transporte de tu hijo/a</p>
+    </div>
+    <div class="eta-badge">
+      <mat-icon>schedule</mat-icon>
+      <span>ETA: {{ eta() }}</span>
+    </div>
+  </div>
+
+  @if (store.loading()) {
+    <div class="loading"><mat-spinner diameter="32"/></div>
+  } @else if (!trackedTrip()) {
+    <div class="empty-state">
+      <mat-icon>directions_bus</mat-icon>
+      <p>No hay viajes activos asignados a tus hijos en este momento.</p>
+    </div>
+  } @else {
+    <div class="tracking-grid">
+      <div class="map-col">
+        <app-trip-map
+          [waypoints]="waypoints()"
+          [currentStop]="trackedTrip()?.currentStop ?? null"
+          [driverName]="trackedTrip()?.driverName ?? null"
+          lineColor="#ffb74d"/>
+
+        <div class="bus-info-card">
+          <div class="bus-info-item">
+            <mat-icon class="info-icon">person</mat-icon>
+            <div>
+              <span class="info-label">Conductor</span>
+              <span class="info-value">{{ trackedTrip()?.driverName }}</span>
+            </div>
+          </div>
+          <div class="bus-info-item">
+            <mat-icon class="info-icon">location_on</mat-icon>
+            <div>
+              <span class="info-label">Ubicación actual</span>
+              <span class="info-value">{{ trackedTrip()?.currentStop || trackedTrip()?.currentLocation || '—' }}</span>
+            </div>
+          </div>
+          <div class="bus-info-item">
+            <mat-icon class="info-icon">route</mat-icon>
+            <div>
+              <span class="info-label">Ruta</span>
+              <span class="info-value">{{ trackedTrip()?.routeName }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-col">
+        <h3 class="timeline-title">Recorrido del día</h3>
+        <div class="timeline">
+          @for (item of timeline(); track $index; let i = $index; let last = $last) {
+            <div class="timeline-item" [class.done]="item.done">
+              <div class="tl-line-col">
+                <div class="tl-dot" [class.done]="item.done">
+                  <mat-icon>{{ item.icon }}</mat-icon>
+                </div>
+                @if (!last) { <div class="tl-connector" [class.done]="item.done"></div> }
+              </div>
+              <div class="tl-content">
+                @if (item.time) { <span class="tl-time">{{ item.time }}</span> }
+                <span class="tl-event">{{ item.event }}</span>
+                <span class="tl-status" [class.done]="item.done" [class.pending]="!item.done">
+                  {{ item.done ? 'Completado' : 'Pendiente' }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="alert-box">
+          <mat-icon class="alert-icon">info</mat-icon>
+          <div>
+            <p class="alert-title">Bus en camino</p>
+            <p class="alert-msg">Tiempo estimado de llegada: <strong>{{ eta() }}</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

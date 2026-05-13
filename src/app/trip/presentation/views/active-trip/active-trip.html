@@ -1,0 +1,244 @@
+<div class="dv-shell">
+
+  <!-- ── Header ── -->
+  <div class="dv-header">
+    <div>
+      <h1 class="dv-title">Viajes</h1>
+      <p class="dv-sub">Selecciona un viaje para iniciar o continuar la simulación</p>
+    </div>
+    <div class="dv-header-actions">
+      @if (orsLoading()) {
+        <mat-spinner diameter="18" style="margin-right:8px"/>
+      }
+      <button mat-stroked-button class="btn-reiniciar" (click)="resetSim()">
+        <mat-icon>refresh</mat-icon> Reiniciar
+      </button>
+      @if (isEnRoute()) {
+        @if (!simRunning()) {
+          <button mat-raised-button class="btn-simular" (click)="startSim()">
+            <mat-icon>play_arrow</mat-icon> Simular
+          </button>
+        } @else {
+          <button mat-raised-button class="btn-simular" (click)="pauseSim()">
+            <mat-icon>pause</mat-icon> Pausar
+          </button>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- ── Info bar ── -->
+  <div class="dv-infobar">
+    <div class="dv-icard">
+      <span class="dv-icard-label">ESTADO</span>
+      <span class="dv-status-chip" [class]="statusClass(selectedTrip()?.status ?? '')">
+        {{ statusLabel() }}
+      </span>
+    </div>
+    <div class="dv-icard">
+      <span class="dv-icard-label">ALUMNOS</span>
+      <span class="dv-icard-value">{{ selectedTrip()?.studentsBoarded ?? 0 }} / {{ selectedTrip()?.studentsTotal ?? 0 }}</span>
+    </div>
+    <div class="dv-icard">
+      <span class="dv-icard-label">PROGRESO</span>
+      <span class="dv-icard-value">{{ progress() }}%</span>
+    </div>
+    <div class="dv-icard">
+      <span class="dv-icard-label">VEHÍCULO</span>
+      <span class="dv-icard-value">{{ selectedTrip()?.vehiclePlate ?? '—' }}</span>
+    </div>
+    <div class="dv-icard">
+      <span class="dv-icard-label">SALIDA</span>
+      <span class="dv-icard-value">{{ selectedTrip()?.scheduledStartTime ?? '—' }}</span>
+    </div>
+    <div class="dv-icard">
+      <span class="dv-icard-label">PARADA ACTUAL</span>
+      <span class="dv-icard-value dv-icard-stop">{{ currentStopName() }}</span>
+    </div>
+  </div>
+
+  <!-- ── Main 3-col ── -->
+  <div class="dv-main">
+
+    <!-- Left: trip list -->
+    <div class="dv-trips">
+      <div class="dv-panel-label">VIAJES DISPONIBLES</div>
+
+      @if (myTrips().length === 0) {
+        <div class="dv-empty">
+          <mat-icon>directions_bus</mat-icon>
+          <p>Sin viajes asignados</p>
+        </div>
+      }
+
+      @for (trip of myTrips(); track trip.id) {
+        <div class="dtc" [class.dtc-active]="selectedTrip()?.id === trip.id" (click)="selectTrip(trip)">
+          <div class="dtc-head">
+            <span class="dtc-name">{{ trip.routeName }}</span>
+            <span class="dtc-dot" [class]="statusClass(trip.status)"></span>
+          </div>
+          <div class="dtc-row">
+            <mat-icon class="dtc-icon">person</mat-icon>
+            <span>{{ trip.driverName }}</span>
+          </div>
+          <div class="dtc-row">
+            <mat-icon class="dtc-icon">group</mat-icon>
+            <span>{{ trip.studentsBoarded ?? 0 }}/{{ trip.studentsTotal ?? 0 }}</span>
+          </div>
+          <div class="dtc-footer">
+            <span class="dtc-type" [class]="trip.tripType === 'RETURN' ? 'type-return' : 'type-outbound'">
+              {{ tripTypeLabel(trip.tripType) }}
+            </span>
+            <span class="dtc-status-label" [class]="statusClass(trip.status)">
+              {{ trip.status === 'EN_ROUTE' ? 'En Ruta' : trip.status === 'COMPLETED' ? 'Completado' : 'Programado' }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Center: map -->
+    <div #mapEl class="dv-map"></div>
+
+    <!-- Right: stops -->
+    <div class="dv-stops">
+      <div class="dv-panel-label">
+        <mat-icon style="font-size:1rem;width:1rem;height:1rem;vertical-align:middle;color:var(--amber)">location_on</mat-icon>
+        Paradas <span class="dv-stop-count">{{ waypoints().length }}</span>
+      </div>
+
+      @if (!waypoints().length) {
+        <div class="dv-empty"><p>Sin paradas</p></div>
+      }
+
+      @for (stop of stops(); track stop.order; let i = $index; let last = $last) {
+        <div class="dvs" [class.dvs-done]="stop.done" [class.dvs-current]="stop.current" [class.dvs-last]="last">
+          <div class="dvs-num"
+               [style.background]="stop.done ? '#22c55e' : stop.current ? '#ffb74d' : i === 0 ? '#16a34a' : last ? '#dc2626' : '#e2e8f0'"
+               [style.color]="stop.done || stop.current || i === 0 || last ? '#fff' : '#64748b'">
+            @if (stop.done && i !== 0) {
+              <mat-icon style="font-size:.85rem;width:.85rem;height:.85rem">check</mat-icon>
+            } @else {
+              {{ i === 0 ? '✓' : i + 1 }}
+            }
+          </div>
+          <div class="dvs-info">
+            <span class="dvs-name">{{ i === 0 ? 'Origen' : stop.name }}</span>
+            @if (i === 0 && stop.done) { <span class="dvs-sub green">Completada</span> }
+            @else if (i === 0 && !stop.done) { <span class="dvs-sub muted">Punto de inicio</span> }
+            @if (stop.current) { <span class="dvs-sub amber">● Aquí ahora</span> }
+          </div>
+          @if (!stop.current && !stop.done) {
+            <mat-icon class="dvs-arrow">chevron_right</mat-icon>
+          }
+        </div>
+      }
+
+      <!-- Finish & Emergency buttons inside stops panel -->
+      <div class="dvs-actions">
+        @if (isScheduled()) {
+          <button mat-raised-button color="primary" class="dvs-btn-full" (click)="startTrip()">
+            <mat-icon>play_arrow</mat-icon> Iniciar Viaje
+          </button>
+        }
+        @if (isEnRoute()) {
+          <button mat-raised-button class="dvs-btn-finish" (click)="finishTrip()">
+            <mat-icon>flag</mat-icon> Finalizar Viaje
+          </button>
+        }
+        <button mat-raised-button class="dvs-btn-emergency" (click)="openEmergency()">
+          <mat-icon>warning</mat-icon> Emergencia
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Bottom bar ── -->
+  <div class="dv-footer">
+    <span class="dv-footer-name">{{ selectedTrip()?.routeName ?? '' }}</span>
+    <div class="dv-footer-bar">
+      <div class="dv-footer-fill" [style.width.%]="progress()"></div>
+    </div>
+    <span class="dv-footer-pct">{{ progress() }}%</span>
+  </div>
+
+</div>
+
+<!-- ── Emergency dialog overlay ── -->
+@if (emergencyDialog()) {
+  <div class="em-backdrop" (click)="closeEmergency()">
+    <div class="em-dialog" (click)="$event.stopPropagation()">
+
+      <div class="em-dialog-header">
+        <mat-icon class="em-header-icon">warning</mat-icon>
+        <span class="em-header-title">Situación de Emergencia</span>
+        <button class="em-close-btn" (click)="closeEmergency()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- ── Mode select ── -->
+      @if (emergencyMode() === null) {
+        <p class="em-mode-hint">Selecciona el tipo de emergencia:</p>
+        <div class="em-mode-btns">
+          <button class="em-mode-btn em-mode-urgent" (click)="emergencyMode.set('urgent')">
+            <mat-icon>phone</mat-icon>
+            <span class="em-mode-label">Urgente</span>
+            <span class="em-mode-sub">Llamar a emergencias</span>
+          </button>
+          <button class="em-mode-btn em-mode-mild" (click)="emergencyMode.set('mild')">
+            <mat-icon>description</mat-icon>
+            <span class="em-mode-label">Leve</span>
+            <span class="em-mode-sub">Reportar incidente</span>
+          </button>
+        </div>
+      }
+
+      <!-- ── Urgent: call screen ── -->
+      @if (emergencyMode() === 'urgent') {
+        <div class="em-urgent-body">
+          <div class="em-phone-circle">
+            <mat-icon>phone</mat-icon>
+          </div>
+          <p class="em-phone-label">Línea de emergencia</p>
+          <p class="em-phone-number">+51 900 000 000</p>
+          <button class="em-call-btn" (click)="callEmergency()">
+            <mat-icon>phone</mat-icon>
+            Llamar ahora
+          </button>
+          <button class="em-back-btn" (click)="emergencyMode.set(null)">Volver</button>
+        </div>
+      }
+
+      <!-- ── Mild: incident form ── -->
+      @if (emergencyMode() === 'mild') {
+        <div class="em-mild-body">
+          <div class="em-field">
+            <label class="em-label">Tipo de incidente</label>
+            <select class="em-select" [(ngModel)]="emergencyType">
+              <option value="RETRASO">Retraso</option>
+              <option value="AVERIA">Avería del vehículo</option>
+              <option value="ACCIDENTE">Accidente</option>
+              <option value="COMPORTAMIENTO">Comportamiento</option>
+              <option value="OTRO">Otro</option>
+            </select>
+          </div>
+          <div class="em-field">
+            <label class="em-label">Descripción</label>
+            <textarea class="em-textarea" [(ngModel)]="emergencyDesc"
+                      placeholder="Describe brevemente la situación..." rows="4"></textarea>
+          </div>
+          <div class="em-mild-actions">
+            <button class="em-back-btn" (click)="emergencyMode.set(null)">Volver</button>
+            <button class="em-submit-btn" (click)="submitEmergencyReport()">
+              <mat-icon>send</mat-icon>
+              Enviar reporte
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+}
