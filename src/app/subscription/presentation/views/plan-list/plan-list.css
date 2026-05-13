@@ -1,0 +1,162 @@
+/* Shell */
+.pl-shell {
+  min-height: 100vh; background: #f0f4f8;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 3rem 1.5rem 4rem;
+}
+
+/* ── Header ── */
+.pl-header { text-align: center; max-width: 620px; width: 100%; }
+
+.pl-eyebrow {
+  font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em;
+  color: #F59E0B; margin-bottom: 0.75rem;
+}
+
+.pl-title {
+  font-size: 2.4rem; font-weight: 900; line-height: 1.15;
+  color: #1a1a2e; margin: 0 0 0.75rem;
+  font-family: var(--heading, 'Montserrat', sans-serif);
+}
+
+.pl-sub {
+  font-size: 0.92rem; color: #64748b; margin: 0 0 2rem;
+}
+
+/* Billing toggle */
+.billing-toggle {
+  display: inline-flex; gap: 0;
+  border: 2px solid #e2e8f0; border-radius: 30px; overflow: hidden;
+  margin-bottom: 2.5rem; background: #fff;
+}
+.billing-btn {
+  padding: 0.45rem 1.4rem; font-size: 0.88rem; font-weight: 600;
+  border: none; background: transparent; color: #64748b; cursor: pointer;
+  border-radius: 28px; transition: all 0.18s;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.billing-btn.active {
+  background: #16305a; color: #fff;
+}
+.discount-badge {
+  background: #dcfce7; color: #15803d;
+  font-size: 0.7rem; font-weight: 800;
+  padding: 1px 6px; border-radius: 20px;
+}
+
+/* ── Plans grid ── */
+.pl-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem; width: 100%; max-width: 1100px;
+  align-items: start;
+}
+
+/* ── Plan card ── */
+.plan-card {
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  padding: 1.75rem 1.5rem;
+  position: relative; display: flex; flex-direction: column;
+  gap: 0.9rem; border: 2px solid transparent;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.plan-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,.1);
+}
+
+/* Popular card — highlighted border */
+.card-popular {
+  border-color: #16305a;
+  box-shadow: 0 4px 24px rgba(22,48,90,.15);
+}
+
+/* Top badge */
+.top-badge {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  padding: 4px 16px; border-radius: 20px;
+  font-size: 0.78rem; font-weight: 800; white-space: nowrap;
+}
+.badge-popular { background: #F59E0B; color: #fff; }
+.badge-dark    { background: #16305a; color: #fff; }
+
+/* Plan head */
+.plan-head { display: flex; gap: 0.75rem; align-items: flex-start; margin-top: 0.5rem; }
+.plan-icon-wrap {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.icon-popular { background: #fef3c7; }
+.plan-icon-wrap mat-icon {
+  font-size: 1.3rem !important; width: 1.3rem !important; height: 1.3rem !important;
+}
+
+.current-badge {
+  display: inline-block; background: #ccfbf1; color: #0d9488;
+  font-size: 0.7rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px; margin-bottom: 4px;
+}
+.plan-name {
+  font-size: 1.25rem; font-weight: 800; color: #1a1a2e; margin: 0 0 2px;
+  font-family: var(--heading, 'Montserrat', sans-serif);
+}
+.plan-subtitle { font-size: 0.78rem; color: #94a3b8; margin: 0; line-height: 1.4; }
+
+/* Price */
+.plan-price-row { display: flex; align-items: baseline; gap: 2px; }
+.price-currency { font-size: 1rem; font-weight: 700; color: #64748b; }
+.price-amount   { font-size: 2.8rem; font-weight: 900; color: #1a1a2e; line-height: 1; }
+.price-per      { font-size: 0.82rem; color: #94a3b8; margin-left: 4px; }
+
+.price-annual {
+  font-size: 0.75rem; color: #94a3b8; margin-top: -0.4rem;
+}
+.price-annual-active { color: #16a34a; font-weight: 600; }
+
+/* Feature list */
+.feature-list {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  flex: 1;
+}
+.feature-item {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.84rem; color: #334155;
+}
+.feat-disabled { color: #94a3b8; }
+
+.feat-icon {
+  font-size: 0.95rem !important; width: 0.95rem !important; height: 0.95rem !important;
+  flex-shrink: 0;
+}
+.feat-check { color: #16a34a; }
+.feat-x     { color: #cbd5e1; }
+
+/* CTA */
+.btn-plan {
+  width: 100%; padding: 0.7rem;
+  border-radius: 10px; border: 1.5px solid #e2e8f0;
+  background: #f8fafc; color: #475569;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; margin-top: 0.5rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+.btn-plan:hover:not(:disabled) { background: #f1f5f9; border-color: #cbd5e1; }
+.btn-plan:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-popular {
+  background: #16305a; color: #fff; border-color: #16305a;
+}
+.btn-popular:hover:not(:disabled) { background: #1e3f70; border-color: #1e3f70; }
+
+.btn-current {
+  background: #f0fdf4; color: #15803d;
+  border-color: #86efac; cursor: default;
+}
+
+/* Error */
+.pl-error {
+  margin-top: 1.5rem; color: #dc2626;
+  font-size: 0.85rem; text-align: center;
+}

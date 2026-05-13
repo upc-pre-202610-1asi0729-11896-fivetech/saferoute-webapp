@@ -1,0 +1,167 @@
+<div class="rf-shell">
+
+  <!-- Header -->
+  <div class="rf-header">
+    <div>
+      <h1 class="rf-title">{{ isEdit ? 'Editar Ruta' : 'Nueva Ruta' }}</h1>
+      <p class="rf-sub">{{ isEdit ? 'Actualiza los datos y paradas de la ruta' : 'Haz clic en el mapa para agregar paradas' }}</p>
+    </div>
+    <button mat-stroked-button (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver
+    </button>
+  </div>
+
+  <div class="rf-grid">
+
+    <!-- ── Left: form details ── -->
+    <div class="rf-left">
+      <div class="rf-card">
+        <h2 class="rf-section-label">
+          <mat-icon>edit_road</mat-icon>
+          Datos de la Ruta
+        </h2>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="rf-form">
+
+          <div class="rf-field">
+            <label class="rf-label">Nombre de la ruta *</label>
+            <input class="rf-input" formControlName="name" placeholder="Ej. Ruta Norte — Comas">
+            @if (form.get('name')!.touched && form.get('name')!.hasError('required')) {
+              <span class="rf-error">Campo requerido</span>
+            }
+          </div>
+
+          <div class="rf-row">
+            <div class="rf-field">
+              <label class="rf-label">Tipo</label>
+              <select class="rf-input rf-select" formControlName="type">
+                <option value="OUTBOUND">Recojo (ida)</option>
+                <option value="RETURN">Retorno (vuelta)</option>
+              </select>
+            </div>
+            <div class="rf-field">
+              <label class="rf-label">Estado</label>
+              <select class="rf-input rf-select" formControlName="status">
+                <option value="ACTIVE">Activa</option>
+                <option value="INACTIVE">Inactiva</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="rf-field">
+            <label class="rf-label">Hora de salida</label>
+            <input class="rf-input" formControlName="scheduledStartTime" type="time">
+          </div>
+
+          <div class="rf-field">
+            <label class="rf-label">Conductor asignado</label>
+            <select class="rf-input rf-select" formControlName="driverId">
+              <option [value]="null">— Sin asignar —</option>
+              @for (d of drivers(); track d.id) {
+                <option [value]="d.id">{{ d.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="rf-form-actions">
+            <button type="submit" class="rf-btn-save" [disabled]="form.invalid || saving()">
+              @if (saving()) { <mat-spinner diameter="16"></mat-spinner> }
+              @else { <mat-icon>save</mat-icon> }
+              {{ isEdit ? 'Actualizar Ruta' : 'Guardar Ruta' }}
+            </button>
+            <button type="button" class="rf-btn-cancel" (click)="cancel()">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Right: map + waypoints ── -->
+    <div class="rf-right">
+
+      <!-- Map card -->
+      <div class="rf-card rf-map-card">
+        <div class="rf-map-header">
+          <h2 class="rf-section-label" style="margin:0">
+            <mat-icon>map</mat-icon>
+            Mapa de Paradas
+          </h2>
+          <div class="rf-map-hint">
+            @if (orsLoading()) {
+              <mat-spinner diameter="14"></mat-spinner>
+              <span>Calculando ruta vial…</span>
+            } @else {
+              <mat-icon style="font-size:1rem;width:1rem;height:1rem;color:#94a3b8">touch_app</mat-icon>
+              <span>Haz clic en el mapa para agregar paradas</span>
+            }
+          </div>
+        </div>
+        <div id="route-map" class="rf-map"></div>
+      </div>
+
+      <!-- Waypoints list -->
+      <div class="rf-card rf-wp-card">
+        <div class="rf-wp-header">
+          <h2 class="rf-section-label" style="margin:0">
+            <mat-icon>location_on</mat-icon>
+            Paradas
+            <span class="rf-wp-count">{{ waypoints().length }}</span>
+          </h2>
+          @if (waypoints().length > 0) {
+            <button mat-button color="warn" (click)="clearWaypoints()">
+              <mat-icon>clear_all</mat-icon>
+              Limpiar todo
+            </button>
+          }
+        </div>
+
+        @if (waypoints().length === 0) {
+          <div class="rf-wp-empty">
+            <mat-icon>add_location_alt</mat-icon>
+            <p>Haz clic en el mapa para agregar la primera parada</p>
+          </div>
+        } @else {
+          <div class="rf-wp-list">
+            @for (wp of waypoints(); track wp.order; let i = $index) {
+              <div class="rf-wp-item">
+
+                <!-- Order badge -->
+                <div class="rf-wp-num"
+                     [style.background]="i === 0 ? '#16a34a' : i === waypoints().length-1 ? '#dc2626' : '#F59E0B'">
+                  {{ wp.order }}
+                </div>
+
+                <!-- Fields -->
+                <div class="rf-wp-fields">
+                  <input
+                    class="rf-wp-name"
+                    [value]="wp.name"
+                    (change)="updateWaypointName(i, $any($event.target).value)"
+                    placeholder="Nombre de parada">
+
+                  <!-- Student picker -->
+                  <select
+                    class="rf-wp-student"
+                    [ngModel]="wp.studentId ?? null"
+                    (ngModelChange)="updateWaypointStudent(i, $event)">
+                    <option [ngValue]="null">— Sin alumno asignado —</option>
+                    @for (c of children(); track c.id) {
+                      <option [ngValue]="c.id">{{ c.name }}{{ c.grade ? ' (' + c.grade + ')' : '' }}</option>
+                    }
+                  </select>
+
+                  <span class="rf-wp-coords">{{ wp.lat.toFixed(5) }}, {{ wp.lng.toFixed(5) }}</span>
+                </div>
+
+                <button mat-icon-button color="warn" (click)="removeWaypoint(i)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+  </div>
+</div>
