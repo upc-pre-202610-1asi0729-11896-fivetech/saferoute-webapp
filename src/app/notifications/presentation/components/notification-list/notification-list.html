@@ -1,0 +1,28 @@
+<div class="page-container">
+  <h1 class="page-title">{{ 'notification.list.title' | translate }}</h1>
+  @if (store.notifications().length === 0) {
+    <div class="empty-state">
+      <mat-icon>notifications_none</mat-icon>
+      <p>{{ 'notification.list.empty' | translate }}</p>
+    </div>
+  } @else {
+    <mat-card>
+      <mat-list>
+        @for (n of store.notifications(); track n.id) {
+          <mat-list-item [class.unread]="!n.read">
+            <mat-icon matListItemIcon [color]="n.read ? '' : 'primary'">
+              {{ n.read ? 'notifications_none' : 'notifications_active' }}
+            </mat-icon>
+            <span matListItemTitle>{{ n.title }}</span>
+            <span matListItemLine>{{ n.body }}</span>
+            @if (!n.read) {
+              <button mat-icon-button (click)="markRead(n.id)">
+                <mat-icon>check</mat-icon>
+              </button>
+            }
+          </mat-list-item>
+        }
+      </mat-list>
+    </mat-card>
+  }
+</div>
