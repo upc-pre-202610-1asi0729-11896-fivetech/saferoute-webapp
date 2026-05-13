@@ -1,0 +1,73 @@
+@use '@angular/material' as mat;
+
+// SafeRoute palette: navy primary + amber accent (no pinks/roses)
+$saferoute-primary: (
+  50:  #e8edf3,
+  100: #c5d2e0,
+  200: #9eb4cc,
+  300: #7795b7,
+  400: #597ea7,
+  500: #16305a,
+  600: #142b51,
+  700: #112447,
+  800: #0d1d3d,
+  900: #07112c,
+  contrast: (
+    50:  #08060d,
+    100: #08060d,
+    200: #08060d,
+    300: #ffffff,
+    400: #ffffff,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff
+  )
+);
+
+$saferoute-accent: (
+  50:  #fff8ee,
+  100: #ffeed4,
+  200: #ffe0b2,
+  300: #ffd28f,
+  400: #ffc26d,
+  500: #ffb74d,
+  600: #fda835,
+  700: #f8961e,
+  800: #ed8408,
+  900: #cf6c00,
+  contrast: (
+    50:  #08060d,
+    100: #08060d,
+    200: #08060d,
+    300: #08060d,
+    400: #08060d,
+    500: #08060d,
+    600: #08060d,
+    700: #08060d,
+    800: #ffffff,
+    900: #ffffff
+  )
+);
+
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: $saferoute-primary,
+      tertiary: $saferoute-accent
+    ),
+    typography: ('DM Sans', sans-serif),
+    density: 0
+  ));
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}

@@ -1,0 +1,20 @@
+export const environment = {
+  production: true,
+  platformProviderApiBaseUrl: 'https://saferoute-db.azurewebsites.net/api/v1', //'http://localhost:3000',
+  platformProviderRoutesEndpointPath: '/routes',
+  platformProviderStopsEndpointPath: '/stops',
+  platformProviderUsersEndpointPath: '/users',
+  platformProviderOrganizationsEndpointPath: '/organizations',
+  platformProviderSignInEndpointPath: '/sign-in',
+  platformProviderSignUpEndpointPath: '/sign-up',
+  platformProviderTripsEndpointPath: '/trips',
+  platformProviderIncidentsEndpointPath: '/incidents',
+  platformProviderNotificationsEndpointPath: '/notifications',
+  logoProviderApiBaseUrl: 'https://img.logo.dev/',
+  logoProviderPublishableKey: 'pk_MaaysUc_QNaCWpZNw7k5UA',
+  orsBaseUrl: 'https://api.openrouteservice.org',
+  orsApiKey:
+    'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjNhMjJlYzkyNWRkMTQyMjJiNTgxYzc1NWRhYWM4NDA1IiwiaCI6Im11cm11cjY0In0=',
+  simulationStepMs: 15000,
+  useFakeAuth: false,
+};

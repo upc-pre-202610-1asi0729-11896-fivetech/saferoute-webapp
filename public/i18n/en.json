@@ -1,0 +1,400 @@
+{
+  "option": {
+    "home": "Home",
+    "about": "About Us",
+    "profiles": "Profiles",
+    "routes": "Routes",
+    "stops": "Stops",
+    "trips": "Trips",
+    "plans": "Plans",
+    "alerts": "Alerts",
+    "sign-in": "Sign In",
+    "sign-out": "Sign Out",
+    "organization": "Organization",
+    "subscription": "Subscription",
+    "tracking": "Track Bus",
+    "attendance": "Attendance",
+    "community": "Community Management",
+    "profile": "My Profile"
+  },
+  "authoring-phrase": {
+    "intro": "Made with",
+    "use": "using",
+    "author": "by {{ brand }} Developer Team"
+  },
+  "about": {
+    "title": "About Us",
+    "content": "PowerTech is revolutionizing school transportation with SafeRoute."
+  },
+  "home": {
+    "title": "Welcome",
+    "content": "Welcome to SafeRoute Platform.",
+    "greeting": "Welcome, {{ name }}!",
+    "role": {
+      "admin": "Administrator",
+      "driver": "Driver",
+      "parent": "Parent",
+      "guest": "Guest"
+    },
+    "admin": {
+      "organization": "Organization",
+      "organization-desc": "Manage your transport organization",
+      "routes": "Routes",
+      "routes-desc": "Configure school routes",
+      "drivers": "Drivers & Profiles",
+      "drivers-desc": "Manage drivers and parents",
+      "subscription": "Subscription",
+      "subscription-desc": "View and manage your plan"
+    },
+    "driver": {
+      "trips": "My Trips",
+      "trips-desc": "View your assigned trips",
+      "routes": "Routes",
+      "routes-desc": "View your assigned routes",
+      "alerts": "Alerts",
+      "alerts-desc": "Check notifications"
+    },
+    "parent": {
+      "trips": "My Children's Trips",
+      "trips-desc": "Track the school bus in real time",
+      "alerts": "Alerts",
+      "alerts-desc": "View notifications and messages",
+      "plans": "Plans",
+      "plans-desc": "See available subscription plans"
+    }
+  },
+  "page-not-found": {
+    "title": "Page Not Found",
+    "content": "The path <strong>{{ invalid_path }}</strong> is not valid.",
+    "go-home": "Go Home"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "powered-by": "Powered by",
+    "and": "and"
+  },
+  "errors": {
+    "occurred": "Errors occurred"
+  },
+  "general": {
+    "loading": "Loading",
+    "save": "Save",
+    "cancel": "Cancel",
+    "search": "Search",
+    "refresh": "Refresh",
+    "edit": "Edit",
+    "delete": "Delete",
+    "new": "New",
+    "actions": "Actions",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "iam": {
+    "sign-in": {
+      "title": "Sign In",
+      "subtitle": "Select your account type to continue.",
+      "no-account": "Don't have an account?",
+      "mode": {
+        "user": "Parent / Driver",
+        "admin": "Administrator"
+      }
+    },
+    "sign-up": {
+      "title": "Create account",
+      "have-account": "Already have an account?",
+      "step-organization": "1. Organization",
+      "step-admin": "2. Administrator",
+      "mode": {
+        "user": "Parent / Driver",
+        "admin": "Administrator"
+      }
+    },
+    "admin-login": { "title": "Administrator sign in" },
+    "user-login": { "title": "Sign in" },
+    "admin-register": { "title": "Register administrator" },
+    "user-register": {
+      "title": "Create a Parent or Driver account",
+      "role": "Account type",
+      "org-placeholder": "e.g. org-1",
+      "org-help": "Ask your administrator for the organization ID."
+    },
+    "role": {
+      "parent": "Parent",
+      "driver": "Driver"
+    },
+    "organization-form": {
+      "title-new": "New organization",
+      "title-edit": "Edit organization"
+    },
+    "organization-management": {
+      "title": "My organization",
+      "empty": "No organization linked to your account."
+    },
+    "organization": {
+      "status": { "active": "Active", "suspended": "Suspended" },
+      "field": { "id": "ID", "created-at": "Created at" }
+    },
+    "fields": {
+      "first-name": "First name",
+      "last-name": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "confirm-password": "Confirm password",
+      "organization-name": "Organization name",
+      "organization-id": "Organization ID"
+    },
+    "actions": {
+      "sign-in": "Sign In",
+      "sign-out": "Sign Out",
+      "register": "Register",
+      "save": "Save",
+      "edit": "Edit",
+      "suspend": "Suspend",
+      "clear": "Clear"
+    },
+    "errors": {
+      "invalid-credentials": "Invalid email or password.",
+      "not-admin": "This account does not have administrator privileges.",
+      "use-admin-tab": "This is an administrator account. Use the Administrator tab.",
+      "password-mismatch": "Passwords do not match.",
+      "registration-failed": "Registration failed. Please try again.",
+      "organization-create-failed": "Could not create the organization."
+    }
+  },
+  "routes": {
+    "list-title": "Routes",
+    "id": "ID",
+    "title": "Title",
+    "description": "Description",
+    "actions": "Actions",
+    "new": "New Route",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "route": {
+    "new-title": "Create New Route",
+    "edit-title": "Edit Route",
+    "title": "Title",
+    "description": "Description",
+    "create": "Create Route",
+    "update": "Update Route",
+    "cancel": "Cancel",
+    "management": {
+      "title": "Route Management",
+      "subtitle": "Configure school bus routes",
+      "new": "New Route",
+      "edit": "Edit Route",
+      "empty": "No routes configured yet."
+    },
+    "fields": {
+      "name": "Route name",
+      "origin": "Origin",
+      "destination": "Destination",
+      "stops": "Number of stops",
+      "driver": "Driver",
+      "schedule": "Schedule"
+    },
+    "error": {
+      "title-required": "Title is required",
+      "description-required": "Description is required"
+    }
+  },
+  "stops": {
+    "list-title": "Stops",
+    "id": "ID",
+    "location": "Location",
+    "time": "Time",
+    "route": "Route",
+    "actions": "Actions",
+    "new": "New Stop",
+    "edit": "Edit",
+    "delete": "Delete"
+  },
+  "stop": {
+    "new-title": "Create New Stop",
+    "edit-title": "Edit Stop",
+    "location": "Location",
+    "time": "Time",
+    "route": "Route",
+    "create": "Create Stop",
+    "update": "Update Stop",
+    "cancel": "Cancel",
+    "error": {
+      "location-required": "Location is required",
+      "time-required": "Time is required",
+      "route-required": "Route is required"
+    }
+  },
+  "trip": {
+    "list": {
+      "title": "Trips",
+      "id": "ID",
+      "route": "Route",
+      "driver": "Driver",
+      "status": "Status",
+      "date": "Date",
+      "empty": "No trips found.",
+      "new": "New Trip"
+    },
+    "form": {
+      "new-title": "Create Trip",
+      "edit-title": "Edit Trip",
+      "route": "Route",
+      "driver": "Driver",
+      "date": "Date",
+      "create": "Create Trip",
+      "update": "Update Trip",
+      "cancel": "Cancel"
+    },
+    "monitor": {
+      "title": "Trip Monitor",
+      "subtitle": "Real-time overview of active trips",
+      "active": "Active Trips",
+      "no-active": "No active trips at the moment."
+    },
+    "active": {
+      "title": "My Active Trip",
+      "start": "Start Trip",
+      "end": "End Trip",
+      "emergency": "Emergency",
+      "no-trip": "No active trip assigned."
+    },
+    "tracking": {
+      "title": "Track My Child's Bus",
+      "no-trip": "No active trip to track."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "en-route": "En Route",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "notification": {
+    "list": {
+      "title": "Notifications",
+      "empty": "No notifications."
+    },
+    "alert": {
+      "title": "Alert Center",
+      "type": "Type",
+      "severity": "Severity",
+      "message": "Message",
+      "date": "Date",
+      "empty": "No alerts.",
+      "new": "Report Incident"
+    },
+    "message": {
+      "new-title": "New Message",
+      "to": "To",
+      "subject": "Subject",
+      "body": "Message",
+      "send": "Send",
+      "cancel": "Cancel"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "type": {
+      "incident": "Incident",
+      "info": "Information",
+      "warning": "Warning"
+    }
+  },
+  "stakeholder": {
+    "management": {
+      "title": "People Management",
+      "new": "Add Person"
+    },
+    "profile": {
+      "list-title": "Profiles",
+      "new": "New Profile",
+      "edit": "Edit Profile",
+      "empty": "No profiles found.",
+      "fields": {
+        "first-name": "First Name",
+        "last-name": "Last Name",
+        "email": "Email",
+        "role": "Role",
+        "organization": "Organization"
+      }
+    },
+    "student": {
+      "title": "Students",
+      "new": "New Student",
+      "empty": "No students found.",
+      "fields": {
+        "name": "Name",
+        "grade": "Grade",
+        "parent": "Parent"
+      }
+    },
+    "vehicle": {
+      "title": "Vehicles",
+      "new": "New Vehicle",
+      "empty": "No vehicles found.",
+      "fields": {
+        "plate": "License Plate",
+        "model": "Model",
+        "capacity": "Capacity",
+        "driver": "Driver"
+      }
+    }
+  },
+  "subscription": {
+    "month": "month",
+    "current": "Current",
+    "plan-tier": {
+      "basic": "Basic",
+      "intermediate": "Intermediate",
+      "complete": "Complete"
+    },
+    "benefits": {
+      "routes": "Up to {{ n }} routes",
+      "drivers": "Up to {{ n }} drivers"
+    },
+    "plan-selection": {
+      "title": "Choose your plan",
+      "subtitle": "Pick the plan that best fits your operation."
+    },
+    "status-view": {
+      "title": "My subscription",
+      "empty": "You don't have an active subscription yet."
+    },
+    "status-card": {
+      "title": "Subscription",
+      "plan": "Plan",
+      "price": "Price",
+      "start-date": "Start date",
+      "end-date": "End date",
+      "remaining-days": "Remaining days"
+    },
+    "status": {
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "clear": "Clear",
+      "upgrade": "Change plan",
+      "cancel": "Cancel subscription",
+      "choose-plan": "Choose a plan"
+    },
+    "feedback": {
+      "subscribed": "Subscription created.",
+      "upgraded": "Plan changed."
+    },
+    "confirm": {
+      "cancel-header": "Cancel subscription",
+      "cancel-message": "Are you sure you want to cancel your subscription?"
+    },
+    "errors": {
+      "no-plan-selected": "Please select a plan first.",
+      "no-org": "You must belong to an organization to subscribe."
+    }
+  }
+}

@@ -1,0 +1,400 @@
+{
+  "option": {
+    "home": "Inicio",
+    "about": "Acerca de",
+    "profiles": "Perfiles",
+    "routes": "Rutas",
+    "stops": "Paradas",
+    "trips": "Viajes",
+    "plans": "Planes",
+    "alerts": "Alertas",
+    "sign-in": "Iniciar sesión",
+    "sign-out": "Cerrar sesión",
+    "organization": "Organización",
+    "subscription": "Suscripción",
+    "tracking": "Seguir Bus",
+    "attendance": "Asistencia",
+    "community": "Gestión de Comunidad",
+    "profile": "Mi Perfil"
+  },
+  "authoring-phrase": {
+    "intro": "Hecho con",
+    "use": "utilizando",
+    "author": "por el Equipo de Desarrollo de {{ brand }}"
+  },
+  "about": {
+    "title": "Acerca de Nosotros",
+    "content": "PowerTech está revolucionando el transporte escolar con SafeRoute."
+  },
+  "home": {
+    "title": "Inicio",
+    "content": "Bienvenido a la Plataforma SafeRoute.",
+    "greeting": "¡Bienvenido, {{ name }}!",
+    "role": {
+      "admin": "Administrador",
+      "driver": "Conductor",
+      "parent": "Padre de familia",
+      "guest": "Invitado"
+    },
+    "admin": {
+      "organization": "Organización",
+      "organization-desc": "Gestiona tu organización de transporte",
+      "routes": "Rutas",
+      "routes-desc": "Configura las rutas escolares",
+      "drivers": "Conductores y Perfiles",
+      "drivers-desc": "Administra conductores y padres",
+      "subscription": "Suscripción",
+      "subscription-desc": "Visualiza y gestiona tu plan"
+    },
+    "driver": {
+      "trips": "Mis Viajes",
+      "trips-desc": "Ver los viajes asignados",
+      "routes": "Rutas",
+      "routes-desc": "Ver las rutas asignadas",
+      "alerts": "Alertas",
+      "alerts-desc": "Revisa notificaciones"
+    },
+    "parent": {
+      "trips": "Viajes de mis hijos",
+      "trips-desc": "Sigue el bus escolar en tiempo real",
+      "alerts": "Alertas",
+      "alerts-desc": "Ver notificaciones y mensajes",
+      "plans": "Planes",
+      "plans-desc": "Conoce los planes de suscripción"
+    }
+  },
+  "page-not-found": {
+    "title": "Página no encontrada",
+    "content": "La ruta <strong>{{ invalid_path }}</strong> no está disponible.",
+    "go-home": "Ir al Inicio"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados.",
+    "powered-by": "Desarrollado con",
+    "and": "y"
+  },
+  "errors": {
+    "occurred": "Ocurrieron errores"
+  },
+  "general": {
+    "loading": "Cargando",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "search": "Buscar",
+    "refresh": "Actualizar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "new": "Nuevo",
+    "actions": "Acciones",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "iam": {
+    "sign-in": {
+      "title": "Iniciar sesión",
+      "subtitle": "Selecciona tu tipo de cuenta para continuar.",
+      "no-account": "¿No tienes una cuenta?",
+      "mode": {
+        "user": "Padre / Conductor",
+        "admin": "Administrador"
+      }
+    },
+    "sign-up": {
+      "title": "Crear cuenta",
+      "have-account": "¿Ya tienes una cuenta?",
+      "step-organization": "1. Organización",
+      "step-admin": "2. Administrador",
+      "mode": {
+        "user": "Padre / Conductor",
+        "admin": "Administrador"
+      }
+    },
+    "admin-login": { "title": "Inicio de sesión de administrador" },
+    "user-login": { "title": "Inicio de sesión" },
+    "admin-register": { "title": "Registrar administrador" },
+    "user-register": {
+      "title": "Crear cuenta de Padre o Conductor",
+      "role": "Tipo de cuenta",
+      "org-placeholder": "Ej: org-1",
+      "org-help": "Pídele a tu administrador el ID de la organización."
+    },
+    "role": {
+      "parent": "Padre",
+      "driver": "Conductor"
+    },
+    "organization-form": {
+      "title-new": "Nueva organización",
+      "title-edit": "Editar organización"
+    },
+    "organization-management": {
+      "title": "Mi organización",
+      "empty": "No hay una organización asociada a tu cuenta."
+    },
+    "organization": {
+      "status": { "active": "Activa", "suspended": "Suspendida" },
+      "field": { "id": "ID", "created-at": "Fecha de creación" }
+    },
+    "fields": {
+      "first-name": "Nombres",
+      "last-name": "Apellidos",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirm-password": "Confirmar contraseña",
+      "organization-name": "Nombre de la organización",
+      "organization-id": "ID de la organización"
+    },
+    "actions": {
+      "sign-in": "Iniciar sesión",
+      "sign-out": "Cerrar sesión",
+      "register": "Registrarse",
+      "save": "Guardar",
+      "edit": "Editar",
+      "suspend": "Suspender",
+      "clear": "Limpiar"
+    },
+    "errors": {
+      "invalid-credentials": "Correo o contraseña inválidos.",
+      "not-admin": "Esta cuenta no tiene privilegios de administrador.",
+      "use-admin-tab": "Esta cuenta es de administrador. Usa la pestaña Administrador.",
+      "password-mismatch": "Las contraseñas no coinciden.",
+      "registration-failed": "El registro falló. Inténtalo de nuevo.",
+      "organization-create-failed": "No se pudo crear la organización."
+    }
+  },
+  "routes": {
+    "list-title": "Rutas",
+    "id": "ID",
+    "title": "Título",
+    "description": "Descripción",
+    "actions": "Acciones",
+    "new": "Nueva Ruta",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "route": {
+    "new-title": "Crear Nueva Ruta",
+    "edit-title": "Editar Ruta",
+    "title": "Título",
+    "description": "Descripción",
+    "create": "Crear Ruta",
+    "update": "Actualizar Ruta",
+    "cancel": "Cancelar",
+    "management": {
+      "title": "Gestión de Rutas",
+      "subtitle": "Configura las rutas del transporte escolar",
+      "new": "Nueva Ruta",
+      "edit": "Editar Ruta",
+      "empty": "No hay rutas configuradas aún."
+    },
+    "fields": {
+      "name": "Nombre de la ruta",
+      "origin": "Origen",
+      "destination": "Destino",
+      "stops": "Número de paradas",
+      "driver": "Conductor",
+      "schedule": "Horario"
+    },
+    "error": {
+      "title-required": "El título es requerido",
+      "description-required": "La descripción es requerida"
+    }
+  },
+  "stops": {
+    "list-title": "Paradas",
+    "id": "ID",
+    "location": "Ubicación",
+    "time": "Hora",
+    "route": "Ruta",
+    "actions": "Acciones",
+    "new": "Nueva Parada",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "stop": {
+    "new-title": "Crear Nueva Parada",
+    "edit-title": "Editar Parada",
+    "location": "Ubicación",
+    "time": "Hora",
+    "route": "Ruta",
+    "create": "Crear Parada",
+    "update": "Actualizar Parada",
+    "cancel": "Cancelar",
+    "error": {
+      "location-required": "La ubicación es requerida",
+      "time-required": "La hora es requerida",
+      "route-required": "La ruta es requerida"
+    }
+  },
+  "trip": {
+    "list": {
+      "title": "Viajes",
+      "id": "ID",
+      "route": "Ruta",
+      "driver": "Conductor",
+      "status": "Estado",
+      "date": "Fecha",
+      "empty": "No se encontraron viajes.",
+      "new": "Nuevo Viaje"
+    },
+    "form": {
+      "new-title": "Crear Viaje",
+      "edit-title": "Editar Viaje",
+      "route": "Ruta",
+      "driver": "Conductor",
+      "date": "Fecha",
+      "create": "Crear Viaje",
+      "update": "Actualizar Viaje",
+      "cancel": "Cancelar"
+    },
+    "monitor": {
+      "title": "Monitor de Viajes",
+      "subtitle": "Resumen en tiempo real de los viajes activos",
+      "active": "Viajes Activos",
+      "no-active": "No hay viajes activos en este momento."
+    },
+    "active": {
+      "title": "Mi Viaje Activo",
+      "start": "Iniciar Viaje",
+      "end": "Finalizar Viaje",
+      "emergency": "Emergencia",
+      "no-trip": "No tienes un viaje activo asignado."
+    },
+    "tracking": {
+      "title": "Seguimiento del Bus",
+      "no-trip": "No hay viaje activo para seguir."
+    },
+    "status": {
+      "scheduled": "Programado",
+      "en-route": "En Ruta",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    }
+  },
+  "notification": {
+    "list": {
+      "title": "Notificaciones",
+      "empty": "No hay notificaciones."
+    },
+    "alert": {
+      "title": "Centro de Alertas",
+      "type": "Tipo",
+      "severity": "Severidad",
+      "message": "Mensaje",
+      "date": "Fecha",
+      "empty": "No hay alertas.",
+      "new": "Reportar Incidente"
+    },
+    "message": {
+      "new-title": "Nuevo Mensaje",
+      "to": "Para",
+      "subject": "Asunto",
+      "body": "Mensaje",
+      "send": "Enviar",
+      "cancel": "Cancelar"
+    },
+    "severity": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "type": {
+      "incident": "Incidente",
+      "info": "Información",
+      "warning": "Advertencia"
+    }
+  },
+  "stakeholder": {
+    "management": {
+      "title": "Gestión de Personas",
+      "new": "Agregar Persona"
+    },
+    "profile": {
+      "list-title": "Perfiles",
+      "new": "Nuevo Perfil",
+      "edit": "Editar Perfil",
+      "empty": "No se encontraron perfiles.",
+      "fields": {
+        "first-name": "Nombre",
+        "last-name": "Apellido",
+        "email": "Correo",
+        "role": "Rol",
+        "organization": "Organización"
+      }
+    },
+    "student": {
+      "title": "Estudiantes",
+      "new": "Nuevo Estudiante",
+      "empty": "No se encontraron estudiantes.",
+      "fields": {
+        "name": "Nombre",
+        "grade": "Grado",
+        "parent": "Padre"
+      }
+    },
+    "vehicle": {
+      "title": "Vehículos",
+      "new": "Nuevo Vehículo",
+      "empty": "No se encontraron vehículos.",
+      "fields": {
+        "plate": "Placa",
+        "model": "Modelo",
+        "capacity": "Capacidad",
+        "driver": "Conductor"
+      }
+    }
+  },
+  "subscription": {
+    "month": "mes",
+    "current": "Actual",
+    "plan-tier": {
+      "basic": "Básico",
+      "intermediate": "Intermedio",
+      "complete": "Completo"
+    },
+    "benefits": {
+      "routes": "Hasta {{ n }} rutas",
+      "drivers": "Hasta {{ n }} conductores"
+    },
+    "plan-selection": {
+      "title": "Elige tu plan",
+      "subtitle": "Selecciona el plan que mejor se ajuste a tu operación."
+    },
+    "status-view": {
+      "title": "Mi suscripción",
+      "empty": "Aún no tienes una suscripción activa."
+    },
+    "status-card": {
+      "title": "Suscripción",
+      "plan": "Plan",
+      "price": "Precio",
+      "start-date": "Fecha de inicio",
+      "end-date": "Fecha de fin",
+      "remaining-days": "Días restantes"
+    },
+    "status": {
+      "active": "Activa",
+      "cancelled": "Cancelada",
+      "expired": "Expirada"
+    },
+    "actions": {
+      "confirm": "Confirmar",
+      "clear": "Limpiar",
+      "upgrade": "Cambiar de plan",
+      "cancel": "Cancelar suscripción",
+      "choose-plan": "Elegir un plan"
+    },
+    "feedback": {
+      "subscribed": "Suscripción creada.",
+      "upgraded": "Plan actualizado."
+    },
+    "confirm": {
+      "cancel-header": "Cancelar suscripción",
+      "cancel-message": "¿Estás seguro de cancelar tu suscripción?"
+    },
+    "errors": {
+      "no-plan-selected": "Selecciona un plan primero.",
+      "no-org": "Debes pertenecer a una organización para suscribirte."
+    }
+  }
+}
