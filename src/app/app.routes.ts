@@ -8,7 +8,7 @@ const checkout = () => import('./subscription/presentation/views/checkout/checko
 const iamRoutes = () => import('./iam/presentation/iam.routes').then(m => m.iamRoutes);
 const routesManagementRoutes = () => import('./routes-management/presentation/routes-management.routes').then(m => m.routesManagementRoutes);
 const tripRoutes = () => import('./trip/presentation/trip.routes').then(m => m.tripRoutes);
-const notificationRoutes = () => import('./notifications/presentation/notifications.routes').then(m => m.notificationRoutes);
+const notificationRoutes = () => import('./routes-management/presentation/routes-management.routes').then(m => m.notificationRoutes);
 const stakeholderRoutes = () => import('./stakeholder/presentation/stakeholder.routes').then(m => m.stakeholderRoutes);
 const subscriptionRoutes = () => import('./subscription/presentation/subscription.routes').then(m => m.subscriptionRoutes);
 

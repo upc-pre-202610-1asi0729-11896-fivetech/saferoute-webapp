@@ -4,7 +4,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
-import { NotificationStore } from '../../../application/notification-store';
+import { NotificationStore } from '../../../application/routes-management.store';
 
 @Component({
   selector: 'app-notification-list',
