@@ -1,0 +1,46 @@
+<div class="page-container">
+  @if (auth.isAuthenticated()) {
+    <div class="welcome-header">
+      <h1 class="page-title">
+        {{ 'home.greeting' | translate: { name: auth.currentUser()?.firstName } }}
+      </h1>
+      <span class="role-badge">
+        <mat-icon class="role-badge-icon">{{ roleIcon() }}</mat-icon>
+        {{ roleLabel() | translate }}
+      </span>
+    </div>
+
+    <div class="metrics-row">
+      @for (m of metrics(); track m.label) {
+        <div class="metric-card">
+          <mat-icon class="metric-icon">{{ m.icon }}</mat-icon>
+          <span class="metric-value">{{ m.value }}</span>
+          <span class="metric-label">{{ m.label }}</span>
+        </div>
+      }
+    </div>
+
+    @if (cards().length > 0) {
+      <h2 class="actions-title">What would you like to do?</h2>
+      <div class="card-grid">
+        @for (card of cards(); track card.route) {
+          <mat-card class="dashboard-card" (click)="navigate(card.route)">
+            <mat-card-content class="card-body">
+              <mat-icon class="card-icon">{{ card.icon }}</mat-icon>
+              <h3 class="card-title">{{ card.label | translate }}</h3>
+              <p class="card-desc">{{ card.desc | translate }}</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  } @else {
+    <div class="welcome-section">
+      <h1 class="page-title">{{ 'home.title' | translate }}</h1>
+      <p class="welcome-text">{{ 'home.content' | translate }}</p>
+      <a mat-raised-button color="primary" routerLink="/iam/sign-in">
+        {{ 'option.sign-in' | translate }}
+      </a>
+    </div>
+  }
+</div>

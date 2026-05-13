@@ -1,0 +1,54 @@
+<mat-sidenav-container class="sidenav-container">
+
+  <mat-sidenav class="sidenav" [opened]="auth.isAuthenticated()" mode="side">
+    <div class="sidebar-brand">
+      <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 4L8 11V24C8 33.6 15.04 42.56 24 44C32.96 42.56 40 33.6 40 24V11L24 4Z" fill="#F59E0B"/>
+      </svg>
+      <span class="brand-name">SafeRoute</span>
+    </div>
+
+    <mat-divider/>
+
+    <mat-nav-list class="sidebar-nav">
+      @for (item of navItems(); track item.link) {
+        <a mat-list-item
+           [routerLink]="item.link"
+           routerLinkActive="active-nav-item">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label | translate }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <div class="sidebar-footer">
+      <mat-divider/>
+
+      <div class="lang-wrap">
+        <app-language-switcher/>
+      </div>
+
+      @if (auth.isAuthenticated()) {
+        <div class="user-info">
+          <mat-icon class="user-icon">account_circle</mat-icon>
+          <div class="user-details">
+            <span class="user-name">{{ auth.currentUser()?.firstName }} {{ auth.currentUser()?.lastName }}</span>
+            <span class="user-role">{{ auth.currentUser()?.role }}</span>
+          </div>
+        </div>
+      }
+
+      <button mat-button class="sign-out-btn" (click)="signOut()">
+        <mat-icon>logout</mat-icon>
+        {{ 'option.sign-out' | translate }}
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    <main class="page-content">
+      <router-outlet/>
+    </main>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>
