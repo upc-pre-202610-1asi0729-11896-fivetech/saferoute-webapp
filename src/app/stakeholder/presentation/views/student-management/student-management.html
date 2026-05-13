@@ -1,0 +1,393 @@
+<div class="cm-shell">
+
+  <!-- ══ HEADER ══ -->
+  <div class="cm-header">
+    <div>
+      <h1 class="cm-title">Gestión de Comunidad</h1>
+      <p class="cm-sub">Administra usuarios, conductores y flota</p>
+    </div>
+    @if (mainTab() === 'usuarios' && usersTab() === 'padres') {
+      <button class="btn-add" (click)="openCreateParent()">+ Agregar Padre</button>
+    }
+    @if (mainTab() === 'usuarios' && usersTab() === 'alumnos') {
+      <button class="btn-add" (click)="openCreateChild(0)">+ Agregar Alumno</button>
+    }
+  </div>
+
+  <!-- ══ MAIN TABS ══ -->
+  <div class="cm-tabs">
+    <button class="cm-tab" [class.active]="mainTab() === 'usuarios'" (click)="mainTab.set('usuarios')">
+      👥 Usuarios
+    </button>
+    <button class="cm-tab" [class.active]="mainTab() === 'logistica'" (click)="mainTab.set('logistica')">
+      🚌 Logística
+    </button>
+  </div>
+
+  <!-- ══ USUARIOS TAB ══ -->
+  @if (mainTab() === 'usuarios') {
+    <div class="cm-body">
+
+      <div class="cm-subtabs">
+        <button class="cm-subtab" [class.active]="usersTab() === 'padres'" (click)="usersTab.set('padres')">
+          Padres ({{ parents().length }})
+        </button>
+        <button class="cm-subtab" [class.active]="usersTab() === 'alumnos'" (click)="usersTab.set('alumnos')">
+          Alumnos ({{ children().length }})
+        </button>
+      </div>
+
+      @if (store.loading()) {
+        <div class="cm-loading"><mat-spinner diameter="40"/></div>
+      }
+
+      <!-- PADRES -->
+      @if (usersTab() === 'padres') {
+        <div class="cm-table-wrap">
+          <table class="cm-table">
+            <thead>
+              <tr>
+                <th style="width:36px"></th>
+                <th>Padre / Madre</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th class="col-center">Hijos</th>
+                <th class="col-center">Estado</th>
+                <th style="width:80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (parent of parents(); track parent.id) {
+                <tr class="parent-row" (click)="toggleExpand(parent.id)">
+                  <td>
+                    <mat-icon class="expand-icon" [class.rotated]="isExpanded(parent.id)">chevron_right</mat-icon>
+                  </td>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar">{{ initials(parent.name) }}</div>
+                      <span class="user-name">{{ parent.name }}</span>
+                    </div>
+                  </td>
+                  <td class="email-cell">{{ parent.email }}</td>
+                  <td>{{ parent.phone }}</td>
+                  <td class="col-center">
+                    <span class="count-badge">{{ childrenOf(parent.id).length }}</span>
+                  </td>
+                  <td class="col-center">
+                    <span class="status-chip" [class]="parent.status ? 'chip-green' : 'chip-red'">
+                      {{ parent.status ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="col-actions" (click)="$event.stopPropagation()">
+                    <button class="icon-btn edit-btn" (click)="openEditParent(parent)"><mat-icon>edit</mat-icon></button>
+                    <button class="icon-btn del-btn" (click)="deleteParent(parent.id)"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+
+                @if (isExpanded(parent.id)) {
+                  <tr class="children-wrap-row">
+                    <td></td>
+                    <td colspan="6">
+                      <div class="children-section">
+                        <div class="children-label">
+                          <mat-icon class="children-icon">group</mat-icon>
+                          Alumnos de {{ parent.name }}
+                        </div>
+                        <table class="children-table">
+                          <thead>
+                            <tr>
+                              <th>Nombre del Alumno</th>
+                              <th>Grado/Sección</th>
+                              <th>Abordaje</th>
+                              <th>Estado</th>
+                              <th style="width:72px"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (child of childrenOf(parent.id); track child.id) {
+                              <tr class="child-row">
+                                <td>{{ child.name }}</td>
+                                <td>{{ child.grade }}</td>
+                                <td>
+                                  <span class="boarding-chip" [class]="boardingClass(child.boardingStatus)">
+                                    {{ boardingLabel(child.boardingStatus) }}
+                                  </span>
+                                </td>
+                                <td>
+                                  <span class="status-chip" [class]="child.status ? 'chip-green' : 'chip-red'">
+                                    {{ child.status ? 'Activo' : 'Inactivo' }}
+                                  </span>
+                                </td>
+                                <td class="col-actions">
+                                  <button class="icon-btn edit-btn" (click)="openEditChild(child)"><mat-icon>edit</mat-icon></button>
+                                  <button class="icon-btn del-btn" (click)="deleteChild(child.id)"><mat-icon>delete</mat-icon></button>
+                                </td>
+                              </tr>
+                            }
+                            @if (!childrenOf(parent.id).length) {
+                              <tr><td colspan="5" class="no-data">Sin alumnos registrados</td></tr>
+                            }
+                          </tbody>
+                        </table>
+                        <button class="btn-add-child" (click)="openCreateChild(parent.id)">
+                          <mat-icon>add</mat-icon> Agregar alumno
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- ALUMNOS -->
+      @if (usersTab() === 'alumnos') {
+        <div class="cm-table-wrap">
+          <table class="cm-table">
+            <thead>
+              <tr>
+                <th>Nombre del Alumno</th>
+                <th>Padre/Madre</th>
+                <th>Grado/Sección</th>
+                <th class="col-center">Abordaje</th>
+                <th class="col-center">Estado</th>
+                <th style="width:80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (child of children(); track child.id) {
+                <tr class="child-row">
+                  <td>{{ child.name }}</td>
+                  <td class="muted-cell">{{ parents().find(p => p.id === child.parentId)?.name ?? '—' }}</td>
+                  <td>{{ child.grade }}</td>
+                  <td class="col-center">
+                    <span class="boarding-chip" [class]="boardingClass(child.boardingStatus)">
+                      {{ boardingLabel(child.boardingStatus) }}
+                    </span>
+                  </td>
+                  <td class="col-center">
+                    <span class="status-chip" [class]="child.status ? 'chip-green' : 'chip-red'">
+                      {{ child.status ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="col-actions">
+                    <button class="icon-btn edit-btn" (click)="openEditChild(child)"><mat-icon>edit</mat-icon></button>
+                    <button class="icon-btn del-btn" (click)="deleteChild(child.id)"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ══ LOGÍSTICA TAB ══ -->
+  @if (mainTab() === 'logistica') {
+    <div class="cm-body">
+
+      <div class="cm-subtabs">
+        <button class="cm-subtab" [class.active]="logisticaTab() === 'conductores'" (click)="logisticaTab.set('conductores')">
+          🧑‍✈️ Conductores ({{ drivers().length }})
+        </button>
+        <button class="cm-subtab" [class.active]="logisticaTab() === 'vehiculos'" (click)="logisticaTab.set('vehiculos')">
+          🚌 Vehículos ({{ vehicles().length }})
+        </button>
+      </div>
+
+      <!-- CONDUCTORES -->
+      @if (logisticaTab() === 'conductores') {
+        <div class="log-header">
+          <h2 class="log-title"><mat-icon>badge</mat-icon> Conductores</h2>
+          <button class="btn-add" (click)="openCreateDriver()">+ Agregar Conductor</button>
+        </div>
+        <div class="cm-table-wrap">
+          <table class="cm-table">
+            <thead>
+              <tr>
+                <th>Conductor</th>
+                <th>Email</th>
+                <th class="col-center">Estado</th>
+                <th style="width:80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of drivers(); track d.id) {
+                <tr>
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar avatar-navy">{{ (d.firstName[0] + d.lastName[0]).toUpperCase() }}</div>
+                      <span class="user-name">{{ d.firstName }} {{ d.lastName }}</span>
+                    </div>
+                  </td>
+                  <td class="email-cell">{{ d.email }}</td>
+                  <td class="col-center"><span class="status-chip chip-green">Activo</span></td>
+                  <td class="col-actions">
+                    <button class="icon-btn edit-btn" (click)="openEditDriver(d)"><mat-icon>edit</mat-icon></button>
+                    <button class="icon-btn del-btn" (click)="deleteDriver(d.id)"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @if (!drivers().length) {
+                <tr><td colspan="4" class="no-data">Sin conductores registrados</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- VEHÍCULOS -->
+      @if (logisticaTab() === 'vehiculos') {
+        <div class="log-header">
+          <h2 class="log-title"><mat-icon>directions_bus</mat-icon> Vehículos</h2>
+          <button class="btn-add" (click)="openCreateVehicle()">+ Agregar Vehículo</button>
+        </div>
+        <div class="cm-table-wrap">
+          <table class="cm-table">
+            <thead>
+              <tr>
+                <th>Placa</th>
+                <th>Modelo</th>
+                <th class="col-center">Capacidad</th>
+                <th class="col-center">Estado</th>
+                <th style="width:80px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of vehicles(); track v.id) {
+                <tr>
+                  <td><strong class="plate-badge">{{ v.plate }}</strong></td>
+                  <td>{{ v.model }}</td>
+                  <td class="col-center">{{ v.capacity }} pax</td>
+                  <td class="col-center">
+                    <span class="status-chip" [class]="v.status === 'ACTIVE' ? 'chip-green' : 'chip-red'">
+                      {{ v.status === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="col-actions">
+                    <button class="icon-btn edit-btn" (click)="openEditVehicle(v)"><mat-icon>edit</mat-icon></button>
+                    <button class="icon-btn del-btn" (click)="deleteVehicle(v.id)"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @if (!vehicles().length) {
+                <tr><td colspan="5" class="no-data">Sin vehículos registrados</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </div>
+  }
+
+</div>
+
+<!-- ══ PARENT DIALOG ══ -->
+@if (showParentDialog()) {
+  <div class="dialog-backdrop" (click)="showParentDialog.set(false)">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ isEdit() ? 'Editar Padre/Madre' : 'Agregar Padre/Madre' }}</h2>
+        <button class="icon-btn" (click)="showParentDialog.set(false)"><mat-icon>close</mat-icon></button>
+      </div>
+      <form [formGroup]="parentForm" (ngSubmit)="saveParent()" class="dialog-form">
+        <div class="field"><label>Nombre completo</label><input formControlName="name" placeholder="Ej. Rosita Nery"></div>
+        <div class="field"><label>Email</label><input formControlName="email" type="email" placeholder="correo@ejemplo.com"></div>
+        <div class="field"><label>Teléfono</label><input formControlName="phone" placeholder="999-888-777"></div>
+        <div class="dialog-actions">
+          <button type="button" class="btn-cancel" (click)="showParentDialog.set(false)">Cancelar</button>
+          <button type="submit" class="btn-save" [disabled]="parentForm.invalid">{{ isEdit() ? 'Actualizar' : 'Agregar' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ══ CHILD DIALOG ══ -->
+@if (showChildDialog()) {
+  <div class="dialog-backdrop" (click)="showChildDialog.set(false)">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ isEdit() ? 'Editar Alumno' : 'Agregar Alumno' }}</h2>
+        <button class="icon-btn" (click)="showChildDialog.set(false)"><mat-icon>close</mat-icon></button>
+      </div>
+      <form [formGroup]="childForm" (ngSubmit)="saveChild()" class="dialog-form">
+        <div class="field"><label>Nombre del alumno</label><input formControlName="name" placeholder="Ej. Lucía Nery"></div>
+        <div class="field"><label>Grado/Sección</label><input formControlName="grade" placeholder="Ej. 3ro B"></div>
+        <div class="field">
+          <label>Estado de abordaje</label>
+          <select formControlName="boardingStatus">
+            <option value="ABORDADO">Abordado</option>
+            <option value="EN_ESPERA">En Espera</option>
+            <option value="AUSENTE">Ausente</option>
+          </select>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn-cancel" (click)="showChildDialog.set(false)">Cancelar</button>
+          <button type="submit" class="btn-save" [disabled]="childForm.invalid">{{ isEdit() ? 'Actualizar' : 'Agregar' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ══ DRIVER DIALOG ══ -->
+@if (showDriverDialog()) {
+  <div class="dialog-backdrop" (click)="showDriverDialog.set(false)">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ isDriverEdit() ? 'Editar Conductor' : 'Agregar Conductor' }}</h2>
+        <button class="icon-btn" (click)="showDriverDialog.set(false)"><mat-icon>close</mat-icon></button>
+      </div>
+      <form [formGroup]="driverForm" (ngSubmit)="saveDriver()" class="dialog-form">
+        <div class="field-row">
+          <div class="field"><label>Nombres</label><input formControlName="firstName" placeholder="Ej. Carlos"></div>
+          <div class="field"><label>Apellidos</label><input formControlName="lastName" placeholder="Ej. Ramirez"></div>
+        </div>
+        <div class="field"><label>Email</label><input formControlName="email" type="email" placeholder="conductor@saferoute.pe"></div>
+        @if (!isDriverEdit()) {
+          <div class="field"><label>Contraseña</label><input formControlName="password" type="password" placeholder="••••••••"></div>
+        }
+        <div class="dialog-actions">
+          <button type="button" class="btn-cancel" (click)="showDriverDialog.set(false)">Cancelar</button>
+          <button type="submit" class="btn-save" [disabled]="driverForm.invalid">{{ isDriverEdit() ? 'Actualizar' : 'Agregar' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ══ VEHICLE DIALOG ══ -->
+@if (showVehicleDialog()) {
+  <div class="dialog-backdrop" (click)="showVehicleDialog.set(false)">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <h2>{{ isVehicleEdit() ? 'Editar Vehículo' : 'Agregar Vehículo' }}</h2>
+        <button class="icon-btn" (click)="showVehicleDialog.set(false)"><mat-icon>close</mat-icon></button>
+      </div>
+      <form [formGroup]="vehicleForm" (ngSubmit)="saveVehicle()" class="dialog-form">
+        <div class="field-row">
+          <div class="field"><label>Placa</label><input formControlName="plate" placeholder="Ej. ABC-123"></div>
+          <div class="field"><label>Capacidad (pax)</label><input formControlName="capacity" type="number" min="1"></div>
+        </div>
+        <div class="field"><label>Modelo</label><input formControlName="model" placeholder="Ej. Toyota Coaster"></div>
+        <div class="field">
+          <label>Estado</label>
+          <select formControlName="status">
+            <option value="ACTIVE">Activo</option>
+            <option value="INACTIVE">Inactivo</option>
+          </select>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn-cancel" (click)="showVehicleDialog.set(false)">Cancelar</button>
+          <button type="submit" class="btn-save" [disabled]="vehicleForm.invalid">{{ isVehicleEdit() ? 'Actualizar' : 'Agregar' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
