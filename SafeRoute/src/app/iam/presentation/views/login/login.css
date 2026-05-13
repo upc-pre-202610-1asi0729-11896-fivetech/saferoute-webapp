@@ -1,0 +1,224 @@
+/* ── Full-page dark blue gradient background ── */
+.auth-bg {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f1b36 0%, #16305a 50%, #1a2a4a 100%);
+  padding: 24px;
+}
+
+/* ── White card ── */
+.auth-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 40px 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Logo ── */
+.logo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.logo-name {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #16305a;
+  font-family: var(--heading);
+  letter-spacing: -0.3px;
+}
+
+/* ── Subtitle ── */
+.auth-subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0 0 20px;
+}
+
+/* ── Role toggle ── */
+.mode-toggle {
+  width: 100%;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.mode-toggle ::ng-deep .mat-button-toggle {
+  flex: 1;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.mode-toggle ::ng-deep .mat-button-toggle-checked {
+  background: #f1f5f9;
+  color: #16305a;
+  font-weight: 600;
+}
+
+.mode-toggle ::ng-deep .mat-button-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+/* ── Fields ── */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.field-input {
+  width: 100%;
+  height: 44px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.field-input:focus {
+  border-color: #F59E0B;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: #ef4444;
+}
+
+/* ── Submit button ── */
+.btn-submit {
+  width: 100%;
+  height: 48px;
+  background: #F59E0B;
+  color: #1a1a2e;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #d97706;
+  transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Auth error ── */
+.auth-error {
+  font-size: 0.82rem;
+  color: #ef4444;
+  text-align: center;
+  margin: 0;
+}
+
+/* ── Bottom link ── */
+.bottom-link {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 20px 0 0;
+}
+
+.bottom-link a {
+  color: #F59E0B;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bottom-link a:hover {
+  text-decoration: underline;
+}
+
+/* ── Demo credentials ── */
+.demo-creds {
+  margin-top: 18px;
+  border: 1px dashed #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #f8fafc;
+}
+
+.demo-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px;
+}
+
+.demo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: #475569;
+  transition: background 0.1s;
+  margin-bottom: 2px;
+}
+
+.demo-row:hover {
+  background: #f1f5f9;
+}
+
+.demo-row code {
+  background: transparent;
+  color: #334155;
+}
+
+.demo-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 46px;
+  text-align: center;
+}
+
+.demo-badge.admin  { background: #fef3c7; color: #92400e; }
+.demo-badge.driver { background: #dbeafe; color: #1e40af; }
+.demo-badge.parent { background: #dcfce7; color: #166534; }
