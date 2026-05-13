@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { TripStore, TripEntity } from '../../../../../../../../Downloads/trip/trip/application/trip-store';
+import { TripStore, TripEntity } from '../../../application/trip-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { TripMap } from '../../../../shared/presentation/components/trip-map/trip-map';
 import { environment } from '../../../../../environments/environment';

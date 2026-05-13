@@ -7,7 +7,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '@ngx-translate/core';
-import { TripStore } from '../../../../../../../../Downloads/trip/trip/application/trip-store';
+import { TripStore } from '../../../application/trip-store';
 
 @Component({
   selector: 'app-trip-list',

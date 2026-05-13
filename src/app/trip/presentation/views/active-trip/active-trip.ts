@@ -9,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import * as L from 'leaflet';
-import { TripStore, TripEntity, RouteEntity, RouteWaypoint } from '../../../../../../../../Downloads/trip/trip/application/trip-store';
+import { TripStore, TripEntity, RouteEntity, RouteWaypoint } from '../../../application/trip-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { NotificationStore } from '../../../../notifications/application/notification-store';
 import { OrsService } from '../../../../shared/infrastructure/ors-service';

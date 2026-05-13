@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TripStore } from '../../../../../../../../Downloads/trip/trip/application/trip-store';
+import { TripStore } from '../../../application/trip-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { StakeholderStore } from '../../../../stakeholder/application/stakeholder-store';
 

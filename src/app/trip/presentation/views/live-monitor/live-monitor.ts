@@ -3,7 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TripStore, TripEntity, RouteEntity } from '../../../../../../../../Downloads/trip/trip/application/trip-store';
+import { TripStore, TripEntity, RouteEntity } from '../../../application/trip-store';
 import { TripMap } from '../../../../shared/presentation/components/trip-map/trip-map';
 
 interface StatusMeta { bg: string; text: string; label: string; icon: string }

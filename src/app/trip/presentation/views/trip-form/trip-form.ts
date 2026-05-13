@@ -9,7 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TranslatePipe } from '@ngx-translate/core';
-import { TripStore } from '../../../../../../../../Downloads/trip/trip/application/trip-store';
+import { TripStore } from '../../../application/trip-store';
 
 @Component({
   selector: 'app-trip-form',
