@@ -1,1 +1,73 @@
-/* Vehicle management styles */
+.vm-shell { padding: 24px; max-width: 1000px; margin: 0 auto; }
+
+.vm-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; gap: 16px; flex-wrap: wrap;
+}
+.vm-title { font-size: 1.5rem; font-weight: 700; margin: 0; }
+.vm-sub { color: #64748b; margin: 4px 0 0; font-size: 0.875rem; }
+
+.btn-add {
+  background: #2563eb; color: #fff; border: none; border-radius: 8px;
+  padding: 10px 16px; font-weight: 600; cursor: pointer; font-size: 0.875rem;
+}
+.btn-add:hover { background: #1d4ed8; }
+
+.vm-loading { display: flex; justify-content: center; padding: 32px; }
+.vm-error {
+  background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca;
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.875rem;
+}
+
+.vm-table-wrap {
+  border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: #fff;
+}
+.vm-table { width: 100%; border-collapse: collapse; }
+.vm-table th {
+  text-align: left; padding: 12px 16px; font-size: 0.75rem; text-transform: uppercase;
+  letter-spacing: 0.04em; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+}
+.vm-table td { padding: 12px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+.vm-table tr:last-child td { border-bottom: none; }
+.col-center { text-align: center; }
+.col-actions { text-align: right; white-space: nowrap; }
+
+.plate {
+  font-family: ui-monospace, monospace; font-weight: 700; background: #f1f5f9;
+  padding: 2px 8px; border-radius: 6px;
+}
+
+.chip {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 600; background: #e2e8f0; color: #475569;
+}
+.chip-green { background: #dcfce7; color: #15803d; }
+.chip-amber { background: #fef3c7; color: #b45309; }
+.chip-red   { background: #fee2e2; color: #b91c1c; }
+
+.icon-btn {
+  background: none; border: none; cursor: pointer; color: #64748b;
+  padding: 4px; border-radius: 6px; vertical-align: middle;
+}
+.icon-btn:hover { background: #f1f5f9; color: #1e293b; }
+.icon-btn.danger:hover { background: #fee2e2; color: #b91c1c; }
+
+.vm-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 40px; color: #94a3b8;
+}
+.vm-empty mat-icon { font-size: 40px; width: 40px; height: 40px; }
+
+/* Dialog */
+.vm-backdrop {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+}
+.vm-dialog {
+  background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 420px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+.vm-dialog-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 16px; }
+.vm-form { display: flex; flex-direction: column; }
+.vm-form .full { width: 100%; }
+.vm-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }

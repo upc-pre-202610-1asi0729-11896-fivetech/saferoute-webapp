@@ -395,6 +395,31 @@
       "currentLocation": null,
       "organizationId": 1,
       "id": 4
+    },
+    {
+      "routeId": 0,
+      "routeName": "Ruta Sur - Surco",
+      "driverId": 2,
+      "driverName": "",
+      "vehiclePlate": "",
+      "studentIds": [
+        1,
+        2,
+        5,
+        6
+      ],
+      "tripType": "OUTBOUND",
+      "scheduledDate": "2026-06-14",
+      "scheduledStartTime": "07:00",
+      "status": "SCHEDULED",
+      "startTime": null,
+      "endTime": null,
+      "studentsTotal": 4,
+      "studentsBoarded": 0,
+      "currentStop": null,
+      "currentLocation": null,
+      "organizationId": 1,
+      "id": 5
     }
   ],
   "profiles": [

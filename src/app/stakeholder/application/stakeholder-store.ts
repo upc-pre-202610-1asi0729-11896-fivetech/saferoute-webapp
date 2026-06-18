@@ -28,6 +28,9 @@ export interface ChildEntity {
 @Injectable({ providedIn: 'root' })
 export class StakeholderStore {
   private readonly base = environment.platformProviderApiBaseUrl;
+  // Vehicles are served by the Spring Boot (Java) backend (Fleet context); everything else
+  // (users, parents, children) stays on json-server.
+  private readonly vehicleBase = environment.platformProviderJavaApiBaseUrl;
 
   private readonly _students = signal<UserEntity[]>([]);
   private readonly _vehicles = signal<VehicleEntity[]>([]);
@@ -50,7 +53,7 @@ export class StakeholderStore {
     const q = `?organizationId=${organizationId}`;
     forkJoin({
       users:    this.http.get<UserEntity[]>   (`${this.base}/users${q}`).pipe(catchError(() => of([]))),
-      vehicles: this.http.get<VehicleEntity[]>(`${this.base}/vehicles${q}`).pipe(catchError(() => of([]))),
+      vehicles: this.http.get<VehicleEntity[]>(`${this.vehicleBase}/vehicles${q}`).pipe(catchError(() => of([]))),
       parents:  this.http.get<ParentEntity[]> (`${this.base}/parents${q}`).pipe(catchError(() => of([]))),
       children: this.http.get<ChildEntity[]>  (`${this.base}/children${q}`).pipe(catchError(() => of([])))
     }).subscribe({
@@ -136,21 +139,21 @@ export class StakeholderStore {
 
   // ── Vehicles ──
   createVehicle(vehicle: Omit<VehicleEntity, 'id'>): void {
-    this.http.post<VehicleEntity>(`${this.base}/vehicles`, vehicle).subscribe({
+    this.http.post<VehicleEntity>(`${this.vehicleBase}/vehicles`, vehicle).subscribe({
       next: v => this._vehicles.update(l => [...l, v]),
       error: err => this._error.set(err.message)
     });
   }
 
   updateVehicle(vehicle: VehicleEntity): void {
-    this.http.put<VehicleEntity>(`${this.base}/vehicles/${vehicle.id}`, vehicle).subscribe({
+    this.http.put<VehicleEntity>(`${this.vehicleBase}/vehicles/${vehicle.id}`, vehicle).subscribe({
       next: v => this._vehicles.update(l => l.map(x => x.id === v.id ? v : x)),
       error: err => this._error.set(err.message)
     });
   }
 
   deleteVehicle(id: number): void {
-    this.http.delete(`${this.base}/vehicles/${id}`).subscribe({
+    this.http.delete(`${this.vehicleBase}/vehicles/${id}`).subscribe({
       next: () => this._vehicles.update(l => l.filter(v => v.id !== id)),
       error: err => this._error.set(err.message)
     });

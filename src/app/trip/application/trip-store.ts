@@ -1,54 +1,30 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { TripEntity } from '../domain/model/trip-entity';
+import { RouteEntity } from '../domain/model/route-entity';
+import { TripApi } from '../infrastructure/trip-api';
 
-export interface RouteWaypoint {
-  order: number;
-  name: string;
-  lat: number;
-  lng: number;
-  studentId?: number | null;
-}
+// Re-export the domain models so existing consumers that import them from the store keep working.
+export type { TripEntity } from '../domain/model/trip-entity';
+export type { RouteEntity, RouteWaypoint } from '../domain/model/route-entity';
 
-export interface RouteEntity {
-  id: number;
-  name: string;
-  type?: string;
-  driverId: number;
-  driverName?: string;
-  vehicleId?: number;
-  vehiclePlate?: string;
-  studentIds?: number[];
-  scheduledStartTime?: string;
-  status?: string;
-  organizationId?: number;
-  waypoints?: RouteWaypoint[];
-}
-
-export interface TripEntity {
-  id: number;
-  routeId: number;
-  routeName?: string;
-  driverId: number;
-  driverName?: string;
-  vehicleId?: number;
-  vehiclePlate?: string;
-  studentIds?: number[];
-  tripType?: string;
-  scheduledDate?: string;
-  scheduledStartTime?: string;
-  status: string;
-  startTime?: string | null;
-  endTime?: string | null;
-  studentsTotal?: number;
-  studentsBoarded?: number;
-  currentStop?: string | null;
-  currentLocation?: string | null;
-  organizationId?: number;
-}
-
+/**
+ * Application store for the Trip Execution & Monitoring context.
+ *
+ * <p>Talks to the Spring Boot backend through the {@link TripApi} facade, which speaks the backend's
+ * clean DDD contract (start / complete / boarding / incidents). This store keeps a stable public API
+ * for the views and adapts their flat calls to the backend use cases:</p>
+ * <ul>
+ *   <li>{@code createTrip} &rarr; START a trip (POST /trips);</li>
+ *   <li>{@code updateTrip}/{@code patchTrip} with status COMPLETED &rarr; COMPLETE the trip;</li>
+ *   <li>other patches (currentStop, currentLocation, studentsBoarded) &rarr; local UI state only
+ *       (the backend Trip does not model live tracking);</li>
+ *   <li>{@code deleteTrip} &rarr; DELETE /trips/{id}.</li>
+ * </ul>
+ * Trips returned by the backend are lean; the store enriches them with display data (routeName,
+ * scheduledStartTime, studentIds, vehicle...) by joining with the loaded routes.
+ */
 @Injectable({ providedIn: 'root' })
 export class TripStore {
   private readonly _trips = signal<TripEntity[]>([]);
@@ -64,48 +40,51 @@ export class TripStore {
   readonly activeTrips = computed(() => this._trips().filter(t => t.status === 'EN_ROUTE'));
   readonly tripCount = computed(() => this._trips().length);
 
-  private readonly base = environment.platformProviderApiBaseUrl;
+  constructor(private readonly api: TripApi) {}
 
-  constructor(private http: HttpClient) {}
+  /** Enriches a lean backend trip with display data joined from the loaded routes. */
+  private enrich(t: TripEntity): TripEntity {
+    const route = this._routes().find(r => r.id === t.routeId);
+    if (!route) return t;
+    return {
+      ...t,
+      routeName: route.name,
+      driverName: route.driverName ?? '',
+      vehicleId: route.vehicleId,
+      vehiclePlate: route.vehiclePlate ?? '',
+      studentIds: route.studentIds ?? [],
+      tripType: route.type,
+      scheduledStartTime: route.scheduledStartTime,
+      studentsTotal: route.studentIds?.length ?? 0,
+      studentsBoarded: t.studentsBoarded ?? 0
+    };
+  }
 
   loadAll(organizationId: number): void {
     this._currentOrgId = organizationId;
     this._loading.set(true);
-    const q = `?organizationId=${organizationId}`;
     forkJoin({
-      trips:  this.http.get<TripEntity[]> (`${this.base}/trips${q}`).pipe(catchError(() => of([]))),
-      routes: this.http.get<RouteEntity[]>(`${this.base}/routes${q}`).pipe(catchError(() => of([])))
+      trips:  this.api.getTrips(organizationId).pipe(catchError(() => of([] as TripEntity[]))),
+      routes: this.api.getRoutes(organizationId).pipe(catchError(() => of([] as RouteEntity[])))
     }).subscribe({
       next: r => {
-        const routes = r.routes ?? [];
-        const validRouteIds = new Set(routes.map(ro => ro.id));
-        const cleanTrips = (r.trips ?? []).filter(t => validRouteIds.has(t.routeId));
-        this._trips.set(cleanTrips);
-        this._routes.set(routes);
+        this._routes.set(r.routes ?? []);
+        this._trips.set((r.trips ?? []).map(t => this.enrich(t)));
         this._loading.set(false);
       },
-      error: err => {
-        this._error.set(err?.message ?? 'Failed to load trips');
-        this._loading.set(false);
-      }
+      error: err => { this._error.set(err?.message ?? 'Failed to load trips'); this._loading.set(false); }
     });
   }
 
-  /** Re-run loadAll with the last used organizationId (e.g. for refresh buttons) */
+  /** Re-run loadAll with the last used organizationId. */
   reload(): void {
     if (this._currentOrgId) this.loadAll(this._currentOrgId);
   }
 
   loadTrips(organizationId?: number): void {
     this._loading.set(true);
-    const q = organizationId ? `?organizationId=${organizationId}` : '';
-    this.http.get<TripEntity[]>(`${this.base}/trips${q}`).subscribe({
-      next: t => {
-        const validIds = new Set(this._routes().map(r => r.id));
-        const clean = (t ?? []).filter(tr => !validIds.size || validIds.has(tr.routeId));
-        this._trips.set(clean);
-        this._loading.set(false);
-      },
+    this.api.getTrips(organizationId ?? this._currentOrgId ?? undefined).subscribe({
+      next: t => { this._trips.set((t ?? []).map(x => this.enrich(x))); this._loading.set(false); },
       error: err => { this._error.set(err?.message ?? 'Failed'); this._loading.set(false); }
     });
   }
@@ -118,66 +97,83 @@ export class TripStore {
     return this._trips().find(t => t.id === id);
   }
 
+  /** Flat "create" maps to STARTING a trip (the backend has no SCHEDULED state). */
   createTrip(trip: Omit<TripEntity, 'id'>): void {
-    this.http.post<TripEntity>(`${this.base}/trips`, trip).subscribe({
-      next: created => this._trips.update(ts => [...ts, created]),
-      error: err => this._error.set(err?.message ?? 'Failed to create trip')
+    const organizationId = trip.organizationId ?? this._currentOrgId ?? 1;
+    const routeId = Number(trip.routeId);
+    const driverId = Number(trip.driverId);
+    if (!routeId || routeId < 1 || !driverId || driverId < 1) {
+      this._error.set('A trip needs a valid route and driver to start');
+      return;
+    }
+    this.api.startTrip({ organizationId, routeId, driverId }).subscribe({
+      next: created => this._trips.update(ts => [...ts, this.enrich(created)]),
+      error: err => this._error.set(err?.message ?? 'Failed to start trip')
     });
   }
 
+  /** Convenience: start a trip directly from a route. */
+  createTripFromRoute(route: RouteEntity): void {
+    this.createTrip({
+      routeId: route.id,
+      driverId: route.driverId ?? 0,
+      status: 'EN_ROUTE',
+      organizationId: route.organizationId ?? this._currentOrgId ?? 1
+    });
+  }
+
+  /** Flat "update": status COMPLETED completes the trip on the backend; otherwise local UI update. */
   updateTrip(trip: TripEntity): void {
-    this.http.put<TripEntity>(`${this.base}/trips/${trip.id}`, trip).subscribe({
-      next: u => this._trips.update(ts => ts.map(t => t.id === u.id ? u : t)),
-      error: err => this._error.set(err?.message ?? 'Failed to update trip')
+    if (trip.status === 'COMPLETED') {
+      this.completeTrip(trip.id);
+      return;
+    }
+    this._trips.update(ts => ts.map(t => t.id === trip.id ? this.enrich({ ...t, ...trip }) : t));
+  }
+
+  /** Flat "patch": status COMPLETED completes the trip; other fields are local UI state only. */
+  patchTrip(id: number, patch: Partial<TripEntity>): void {
+    if (patch.status === 'COMPLETED') {
+      this.completeTrip(id);
+      return;
+    }
+    this._trips.update(ts => ts.map(t => t.id === id ? { ...t, ...patch } : t));
+  }
+
+  completeTrip(id: number): void {
+    this.api.completeTrip(id).subscribe({
+      next: updated => this._trips.update(ts => ts.map(t => t.id === id ? this.enrich({ ...t, ...updated }) : t)),
+      error: err => this._error.set(err?.message ?? 'Failed to complete trip')
     });
   }
 
-  patchTrip(id: number, patch: Partial<TripEntity>): void {
-    this.http.patch<TripEntity>(`${this.base}/trips/${id}`, patch).subscribe({
-      next: u => this._trips.update(ts => ts.map(t => t.id === id ? u : t)),
-      error: err => this._error.set(err?.message ?? 'Failed to update trip')
+  /** Marks a child's boarding status on the backend (US-11). */
+  updateBoarding(tripId: number, childId: number, boardingState: string): void {
+    this.api.updateBoarding(tripId, { childId, boardingState }).subscribe({
+      next: updated => this._trips.update(ts => ts.map(t => t.id === tripId ? this.enrich({ ...t, ...updated }) : t)),
+      error: err => this._error.set(err?.message ?? 'Failed to update boarding')
+    });
+  }
+
+  /** Reports an incident on the backend. */
+  reportIncident(tripId: number, description: string): void {
+    this.api.reportIncident(tripId, { description }).subscribe({
+      error: err => this._error.set(err?.message ?? 'Failed to report incident')
     });
   }
 
   deleteTrip(id: number): void {
-    this.http.delete(`${this.base}/trips/${id}`).subscribe({
+    this.api.deleteTrip(id).subscribe({
       next: () => this._trips.update(ts => ts.filter(t => t.id !== id)),
       error: err => this._error.set(err?.message ?? 'Failed to delete trip')
     });
   }
 
-  /** Keep TripStore's route cache in sync when admin adds/edits a route */
+  /** Keep the route cache in sync when admin adds/edits a route. */
   syncRoute(route: RouteEntity): void {
     this._routes.update(rs => {
       const exists = rs.some(r => r.id === route.id);
-      return exists
-        ? rs.map(r => r.id === route.id ? { ...r, ...route } : r)
-        : [...rs, route];
+      return exists ? rs.map(r => r.id === route.id ? { ...r, ...route } : r) : [...rs, route];
     });
-  }
-
-  createTripFromRoute(route: RouteEntity): void {
-    const today = new Date().toISOString().slice(0, 10);
-    const trip: Omit<TripEntity, 'id'> = {
-      routeId:           route.id,
-      routeName:         route.name,
-      driverId:          route.driverId ?? 0,
-      driverName:        route.driverName ?? '',
-      vehicleId:         route.vehicleId,
-      vehiclePlate:      route.vehiclePlate ?? '',
-      studentIds:        route.studentIds ?? [],
-      tripType:          route.type ?? 'OUTBOUND',
-      scheduledDate:     today,
-      scheduledStartTime: route.scheduledStartTime ?? '',
-      status:            'SCHEDULED',
-      startTime:         null,
-      endTime:           null,
-      studentsTotal:     route.studentIds?.length ?? 0,
-      studentsBoarded:   0,
-      currentStop:       null,
-      currentLocation:   null,
-      organizationId:    route.organizationId ?? 1,
-    };
-    this.createTrip(trip);
   }
 }

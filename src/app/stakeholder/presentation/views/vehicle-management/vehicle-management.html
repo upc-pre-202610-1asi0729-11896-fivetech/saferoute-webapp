@@ -1,10 +1,109 @@
-<div class="page-container">
-  <div class="page-header">
-    <h1 class="page-title">{{ 'stakeholder.vehicle.title' | translate }}</h1>
+<div class="vm-shell">
+
+  <!-- Header -->
+  <div class="vm-header">
+    <div>
+      <h1 class="vm-title">Gestión de Vehículos</h1>
+      <p class="vm-sub">Administra la flota de tu organización</p>
+    </div>
+    <button class="btn-add" (click)="openCreate()">+ Agregar Vehículo</button>
   </div>
-  <div class="empty-state">
-    <mat-icon>directions_bus</mat-icon>
-    <p>{{ 'stakeholder.vehicle.empty' | translate }}</p>
-    <p style="font-size:0.875rem; color:#94a3b8">Vehicle management coming soon.</p>
+
+  @if (store.loading()) {
+    <div class="vm-loading"><mat-spinner diameter="40" /></div>
+  }
+
+  @if (store.error()) {
+    <div class="vm-error">{{ store.error() }}</div>
+  }
+
+  <!-- Table -->
+  <div class="vm-table-wrap">
+    <table class="vm-table">
+      <thead>
+        <tr>
+          <th>Placa</th>
+          <th>Modelo</th>
+          <th class="col-center">Capacidad</th>
+          <th class="col-center">Estado</th>
+          <th style="width:110px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (v of vehicles(); track v.id) {
+          <tr>
+            <td><span class="plate">{{ v.plate }}</span></td>
+            <td>{{ v.model }}</td>
+            <td class="col-center">{{ v.capacity }}</td>
+            <td class="col-center">
+              <span class="chip" [class.chip-green]="(v.status ?? 'ACTIVE') === 'ACTIVE'"
+                    [class.chip-amber]="v.status === 'MAINTENANCE'"
+                    [class.chip-red]="v.status === 'INACTIVE'">
+                {{ v.status ?? 'ACTIVE' }}
+              </span>
+            </td>
+            <td class="col-actions">
+              <button class="icon-btn" (click)="openEdit(v)" aria-label="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="icon-btn danger" (click)="remove(v.id)" aria-label="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5">
+              <div class="vm-empty">
+                <mat-icon>directions_bus</mat-icon>
+                <p>No hay vehículos registrados. Agrega el primero.</p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
 </div>
+
+<!-- Dialog -->
+@if (showDialog()) {
+  <div class="vm-backdrop" (click)="cancel()">
+    <div class="vm-dialog" (click)="$event.stopPropagation()">
+      <h2 class="vm-dialog-title">{{ isEdit() ? 'Editar Vehículo' : 'Nuevo Vehículo' }}</h2>
+
+      <form [formGroup]="vehicleForm" (ngSubmit)="save()" class="vm-form">
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Placa</mat-label>
+          <input matInput formControlName="plate" placeholder="ABC-123" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Modelo</mat-label>
+          <input matInput formControlName="model" placeholder="Mercedes Sprinter" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Capacidad</mat-label>
+          <input matInput type="number" formControlName="capacity" min="1" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Estado</mat-label>
+          <mat-select formControlName="status">
+            @for (s of statuses; track s) {
+              <mat-option [value]="s">{{ s }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="vm-actions">
+          <button type="button" mat-button (click)="cancel()">Cancelar</button>
+          <button type="submit" mat-flat-button color="primary" [disabled]="vehicleForm.invalid">
+            {{ isEdit() ? 'Guardar' : 'Crear' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
