@@ -15,7 +15,7 @@
     @if (selectedPlan()) {
       <div class="plan-banner">
         <span class="plan-banner-icon">🛡️</span>
-        <span>Plan seleccionado: <strong>{{ selectedPlan() }}</strong> — <strong>{{ selectedPrice() }}</strong></span>
+        <span>{{ 'subscription.selected-plan' | translate }}: <strong>{{ selectedPlan() }}</strong> — <strong>{{ selectedPrice() }}</strong></span>
       </div>
     }
 
@@ -30,10 +30,10 @@
               <input class="field-input" formControlName="name"
                      [placeholder]="'iam.fields.organization-name' | translate">
               @if (orgForm.controls.name.hasError('required') && orgForm.controls.name.touched) {
-                <span class="field-error">Nombre requerido</span>
+                <span class="field-error">{{ 'general.name-required' | translate }}</span>
               }
             </div>
-            <button type="button" class="btn-submit" matStepperNext>Siguiente</button>
+            <button type="button" class="btn-submit" matStepperNext>{{ 'general.next' | translate }}</button>
           </form>
         </mat-step>
 
@@ -55,13 +55,13 @@
             </div>
             <div class="field-wrap">
               <label class="field-label">{{ 'iam.fields.password' | translate }}</label>
-              <input class="field-input" type="password" formControlName="password" placeholder="••••••••">
+              <input class="field-input" type="password" formControlName="password" [placeholder]="'iam.fields.password' | translate">
             </div>
             @if (store.error()) {
               <p class="auth-error">{{ store.error()! | translate }}</p>
             }
             <div class="step-nav">
-              <button type="button" class="btn-back" matStepperPrevious>Atrás</button>
+              <button type="button" class="btn-back" matStepperPrevious>{{ 'general.back' | translate }}</button>
               <button type="submit" class="btn-submit flex-1" [disabled]="store.loading()">
                 @if (store.loading()) { <mat-spinner diameter="18"></mat-spinner> }
                 @else { {{ 'iam.actions.register' | translate }} }

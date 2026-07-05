@@ -5,24 +5,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TripStore, TripEntity, RouteEntity } from '../../../application/trip-store';
 import { TripMap } from '../../../../shared/presentation/components/trip-map/trip-map';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface StatusMeta { bg: string; text: string; label: string; icon: string }
 
 const STATUS: Record<string, StatusMeta> = {
-  EN_ROUTE:  { bg: '#dcfce7', text: '#15803d', label: 'En Ruta',    icon: 'directions_bus' },
-  SCHEDULED: { bg: '#fef9c3', text: '#854d0e', label: 'Programado', icon: 'schedule' },
-  COMPLETED: { bg: '#e0f2fe', text: '#0369a1', label: 'Completado', icon: 'check_circle' },
-  CANCELLED: { bg: '#fee2e2', text: '#dc2626', label: 'Cancelado',  icon: 'cancel' }
+  EN_ROUTE:  { bg: '#dcfce7', text: '#15803d', label: 'trip.status.en-route',    icon: 'directions_bus' },
+  SCHEDULED: { bg: '#fef9c3', text: '#854d0e', label: 'trip.status.scheduled', icon: 'schedule' },
+  COMPLETED: { bg: '#e0f2fe', text: '#0369a1', label: 'trip.status.completed', icon: 'check_circle' },
+  CANCELLED: { bg: '#fee2e2', text: '#dc2626', label: 'trip.status.cancelled',  icon: 'cancel' }
 };
 
 @Component({
   selector: 'app-live-monitor',
-  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, TripMap],
+  imports: [MatCardModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, TripMap, TranslatePipe],
   templateUrl: './live-monitor.html',
   styleUrl: './live-monitor.css'
 })
 export class LiveMonitor {
   protected store = inject(TripStore);
+  private translate = inject(TranslateService);
 
   selectedId = signal<number | null>(null);
 
@@ -66,19 +68,19 @@ export class LiveMonitor {
 
   cancelTrip(trip: TripEntity, event: Event): void {
     event.stopPropagation();
-    if (!confirm(`Cancelar viaje #${trip.id}?`)) return;
+    if (!confirm(this.translate.instant('trip.confirm.cancel-trip', { id: trip.id }))) return;
     this.store.cancelTrip(trip.id);
   }
 
   activateTrip(trip: TripEntity, event: Event): void {
     event.stopPropagation();
-    if (!confirm(`Activar viaje #${trip.id}?`)) return;
+    if (!confirm(this.translate.instant('trip.confirm.activate-trip', { id: trip.id }))) return;
     this.store.activateTrip(trip.id);
   }
 
   deleteTrip(trip: TripEntity, event: Event): void {
     event.stopPropagation();
-    if (!confirm(`Eliminar viaje #${trip.id}?`)) return;
+    if (!confirm(this.translate.instant('trip.confirm.delete-trip', { id: trip.id }))) return;
     this.store.deleteTrip(trip.id);
     if (this.selectedId() === trip.id) this.selectedId.set(null);
   }

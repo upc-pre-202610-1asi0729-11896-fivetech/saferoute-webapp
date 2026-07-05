@@ -9,15 +9,15 @@
 
     <div class="co-sandbox-pill">
       <span class="co-dot"></span>
-      Sandbox - entorno de prueba
+      {{ 'subscription.checkout.sandbox' | translate }}
     </div>
 
     <div class="co-card">
       <h1 class="co-title">{{ mode() === 'upgrade' ? 'Actualiza tu plan' : 'Finaliza tu suscripcion' }}</h1>
-      <p class="co-subtitle">Revisa tu plan y completa el pago de forma segura.</p>
+      <p class="co-subtitle">{{ 'subscription.checkout.subtitle' | translate }}</p>
 
       <div class="co-order">
-        <div class="co-order-label">Resumen de orden</div>
+        <div class="co-order-label">{{ 'subscription.checkout.order-summary' | translate }}</div>
         <div class="co-order-plan">{{ planName() }}</div>
         @if (planPrice()) {
           <div class="co-order-price">{{ planPrice() }} / mes</div>
@@ -33,8 +33,8 @@
         <div class="co-msg co-msg-success">
           <span class="co-msg-icon">OK</span>
           <div>
-            <strong>Pago realizado con exito</strong>
-            <p>Actualizando tu cuenta en unos segundos...</p>
+            <strong>{{ 'subscription.checkout.success' | translate }}</strong>
+            <p>{{ 'subscription.checkout.updating' | translate }}</p>
           </div>
         </div>
       }
@@ -43,8 +43,8 @@
         <div class="co-msg co-msg-warn">
           <span class="co-msg-icon">!</span>
           <div>
-            <strong>Pago cancelado</strong>
-            <p>Puedes intentarlo de nuevo cuando quieras.</p>
+            <strong>{{ 'subscription.checkout.cancelled' | translate }}</strong>
+            <p>{{ 'subscription.checkout.try-again' | translate }}</p>
           </div>
         </div>
       }
@@ -53,19 +53,19 @@
         <div class="co-msg co-msg-error">
           <span class="co-msg-icon">X</span>
           <div>
-            <strong>Error al procesar el pago</strong>
-            <p>Intenta nuevamente con PayPal sandbox.</p>
+            <strong>{{ 'subscription.checkout.error' | translate }}</strong>
+            <p>{{ 'subscription.checkout.error-help' | translate }}</p>
           </div>
         </div>
       }
 
       @if (status() === 'idle' || status() === 'cancelled' || status() === 'error') {
-        <div class="co-pay-label">Pagar con PayPal</div>
+        <div class="co-pay-label">{{ 'subscription.checkout.pay-paypal' | translate }}</div>
 
         @if (!sdkReady()) {
           <div class="co-spinner-wrap">
             <div class="co-spinner"></div>
-            Cargando opciones de pago...
+            {{ 'subscription.checkout.loading-options' | translate }}
           </div>
         }
 
@@ -73,7 +73,7 @@
       }
 
       <div class="co-back-link">
-        <button class="co-btn-link" (click)="goBack()">Volver</button>
+        <button class="co-btn-link" (click)="goBack()">{{ 'general.back' | translate }}</button>
       </div>
     </div>
   </div>

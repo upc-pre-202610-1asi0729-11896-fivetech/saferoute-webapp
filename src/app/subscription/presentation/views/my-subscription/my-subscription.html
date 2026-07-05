@@ -1,12 +1,12 @@
 <div class="sub-shell">
   <div class="sub-header">
     <div>
-      <h1 class="sub-title">Mi Suscripcion</h1>
-      <p class="sub-sub">Plan actual, vigencia y cambios de plan</p>
+      <h1 class="sub-title">{{ 'subscription.status-view.title' | translate }}</h1>
+      <p class="sub-sub">{{ 'subscription.status-view.subtitle' | translate }}</p>
     </div>
     <a class="btn-plans" routerLink="/subscription/plans">
       <mat-icon>menu</mat-icon>
-      Ver todos los planes
+      {{ 'subscription.actions.view-all-plans' | translate }}
     </a>
   </div>
 
@@ -15,17 +15,17 @@
   } @else {
     <div class="summary-grid">
       <div class="summary-card">
-        <span class="summary-label">Plan actual</span>
+        <span class="summary-label">{{ 'subscription.status-card.current-plan' | translate }}</span>
         <strong>{{ store.subscription() ? planLabel() : 'Sin plan activo' }}</strong>
         <small>{{ store.subscription()?.status ?? 'PENDIENTE' }}</small>
       </div>
       <div class="summary-card">
-        <span class="summary-label">Dias restantes</span>
+        <span class="summary-label">{{ 'subscription.status-card.remaining-days' | translate }}</span>
         <strong>{{ remainingDays() }}</strong>
         <small>de {{ totalDays() }} dias</small>
       </div>
       <div class="summary-card">
-        <span class="summary-label">Vence</span>
+        <span class="summary-label">{{ 'subscription.status-card.expires' | translate }}</span>
         <strong>{{ formatDate(store.subscription()?.endDate ?? '') }}</strong>
         <small>Inicio: {{ formatDate(store.subscription()?.startDate ?? '') }}</small>
       </div>
@@ -45,11 +45,11 @@
 
         <div class="plan-price">
           <span class="price-amt">$ {{ currentPlan()?.price ?? store.subscription()?.planPrice ?? 0 }}</span>
-          <span class="price-per"> / mes</span>
+          <span class="price-per"> {{ 'subscription.monthly-suffix' | translate }}</span>
         </div>
 
         <div class="plan-remaining">
-          <span class="remain-label">Dias restantes</span>
+          <span class="remain-label">{{ 'subscription.status-card.remaining-days' | translate }}</span>
           <span class="remain-val" [class.remain-warn]="remainingDays() <= 10">
             {{ remainingDays() }} dias
           </span>
@@ -62,21 +62,21 @@
           <div class="plan-date-item">
             <mat-icon class="date-icon">event</mat-icon>
             <div>
-              <div class="date-lbl">INICIO</div>
+              <div class="date-lbl">{{ 'subscription.status-card.start-date' | translate }}</div>
               <div class="date-val">{{ formatDate(store.subscription()?.startDate ?? '') }}</div>
             </div>
           </div>
           <div class="plan-date-item">
             <mat-icon class="date-icon">event_available</mat-icon>
             <div>
-              <div class="date-lbl">VENCE</div>
+              <div class="date-lbl">{{ 'subscription.status-card.end-date' | translate }}</div>
               <div class="date-val">{{ formatDate(store.subscription()?.endDate ?? '') }}</div>
             </div>
           </div>
         </div>
 
         @if (store.subscription()) {
-          <button class="btn-cancel" (click)="cancel()">Cancelar Suscripcion</button>
+          <button class="btn-cancel" (click)="cancel()">{{ 'subscription.actions.cancel' | translate }}</button>
         }
       </div>
 
@@ -84,11 +84,11 @@
         <div class="detail-card">
           <div class="detail-card-title">
             <mat-icon class="detail-title-icon">check_circle</mat-icon>
-            Funcionalidades incluidas
+            {{ 'subscription.status-card.included-features' | translate }}
           </div>
           <div class="features-wrap">
             @for (f of features(); track f) {
-              <span class="feature-chip"><mat-icon class="chip-icon">check</mat-icon> {{ f }}</span>
+              <span class="feature-chip"><mat-icon class="chip-icon">check</mat-icon> {{ f.startsWith('subscription.') ? (f | translate) : f }}</span>
             }
           </div>
         </div>
@@ -96,18 +96,18 @@
         <div class="detail-card">
           <div class="detail-card-title">
             <mat-icon class="detail-title-icon">upgrade</mat-icon>
-            Upgrade de plan
+            {{ 'subscription.actions.upgrade' | translate }}
           </div>
 
           @if (upgradePlans().length === 0) {
-            <p class="muted-copy">No hay otros planes disponibles desde el backend.</p>
+            <p class="muted-copy">{{ 'subscription.status-view.no-other-plans' | translate }}</p>
           } @else {
             <div class="upgrade-grid">
               @for (plan of upgradePlans(); track plan.id) {
                 <div class="upgrade-card">
                   <div>
                     <h3>{{ plan.name }}</h3>
-                    <p>$ {{ plan.price }} / mes</p>
+                    <p>$ {{ plan.price }} {{ 'subscription.monthly-suffix' | translate }}</p>
                     <span>{{ plan.maxRoutes }} rutas · {{ plan.maxDrivers }} conductores</span>
                   </div>
                   <button class="btn-upgrade" (click)="choosePlan(plan.id)" [disabled]="store.loading()">
@@ -122,19 +122,19 @@
         <div class="detail-card">
           <div class="detail-card-title">
             <mat-icon class="detail-title-icon">apartment</mat-icon>
-            Informacion de organizacion
+            {{ 'subscription.status-card.organization-info' | translate }}
           </div>
           <div class="org-rows">
             <div class="org-row">
-              <span class="org-lbl">Organizacion</span>
+              <span class="org-lbl">{{ 'option.organization' | translate }}</span>
               <span class="org-val">org-{{ store.subscription()?.organizationId ?? auth.currentUser()?.organizationId ?? '-' }}</span>
             </div>
             <div class="org-row">
-              <span class="org-lbl">ID Suscripcion</span>
+              <span class="org-lbl">{{ 'subscription.status-card.subscription-id' | translate }}</span>
               <span class="org-val">{{ store.subscription()?.id ?? '-' }}</span>
             </div>
             <div class="org-row">
-              <span class="org-lbl">Estado</span>
+              <span class="org-lbl">{{ 'general.status' | translate }}</span>
               <span class="org-status-chip">{{ store.subscription()?.status ?? 'Sin plan' }}</span>
             </div>
           </div>

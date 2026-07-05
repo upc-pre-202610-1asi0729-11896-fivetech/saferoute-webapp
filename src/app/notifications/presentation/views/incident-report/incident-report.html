@@ -1,19 +1,19 @@
-<div class="alert-center">
+﻿<div class="alert-center">
 
   <!-- Header -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Centro de Alertas</h1>
-      <p class="page-sub">Incidencias y notificaciones del transporte escolar</p>
+      <h1 class="page-title">{{ 'notification.alert.title' | translate }}</h1>
+      <p class="page-sub">{{ 'notification.incident.subtitle' | translate }}</p>
     </div>
     <div class="header-actions">
       @if (isAdmin()) {
         <a mat-stroked-button routerLink="/notifications/alerts/new">
-          <mat-icon>campaign</mat-icon> Nueva Alerta
+          <mat-icon>campaign</mat-icon> {{ 'notification.alert.new-alert' | translate }}
         </a>
       }
       <button mat-raised-button color="primary" (click)="openDialog()">
-        <mat-icon>add</mat-icon> Reportar Incidencia
+        <mat-icon>add</mat-icon> {{ 'notification.incident.report' | translate }}
       </button>
     </div>
   </div>
@@ -39,30 +39,30 @@
     <!-- Filters -->
     <div class="filters-row">
       <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Tipo</mat-label>
+        <mat-label>{{ 'notification.incident.type' | translate }}</mat-label>
         <mat-select [value]="filterType()" (selectionChange)="filterType.set($event.value)">
           @for (t of INCIDENT_TYPES; track t.value) {
-            <mat-option [value]="t.value">{{ t.label }}</mat-option>
+            <mat-option [value]="t.value">{{ t.label | translate }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Gravedad</mat-label>
+        <mat-label>{{ 'notification.incident.severity' | translate }}</mat-label>
         <mat-select [value]="filterSeverity()" (selectionChange)="filterSeverity.set($event.value)">
-          <mat-option value="ALL">Toda gravedad</mat-option>
-          <mat-option value="LOW">Leve</mat-option>
-          <mat-option value="MEDIUM">Moderado</mat-option>
-          <mat-option value="HIGH">Grave</mat-option>
+          <mat-option value="ALL">{{ 'notification.incident.all-severity' | translate }}</mat-option>
+          <mat-option value="LOW">{{ 'notification.incident.low' | translate }}</mat-option>
+          <mat-option value="MEDIUM">{{ 'notification.incident.medium' | translate }}</mat-option>
+          <mat-option value="HIGH">{{ 'notification.incident.high' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Estado</mat-label>
+        <mat-label>{{ 'general.status' | translate }}</mat-label>
         <mat-select [value]="filterStatus()" (selectionChange)="filterStatus.set($event.value)">
-          <mat-option value="ALL">Todos los estados</mat-option>
-          <mat-option value="OPEN">Abierto</mat-option>
-          <mat-option value="RESOLVED">Resuelto</mat-option>
+          <mat-option value="ALL">{{ 'notification.incident.all-statuses' | translate }}</mat-option>
+          <mat-option value="OPEN">{{ 'notification.incident.open' | translate }}</mat-option>
+          <mat-option value="RESOLVED">{{ 'notification.incident.resolved' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
@@ -70,7 +70,7 @@
     @if (filteredIncidents().length === 0) {
       <div class="empty-state">
         <mat-icon class="empty-icon">check_circle</mat-icon>
-        <p>No hay incidencias con los filtros actuales.</p>
+        <p>{{ 'notification.incident.empty-filtered' | translate }}</p>
       </div>
     }
 
@@ -86,14 +86,14 @@
           </div>
           <div class="inc-body">
             <div class="inc-row1">
-              <span class="inc-type">{{ typeLabel(inc.type) }}</span>
+              <span class="inc-type">{{ typeLabel(inc.type) | translate }}</span>
               <span class="sev-badge"
                     [style.background]="SEVERITY_COLORS[inc.severity] + '22'"
                     [style.color]="SEVERITY_COLORS[inc.severity]">
-                {{ SEVERITY_LABELS[inc.severity] }}
+                {{ SEVERITY_LABELS[inc.severity] | translate }}
               </span>
               <span class="status-badge" [class.open]="inc.status === 'OPEN'" [class.resolved]="inc.status === 'RESOLVED'">
-                {{ inc.status === 'OPEN' ? 'Abierto' : 'Resuelto' }}
+                {{ (inc.status === 'OPEN' ? 'notification.incident.open' : 'notification.incident.resolved') | translate }}
               </span>
             </div>
             <p class="inc-desc">{{ inc.description }}</p>
@@ -107,7 +107,7 @@
           @if (isAdmin() && inc.status === 'OPEN') {
             <div class="inc-actions">
               <button mat-stroked-button (click)="resolveIncident(inc)">
-                <mat-icon>check</mat-icon> Resolver
+                <mat-icon>check</mat-icon> {{ 'notification.incident.resolve' | translate }}
               </button>
             </div>
           }
@@ -121,14 +121,14 @@
     <div class="notif-header-row">
       <span class="notif-count">{{ visibleNotifs().length }} notificaciones</span>
       @if (unreadCount() > 0) {
-        <button mat-button (click)="markAllRead()">Marcar todas leídas</button>
+        <button mat-button (click)="markAllRead()">{{ 'notification.list.mark-all-read' | translate }}</button>
       }
     </div>
 
     @if (visibleNotifs().length === 0) {
       <div class="empty-state">
         <mat-icon class="empty-icon">notifications_off</mat-icon>
-        <p>No hay notificaciones.</p>
+        <p>{{ 'notification.list.empty' | translate }}</p>
       </div>
     }
 
@@ -153,39 +153,39 @@
     <div class="dialog-backdrop" (click)="showDialog.set(false)">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
         <div class="dialog-header">
-          <h2>Reportar Incidencia</h2>
+          <h2>{{ 'notification.incident.report' | translate }}</h2>
           <button mat-icon-button (click)="showDialog.set(false)"><mat-icon>close</mat-icon></button>
         </div>
         <form [formGroup]="form" (ngSubmit)="saveIncident()" class="dialog-form">
           <mat-form-field appearance="outline" class="full">
-            <mat-label>Tipo de Incidencia</mat-label>
+            <mat-label>{{ 'notification.incident.type-of-incident' | translate }}</mat-label>
             <mat-select formControlName="type">
               @for (t of INCIDENT_TYPES.slice(1); track t.value) {
-                <mat-option [value]="t.value">{{ t.label }}</mat-option>
+                <mat-option [value]="t.value">{{ t.label | translate }}</mat-option>
               }
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full">
-            <mat-label>Gravedad</mat-label>
+            <mat-label>{{ 'notification.incident.severity' | translate }}</mat-label>
             <mat-select formControlName="severity">
-              <mat-option value="LOW">Leve</mat-option>
-              <mat-option value="MEDIUM">Moderado</mat-option>
-              <mat-option value="HIGH">Grave</mat-option>
+              <mat-option value="LOW">{{ 'notification.incident.low' | translate }}</mat-option>
+              <mat-option value="MEDIUM">{{ 'notification.incident.medium' | translate }}</mat-option>
+              <mat-option value="HIGH">{{ 'notification.incident.high' | translate }}</mat-option>
             </mat-select>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full">
-            <mat-label>Descripción *</mat-label>
+            <mat-label>{{ 'notification.incident.description-required' | translate }}</mat-label>
             <textarea matInput formControlName="description" rows="4"
-                      placeholder="Describe la incidencia con detalle..."></textarea>
+                      placeholder="{{ 'notification.incident.placeholder' | translate }}"></textarea>
           </mat-form-field>
 
           <div class="dialog-footer">
-            <button mat-button type="button" (click)="showDialog.set(false)">Cancelar</button>
+            <button mat-button type="button" (click)="showDialog.set(false)">{{ 'general.cancel' | translate }}</button>
             <button mat-raised-button color="primary" type="submit"
                     [disabled]="!form.value.description">
-              <mat-icon>send</mat-icon> Reportar
+              <mat-icon>send</mat-icon> {{ 'notification.incident.report' | translate }}
             </button>
           </div>
         </form>
@@ -193,3 +193,4 @@
     </div>
   }
 </div>
+

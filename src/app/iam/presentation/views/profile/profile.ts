@@ -4,10 +4,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthStore } from '../../../application/auth-store';
 import { Role } from '../../../domain/model/role-enum';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-profile',
-  imports: [ReactiveFormsModule, MatIconModule],
+  imports: [ReactiveFormsModule, MatIconModule, TranslatePipe],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -15,6 +16,7 @@ export class Profile {
   protected auth = inject(AuthStore);
   private fb = inject(FormBuilder);
   private snack = inject(MatSnackBar);
+  private translate = inject(TranslateService);
 
   // Notification toggles (local state only)
   notifyTrip      = signal(true);
@@ -42,9 +44,9 @@ export class Profile {
 
   get roleLabel(): string {
     switch (this.auth.currentUser()?.role) {
-      case Role.ADMIN:  return 'Administrador';
-      case Role.DRIVER: return 'Conductor';
-      case Role.PARENT: return 'Padre / Madre';
+      case Role.ADMIN:  return this.translate.instant('home.role.admin');
+      case Role.DRIVER: return this.translate.instant('home.role.driver');
+      case Role.PARENT: return this.translate.instant('home.role.parent');
       default:          return this.auth.currentUser()?.role ?? '—';
     }
   }
@@ -58,18 +60,18 @@ export class Profile {
     if (this.profileForm.invalid) { this.profileForm.markAllAsTouched(); return; }
     // In a real app, call an update API here
     console.log('saveProfile', this.profileForm.value);
-    this.snack.open('Perfil actualizado', 'OK', { duration: 3000 });
+    this.snack.open(this.translate.instant('iam.profile.profile-updated'), 'OK', { duration: 3000 });
   }
 
   saveSecurity(): void {
     if (this.securityForm.invalid) { this.securityForm.markAllAsTouched(); return; }
     const v = this.securityForm.value;
     if (v.newPassword !== v.confirmPassword) {
-      this.snack.open('Las contraseñas no coinciden', 'OK', { duration: 3000 });
+      this.snack.open(this.translate.instant('iam.profile.passwords-do-not-match'), 'OK', { duration: 3000 });
       return;
     }
     console.log('saveSecurity', v);
-    this.snack.open('Contraseña actualizada', 'OK', { duration: 3000 });
+    this.snack.open(this.translate.instant('iam.profile.password-updated'), 'OK', { duration: 3000 });
     this.securityForm.reset();
   }
 }

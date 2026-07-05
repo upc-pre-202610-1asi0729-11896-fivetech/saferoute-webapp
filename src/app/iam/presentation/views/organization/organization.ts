@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+﻿import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,19 +9,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthStore } from '../../../application/auth-store';
 import { IamApi } from '../../../infrastructure/iam-api';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-organization',
-  imports: [
-    ReactiveFormsModule,
+  imports: [ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
-  ],
+    MatSnackBarModule, TranslatePipe],
   templateUrl: './organization.html',
   styleUrl: './organization.css',
 })
@@ -30,6 +29,7 @@ export class Organization {
   private readonly auth = inject(AuthStore);
   private readonly api = inject(IamApi);
   private readonly snack = inject(MatSnackBar);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -64,7 +64,7 @@ export class Organization {
         this.loading.set(false);
       },
       error: err => {
-        this.error.set(err.message ?? 'No se pudo cargar la organizacion.');
+        this.error.set(err.message ?? this.translate.instant('iam.organization.load-error'));
         this.loading.set(false);
       },
     });
@@ -91,13 +91,14 @@ export class Organization {
           createdAt: org.createdAt ?? '',
           legalIdentifier: org.legalIdentifier,
         });
-        this.snack.open('Organizacion actualizada', 'OK', { duration: 3000 });
+        this.snack.open(this.translate.instant('iam.organization.updated'), 'OK', { duration: 3000 });
         this.saving.set(false);
       },
       error: err => {
-        this.error.set(err.message ?? 'No se pudo actualizar la organizacion.');
+        this.error.set(err.message ?? this.translate.instant('iam.organization.update-error'));
         this.saving.set(false);
       },
     });
   }
 }
+

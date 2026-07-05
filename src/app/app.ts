@@ -28,6 +28,10 @@ export class App {
   constructor() {
     this.translate = inject(TranslateService);
     this.translate.addLangs(['en', 'es']);
-    this.translate.use('en');
+    this.translate.setDefaultLang('en');
+    const savedLanguage = localStorage.getItem('saferoute-language');
+    const browserLanguage = this.translate.getBrowserLang();
+    const language = savedLanguage ?? (browserLanguage?.match(/en|es/) ? browserLanguage : 'en');
+    this.translate.use(language);
   }
 }

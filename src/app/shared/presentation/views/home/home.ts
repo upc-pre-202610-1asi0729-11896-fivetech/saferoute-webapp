@@ -62,9 +62,9 @@ export class Home implements OnInit {
       const myRoutes = routes.filter(r => r.driverId === user?.id);
       const myTrips  = trips.filter(t => t.driverId === user?.id);
       return [
-        { icon: 'route',           value: myRoutes.length,                                                     label: 'My Routes' },
-        { icon: 'directions_bus',  value: myTrips.filter(t => t.status === 'EN_ROUTE').length,               label: 'Trips Active' },
-        { icon: 'group',           value: myRoutes.reduce((s, r) => s + (r.studentIds?.length || 0), 0),     label: 'Students Served' }
+        { icon: 'route',           value: myRoutes.length,                                                     label: 'home.metrics.my-routes' },
+        { icon: 'directions_bus',  value: myTrips.filter(t => t.status === 'EN_ROUTE').length,               label: 'home.metrics.trips-active' },
+        { icon: 'group',           value: myRoutes.reduce((s, r) => s + (r.studentIds?.length || 0), 0),     label: 'home.metrics.students-served' }
       ];
     }
 
@@ -75,37 +75,37 @@ export class Home implements OnInit {
       const liveTrips = trips.filter(t => t.status === 'EN_ROUTE' && kidIds.some(id => (t.studentIds || []).includes(id)));
       const assignedRoutes = routes.filter(r => r.studentIds?.some((id: number | string) => kidIds.map(String).includes(String(id))));
       return [
-        { icon: 'school',          value: kids.length,           label: 'My Children' },
-        { icon: 'directions_bus',  value: liveTrips.length,      label: 'Trips Active' },
-        { icon: 'route',           value: assignedRoutes.length, label: 'Routes Assigned' }
+        { icon: 'school',          value: kids.length,           label: 'home.metrics.my-children' },
+        { icon: 'directions_bus',  value: liveTrips.length,      label: 'home.metrics.trips-active' },
+        { icon: 'route',           value: assignedRoutes.length, label: 'home.metrics.routes-assigned' }
       ];
     }
 
     // ADMIN (default)
     return [
-      { icon: 'route',           value: routes.length,                                          label: 'Routes' },
-      { icon: 'directions_bus',  value: trips.filter(t => t.status === 'EN_ROUTE').length,    label: 'Trips in Route' },
-      { icon: 'group',           value: this.dashboard.users().length,                        label: 'Users' }
+      { icon: 'route',           value: routes.length,                                          label: 'home.metrics.routes' },
+      { icon: 'directions_bus',  value: trips.filter(t => t.status === 'EN_ROUTE').length,    label: 'home.metrics.trips-in-route' },
+      { icon: 'group',           value: this.dashboard.users().length,                        label: 'home.metrics.users' }
     ];
   });
 
   cards = computed<DashboardCard[]>(() => {
     const role = this.auth.currentUser()?.role;
     if (role === Role.ADMIN) return [
-      { label: 'Register Drivers',  desc: 'Gestiona conductores: licencias, vehículo asignado y estado.', icon: 'badge',     route: '/stakeholder/profiles' },
-      { label: 'Register Routes',   desc: 'Crea rutas con paradas, conductor, vehículo y horario.',       icon: 'route',     route: '/routes-management/routes' },
-      { label: 'Register Students', desc: 'Registra alumnos y vincúlalos con sus padres.',                icon: 'school',    route: '/stakeholder/profiles' },
-      { label: 'Register Parent',   desc: 'Administra padres de familia y datos de contacto.',            icon: 'group',     route: '/stakeholder/profiles' },
-      { label: 'Subscription',      desc: 'Visualiza y gestiona el plan de tu organización.',             icon: 'workspace_premium', route: '/subscription/status' }
+      { label: 'home.admin.register-drivers',  desc: 'home.admin.register-drivers-desc',  icon: 'badge',     route: '/stakeholder/profiles' },
+      { label: 'home.admin.register-routes',   desc: 'home.admin.register-routes-desc',   icon: 'route',     route: '/routes-management/routes' },
+      { label: 'home.admin.register-students', desc: 'home.admin.register-students-desc', icon: 'school',    route: '/stakeholder/profiles' },
+      { label: 'home.admin.register-parent',   desc: 'home.admin.register-parent-desc',            icon: 'group',     route: '/stakeholder/profiles' },
+      { label: 'option.subscription',      desc: 'home.admin.subscription-desc',        icon: 'workspace_premium', route: '/subscription/status' }
     ];
     if (role === Role.DRIVER) return [
       { label: 'home.driver.trips',  desc: 'home.driver.trips-desc',  icon: 'directions_bus', route: '/trip/list' },
       { label: 'home.driver.alerts', desc: 'home.driver.alerts-desc', icon: 'notifications',  route: '/notifications/alerts' }
     ];
     if (role === Role.PARENT) return [
-      { label: 'My Child',         desc: 'Sigue en tiempo real el viaje y la ubicación de tu hijo.',   icon: 'favorite',      route: '/trip/tracking' },
-      { label: 'Incident Report',  desc: 'Revisa reportes de incidentes ocurridos durante los viajes.', icon: 'warning',       route: '/notifications/alerts' },
-      { label: 'Check Assistance', desc: 'Verifica la asistencia y estado de abordaje de tu hijo.',     icon: 'check_circle',  route: '/trip/attendance' }
+      { label: 'home.parent.my-child',         desc: 'home.parent.my-child-desc',         icon: 'favorite',      route: '/trip/tracking' },
+      { label: 'home.parent.incident-report',  desc: 'home.parent.incident-report-desc', icon: 'warning',       route: '/notifications/alerts' },
+      { label: 'home.parent.check-assistance', desc: 'home.parent.check-assistance-desc',     icon: 'check_circle',  route: '/trip/attendance' }
     ];
     return [];
   });

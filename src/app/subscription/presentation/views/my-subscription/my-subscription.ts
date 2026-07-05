@@ -4,10 +4,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SubscriptionStore } from '../../../application/subscription-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-my-subscription',
-  imports: [RouterLink, MatIconModule, MatProgressSpinnerModule],
+  imports: [RouterLink, MatIconModule, MatProgressSpinnerModule, TranslatePipe],
   templateUrl: './my-subscription.html',
   styleUrl: './my-subscription.css'
 })
@@ -15,6 +16,7 @@ export class MySubscription implements OnInit {
   protected store = inject(SubscriptionStore);
   protected auth = inject(AuthStore);
   private router = inject(Router);
+  private translate = inject(TranslateService);
 
   ngOnInit(): void {
     const orgId = this.auth.currentUser()?.organizationId;
@@ -62,13 +64,13 @@ export class MySubscription implements OnInit {
     const plan = this.currentPlan();
     if (plan?.features?.length) return plan.features;
     return [
-      'Rutas activas segun limite del plan',
-      'Conductores segun limite del plan',
-      'Registro de alumnos',
-      'Marcacion de abordaje digital',
-      'Inicio y cierre de trayecto',
-      'Reporte de incidencias',
-      'Notificaciones de abordaje',
+      'subscription.features.active-routes-by-plan',
+      'subscription.features.drivers-by-plan',
+      'subscription.features.student-registration',
+      'subscription.features.digital-boarding',
+      'subscription.features.trip-start-end',
+      'subscription.features.incident-reporting',
+      'subscription.features.boarding-notifications',
     ];
   });
 
@@ -112,7 +114,7 @@ export class MySubscription implements OnInit {
   }
 
   cancel(): void {
-    if (!confirm('Cancelar la suscripcion activa?')) return;
+    if (!confirm(this.translate.instant('subscription.confirm.cancel-active'))) return;
     this.store.cancelSubscription();
   }
 }

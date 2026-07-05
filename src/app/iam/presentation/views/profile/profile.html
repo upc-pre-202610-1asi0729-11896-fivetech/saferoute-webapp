@@ -1,7 +1,7 @@
-<div class="prof-shell">
+﻿<div class="prof-shell">
   <div class="prof-grid">
 
-    <!-- ── Left sidebar ── -->
+    <!-- â”€â”€ Left sidebar â”€â”€ -->
     <div class="prof-sidebar">
 
       <div class="prof-avatar">{{ initials }}</div>
@@ -10,23 +10,23 @@
 
       <div class="prof-active-badge">
         <mat-icon class="badge-icon">check_circle</mat-icon>
-        Cuenta Activa
+        {{ 'iam.profile.active-account' | translate }}
       </div>
 
       @if (auth.currentUser()?.organizationId) {
         <div class="prof-org-id-box">
-          <div class="prof-org-id-label">Código de organización</div>
+          <div class="prof-org-id-label">{{ 'iam.profile.organization-code' | translate }}</div>
           <div class="prof-org-id-value">{{ auth.currentUser()!.organizationId }}</div>
-          <div class="prof-org-id-hint">Comparte este código con los padres y conductores para que puedan registrarse.</div>
+          <div class="prof-org-id-hint">{{ 'iam.profile.organization-code-help' | translate }}</div>
         </div>
       }
 
       <div class="prof-divider"></div>
 
-      <div class="prof-section-label">Notificaciones</div>
+      <div class="prof-section-label">{{ 'iam.profile.notifications' | translate }}</div>
 
       <div class="prof-toggle-row">
-        <span class="prof-toggle-text">Viajes</span>
+        <span class="prof-toggle-text">{{ 'option.trips' | translate }}</span>
         <label class="toggle-switch">
           <input type="checkbox" [checked]="notifyTrip()" (change)="notifyTrip.set(!notifyTrip())">
           <span class="toggle-track"></span>
@@ -34,7 +34,7 @@
       </div>
 
       <div class="prof-toggle-row">
-        <span class="prof-toggle-text">Incidentes</span>
+        <span class="prof-toggle-text">{{ 'notification.type.incident' | translate }}</span>
         <label class="toggle-switch">
           <input type="checkbox" [checked]="notifyIncident()" (change)="notifyIncident.set(!notifyIncident())">
           <span class="toggle-track"></span>
@@ -42,7 +42,7 @@
       </div>
 
       <div class="prof-toggle-row">
-        <span class="prof-toggle-text">Generales</span>
+        <span class="prof-toggle-text">{{ 'iam.profile.general-notifications' | translate }}</span>
         <label class="toggle-switch">
           <input type="checkbox" [checked]="notifyGeneral()" (change)="notifyGeneral.set(!notifyGeneral())">
           <span class="toggle-track"></span>
@@ -51,44 +51,44 @@
 
     </div>
 
-    <!-- ── Right main ── -->
+    <!-- â”€â”€ Right main â”€â”€ -->
     <div class="prof-main">
 
       <!-- Personal info -->
       <div class="prof-card">
         <h2 class="prof-card-title">
           <mat-icon>person_outline</mat-icon>
-          Información Personal
+          {{ 'iam.profile.personal-information' | translate }}
         </h2>
 
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="prof-form">
           <div class="prof-fields-row">
             <div class="prof-field">
-              <label class="prof-label">Nombre</label>
-              <input class="prof-input" formControlName="firstName" placeholder="Nombre">
+              <label class="prof-label">{{ 'iam.fields.first-name' | translate }}</label>
+              <input class="prof-input" formControlName="firstName" placeholder="{{ 'iam.fields.first-name' | translate }}">
               @if (profileForm.controls.firstName.hasError('required') && profileForm.controls.firstName.touched) {
-                <span class="prof-error">Campo requerido</span>
+                <span class="prof-error">{{ 'general.required-field' | translate }}</span>
               }
             </div>
             <div class="prof-field">
-              <label class="prof-label">Apellido</label>
-              <input class="prof-input" formControlName="lastName" placeholder="Apellido">
+              <label class="prof-label">{{ 'iam.fields.last-name' | translate }}</label>
+              <input class="prof-input" formControlName="lastName" placeholder="{{ 'iam.fields.last-name' | translate }}">
               @if (profileForm.controls.lastName.hasError('required') && profileForm.controls.lastName.touched) {
-                <span class="prof-error">Campo requerido</span>
+                <span class="prof-error">{{ 'general.required-field' | translate }}</span>
               }
             </div>
           </div>
 
           <div class="prof-fields-row">
             <div class="prof-field">
-              <label class="prof-label">Correo electrónico</label>
-              <input class="prof-input" type="email" formControlName="email" placeholder="correo@ejemplo.com">
+              <label class="prof-label">{{ 'iam.fields.email' | translate }}</label>
+              <input class="prof-input" type="email" formControlName="email" [placeholder]="'stakeholder.placeholders.email' | translate">
               @if (profileForm.controls.email.hasError('email') && profileForm.controls.email.touched) {
-                <span class="prof-error">Correo inválido</span>
+                <span class="prof-error">{{ 'iam.errors.invalid-email' | translate }}</span>
               }
             </div>
             <div class="prof-field">
-              <label class="prof-label">Teléfono</label>
+              <label class="prof-label">{{ 'iam.fields.phone' | translate }}</label>
               <input class="prof-input" formControlName="phone" placeholder="+51 999 999 999">
             </div>
           </div>
@@ -96,7 +96,7 @@
           <div class="prof-form-footer">
             <button type="submit" class="prof-btn-save">
               <mat-icon>save</mat-icon>
-              Guardar cambios
+              {{ 'general.save-changes' | translate }}
             </button>
           </div>
         </form>
@@ -106,33 +106,33 @@
       <div class="prof-card">
         <h2 class="prof-card-title">
           <mat-icon>lock_outline</mat-icon>
-          Seguridad
+          {{ 'iam.profile.security' | translate }}
         </h2>
 
         <form [formGroup]="securityForm" (ngSubmit)="saveSecurity()" class="prof-form">
           <div class="prof-field">
-            <label class="prof-label">Contraseña actual</label>
-            <input class="prof-input" type="password" formControlName="currentPassword" placeholder="••••••••">
+            <label class="prof-label">{{ 'iam.profile.current-password' | translate }}</label>
+            <input class="prof-input" type="password" formControlName="currentPassword" [placeholder]="'iam.profile.current-password' | translate">
           </div>
 
           <div class="prof-fields-row">
             <div class="prof-field">
-              <label class="prof-label">Nueva contraseña</label>
-              <input class="prof-input" type="password" formControlName="newPassword" placeholder="••••••••">
+              <label class="prof-label">{{ 'iam.profile.new-password' | translate }}</label>
+              <input class="prof-input" type="password" formControlName="newPassword" [placeholder]="'iam.profile.new-password' | translate">
               @if (securityForm.controls.newPassword.hasError('minlength') && securityForm.controls.newPassword.touched) {
-                <span class="prof-error">Mínimo 6 caracteres</span>
+                <span class="prof-error">{{ 'iam.errors.min-password' | translate }}</span>
               }
             </div>
             <div class="prof-field">
-              <label class="prof-label">Confirmar contraseña</label>
-              <input class="prof-input" type="password" formControlName="confirmPassword" placeholder="••••••••">
+              <label class="prof-label">{{ 'iam.fields.confirm-password' | translate }}</label>
+              <input class="prof-input" type="password" formControlName="confirmPassword" [placeholder]="'iam.fields.confirm-password' | translate">
             </div>
           </div>
 
           <div class="prof-form-footer">
             <button type="submit" class="prof-btn-save">
               <mat-icon>lock_reset</mat-icon>
-              Actualizar contraseña
+              {{ 'iam.profile.update-password' | translate }}
             </button>
           </div>
         </form>
@@ -141,3 +141,4 @@
     </div>
   </div>
 </div>
+

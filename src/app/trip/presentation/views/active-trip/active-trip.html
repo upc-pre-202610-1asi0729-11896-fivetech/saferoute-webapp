@@ -1,73 +1,73 @@
-<div class="dv-shell">
+﻿<div class="dv-shell">
 
-  <!-- ── Header ── -->
+  <!-- â”€â”€ Header â”€â”€ -->
   <div class="dv-header">
     <div>
-      <h1 class="dv-title">Viajes</h1>
-      <p class="dv-sub">Selecciona un viaje para iniciar o continuar la simulación</p>
+      <h1 class="dv-title">{{ 'trip.active.driver-title' | translate }}</h1>
+      <p class="dv-sub">{{ 'trip.active.select-trip-help' | translate }}</p>
     </div>
     <div class="dv-header-actions">
       @if (orsLoading()) {
         <mat-spinner diameter="18" style="margin-right:8px"/>
       }
       <button mat-stroked-button class="btn-reiniciar" (click)="resetSim()">
-        <mat-icon>refresh</mat-icon> Reiniciar demo
+        <mat-icon>refresh</mat-icon> {{ 'trip.demo.restart' | translate }}
       </button>
       @if (isEnRoute()) {
         @if (!simRunning()) {
           <button mat-raised-button class="btn-simular" (click)="startSim()">
-            <mat-icon>play_arrow</mat-icon> Simular
+            <mat-icon>play_arrow</mat-icon> {{ 'trip.demo.simulate' | translate }}
           </button>
         } @else {
           <button mat-raised-button class="btn-simular" (click)="pauseSim()">
-            <mat-icon>pause</mat-icon> Pausar
+            <mat-icon>pause</mat-icon> {{ 'trip.demo.pause' | translate }}
           </button>
         }
       }
     </div>
   </div>
 
-  <!-- ── Info bar ── -->
+  <!-- â”€â”€ Info bar â”€â”€ -->
   <div class="dv-infobar">
     <div class="dv-icard">
-      <span class="dv-icard-label">ESTADO</span>
+      <span class="dv-icard-label">{{ 'trip.list.status' | translate }}</span>
       <span class="dv-status-chip" [class]="statusClass(selectedTrip()?.status ?? '')">
         {{ statusLabel() }}
       </span>
     </div>
     <div class="dv-icard">
-      <span class="dv-icard-label">ALUMNOS</span>
+      <span class="dv-icard-label">{{ 'stakeholder.student.title' | translate }}</span>
       <span class="dv-icard-value">{{ selectedTrip()?.studentsBoarded ?? 0 }} / {{ selectedTrip()?.studentsTotal ?? 0 }}</span>
     </div>
     <div class="dv-icard">
-      <span class="dv-icard-label">PROGRESO</span>
+      <span class="dv-icard-label">{{ 'trip.active.progress' | translate }}</span>
       <span class="dv-icard-value">{{ progress() }}%</span>
     </div>
     <div class="dv-icard">
-      <span class="dv-icard-label">VEHÍCULO</span>
-      <span class="dv-icard-value">{{ selectedTrip()?.vehiclePlate ?? '—' }}</span>
+      <span class="dv-icard-label">{{ 'stakeholder.vehicle.singular' | translate }}</span>
+      <span class="dv-icard-value">{{ selectedTrip()?.vehiclePlate ?? 'â€”' }}</span>
     </div>
     <div class="dv-icard">
-      <span class="dv-icard-label">SALIDA</span>
-      <span class="dv-icard-value">{{ selectedTrip()?.scheduledStartTime ?? '—' }}</span>
+      <span class="dv-icard-label">{{ 'trip.active.departure' | translate }}</span>
+      <span class="dv-icard-value">{{ selectedTrip()?.scheduledStartTime ?? 'â€”' }}</span>
     </div>
     <div class="dv-icard">
-      <span class="dv-icard-label">PARADA ACTUAL</span>
+      <span class="dv-icard-label">{{ 'trip.active.current-stop' | translate }}</span>
       <span class="dv-icard-value dv-icard-stop">{{ currentStopName() }}</span>
     </div>
   </div>
 
-  <!-- ── Main 3-col ── -->
+  <!-- â”€â”€ Main 3-col â”€â”€ -->
   <div class="dv-main">
 
     <!-- Left: trip list -->
     <div class="dv-trips">
-      <div class="dv-panel-label">VIAJES DISPONIBLES</div>
+      <div class="dv-panel-label">{{ 'trip.active.available-trips' | translate }}</div>
 
       @if (myTrips().length === 0) {
         <div class="dv-empty">
           <mat-icon>directions_bus</mat-icon>
-          <p>Sin viajes asignados</p>
+          <p>{{ 'trip.active.no-assigned-trips' | translate }}</p>
         </div>
       }
 
@@ -90,7 +90,7 @@
               {{ tripTypeLabel(trip.tripType) }}
             </span>
             <span class="dtc-status-label" [class]="statusClass(trip.status)">
-              {{ trip.status === 'EN_ROUTE' ? 'En Ruta' : trip.status === 'COMPLETED' ? 'Completado' : 'Programado' }}
+              {{ (trip.status === 'EN_ROUTE' ? 'trip.status.en-route' : trip.status === 'COMPLETED' ? 'trip.status.completed' : 'trip.status.scheduled') | translate }}
             </span>
           </div>
         </div>
@@ -104,11 +104,11 @@
     <div class="dv-stops">
       <div class="dv-panel-label">
         <mat-icon style="font-size:1rem;width:1rem;height:1rem;vertical-align:middle;color:var(--amber)">location_on</mat-icon>
-        Paradas <span class="dv-stop-count">{{ waypoints().length }}</span>
+        {{ 'trip.stops.title' | translate }} <span class="dv-stop-count">{{ waypoints().length }}</span>
       </div>
 
       @if (!waypoints().length) {
-        <div class="dv-empty"><p>Sin paradas</p></div>
+        <div class="dv-empty"><p>{{ 'trip.stops.empty' | translate }}</p></div>
       }
 
       @for (stop of stops(); track stop.order; let i = $index; let last = $last) {
@@ -124,9 +124,9 @@
           </div>
           <div class="dvs-info">
             <span class="dvs-name">{{ stop.name }}</span>
-            @if (i === 0 && stop.done) { <span class="dvs-sub green">Completada</span> }
-            @else if (i === 0 && !stop.done) { <span class="dvs-sub muted">Punto de inicio</span> }
-            @if (stop.current) { <span class="dvs-sub amber">Aqui ahora</span> }
+            @if (i === 0 && stop.done) { <span class="dvs-sub green">{{ 'trip.stops.completed' | translate }}</span> }
+            @else if (i === 0 && !stop.done) { <span class="dvs-sub muted">{{ 'trip.stops.start-point' | translate }}</span> }
+            @if (stop.current) { <span class="dvs-sub amber">{{ 'trip.stops.current' | translate }}</span> }
           </div>
           @if (!stop.current && !stop.done) {
             <mat-icon class="dvs-arrow">chevron_right</mat-icon>
@@ -138,23 +138,23 @@
       <div class="dvs-actions">
         @if (isScheduled()) {
           <button mat-raised-button color="primary" class="dvs-btn-full" (click)="startTrip()">
-            <mat-icon>play_arrow</mat-icon> Iniciar Viaje
+            <mat-icon>play_arrow</mat-icon> {{ 'trip.active.start' | translate }}
           </button>
         }
         @if (isEnRoute()) {
           <button mat-raised-button class="dvs-btn-finish" (click)="finishTrip()">
-            <mat-icon>flag</mat-icon> Finalizar Viaje
+            <mat-icon>flag</mat-icon> {{ 'trip.active.end' | translate }}
           </button>
         }
         <button mat-raised-button class="dvs-btn-emergency" (click)="openEmergency()">
-          <mat-icon>warning</mat-icon> Emergencia
+          <mat-icon>warning</mat-icon> {{ 'trip.active.emergency' | translate }}
         </button>
       </div>
     </div>
 
   </div>
 
-  <!-- ── Bottom bar ── -->
+  <!-- â”€â”€ Bottom bar â”€â”€ -->
   <div class="dv-footer">
     <span class="dv-footer-name">{{ selectedTrip()?.routeName ?? '' }}</span>
     <div class="dv-footer-bar">
@@ -170,18 +170,18 @@
     <div class="em-dialog boarding-dialog scanner-dialog" (click)="$event.stopPropagation()">
       <div class="em-dialog-header">
         <mat-icon class="em-header-icon">qr_code_scanner</mat-icon>
-        <span class="em-header-title">Escaner de abordaje</span>
+        <span class="em-header-title">{{ 'trip.active.boarding.title' | translate }}</span>
       </div>
       <div class="boarding-body">
-        <p class="em-mode-hint">El conductor escanea el QR que presenta {{ currentBoardingLabel() }}.</p>
+        <p class="em-mode-hint">{{ 'trip.active.boarding.description' | translate: { student: currentBoardingLabel() } }}</p>
 
         <div class="scanner-frame" [class.scanner-ready]="scannerStatus() === 'ready'">
           <div id="boarding-qr-reader" class="qr-reader-box"></div>
           @if (scannerStatus() === 'starting') {
-            <div class="scanner-overlay">Activando camara...</div>
+            <div class="scanner-overlay">{{ 'trip.active.boarding.activating-camera' | translate }}</div>
           }
           @if (scannerStatus() === 'ready') {
-            <div class="scanner-autodetect">{{ scannerMessage() || 'Detectando QR automaticamente...' }}</div>
+            <div class="scanner-autodetect">{{ scannerMessage() || ('trip.active.boarding.detecting' | translate) }}</div>
           }
           @if (scannerStatus() === 'error') {
             <div class="scanner-overlay scanner-error">{{ scannerError() }}</div>
@@ -189,85 +189,85 @@
         </div>
       </div>
       <div class="em-mild-actions boarding-actions">
-        <button class="em-back-btn" (click)="markBoarding('ABSENT')">Marcar ausencia</button>
+        <button class="em-back-btn" (click)="markBoarding('ABSENT')">{{ 'trip.active.boarding.mark-absent' | translate }}</button>
         <button class="em-submit-btn" (click)="fallbackBoarding()">
           <mat-icon>how_to_reg</mat-icon>
-          Marcar abordaje
+          {{ 'trip.active.boarding.mark-boarded' | translate }}
         </button>
       </div>
     </div>
   </div>
 }
 
-<!-- ── Emergency dialog overlay ── -->
+<!-- â”€â”€ Emergency dialog overlay â”€â”€ -->
 @if (emergencyDialog()) {
   <div class="em-backdrop" (click)="closeEmergency()">
     <div class="em-dialog" (click)="$event.stopPropagation()">
 
       <div class="em-dialog-header">
         <mat-icon class="em-header-icon">warning</mat-icon>
-        <span class="em-header-title">Situación de Emergencia</span>
+        <span class="em-header-title">{{ 'trip.emergency.title' | translate }}</span>
         <button class="em-close-btn" (click)="closeEmergency()">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <!-- ── Mode select ── -->
+      <!-- â”€â”€ Mode select â”€â”€ -->
       @if (emergencyMode() === null) {
-        <p class="em-mode-hint">Selecciona el tipo de emergencia:</p>
+        <p class="em-mode-hint">{{ 'trip.emergency.select-type' | translate }}</p>
         <div class="em-mode-btns">
           <button class="em-mode-btn em-mode-urgent" (click)="emergencyMode.set('urgent')">
             <mat-icon>phone</mat-icon>
-            <span class="em-mode-label">Urgente</span>
-            <span class="em-mode-sub">Llamar a emergencias</span>
+            <span class="em-mode-label">{{ 'trip.emergency.urgent' | translate }}</span>
+            <span class="em-mode-sub">{{ 'trip.emergency.call-emergency' | translate }}</span>
           </button>
           <button class="em-mode-btn em-mode-mild" (click)="emergencyMode.set('mild')">
             <mat-icon>description</mat-icon>
-            <span class="em-mode-label">Leve</span>
-            <span class="em-mode-sub">Reportar incidente</span>
+            <span class="em-mode-label">{{ 'trip.emergency.mild' | translate }}</span>
+            <span class="em-mode-sub">{{ 'trip.emergency.report-incident' | translate }}</span>
           </button>
         </div>
       }
 
-      <!-- ── Urgent: call screen ── -->
+      <!-- â”€â”€ Urgent: call screen â”€â”€ -->
       @if (emergencyMode() === 'urgent') {
         <div class="em-urgent-body">
           <div class="em-phone-circle">
             <mat-icon>phone</mat-icon>
           </div>
-          <p class="em-phone-label">Línea de emergencia</p>
+          <p class="em-phone-label">{{ 'trip.emergency.line' | translate }}</p>
           <p class="em-phone-number">+51 900 000 000</p>
           <button class="em-call-btn" (click)="callEmergency()">
             <mat-icon>phone</mat-icon>
-            Llamar ahora
+            {{ 'trip.emergency.call-now' | translate }}
           </button>
-          <button class="em-back-btn" (click)="emergencyMode.set(null)">Volver</button>
+          <button class="em-back-btn" (click)="emergencyMode.set(null)">{{ 'general.back' | translate }}</button>
         </div>
       }
 
-      <!-- ── Mild: incident form ── -->
+      <!-- â”€â”€ Mild: incident form â”€â”€ -->
       @if (emergencyMode() === 'mild') {
         <div class="em-mild-body">
           <div class="em-field">
-            <label class="em-label">Tipo de incidente</label>
+            <label class="em-label">{{ 'notification.incident.type' | translate }}</label>
             <select class="em-select" [(ngModel)]="emergencyType">
-              <option value="RETRASO">Retraso</option>
-              <option value="AVERIA">Avería del vehículo</option>
-              <option value="ACCIDENTE">Accidente</option>
-              <option value="COMPORTAMIENTO">Comportamiento</option>
-              <option value="OTRO">Otro</option>
+              <option value="RETRASO">{{ 'notification.incident.delay' | translate }}</option>
+              <option value="AVERIA">{{ 'notification.incident.breakdown' | translate }}</option>
+              <option value="ACCIDENTE">{{ 'notification.incident.accident' | translate }}</option>
+              <option value="COMPORTAMIENTO">{{ 'notification.incident.behavior' | translate }}</option>
+              <option value="OTRO">{{ 'notification.incident.other' | translate }}</option>
             </select>
           </div>
           <div class="em-field">
-            <label class="em-label">Descripción</label>
+            <label class="em-label">{{ 'notification.incident.description' | translate }}</label>
             <textarea class="em-textarea" [(ngModel)]="emergencyDesc"
-                      placeholder="Describe brevemente la situación..." rows="4"></textarea>
+                      [placeholder]="'notification.incident.short-placeholder' | translate" rows="4"></textarea>
           </div>
           <div class="em-mild-actions">
-            <button class="em-back-btn" (click)="emergencyMode.set(null)">Volver</button>
+            <button class="em-back-btn" (click)="emergencyMode.set(null)">{{ 'general.back' | translate }}</button>
             <button class="em-submit-btn" (click)="submitEmergencyReport()">
               <mat-icon>send</mat-icon>
-              Enviar reporte
+              {{ 'notification.incident.send-report' | translate }}
             </button>
           </div>
         </div>
@@ -276,3 +276,4 @@
     </div>
   </div>
 }
+

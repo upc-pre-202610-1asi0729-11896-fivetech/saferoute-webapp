@@ -1,11 +1,11 @@
 <div class="trip-monitor">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Trip Monitor</h1>
-      <p class="page-sub">Real-time overview of active trips</p>
+      <h1 class="page-title">{{ 'trip.monitor.title' | translate }}</h1>
+      <p class="page-sub">{{ 'trip.monitor.subtitle' | translate }}</p>
     </div>
     <button mat-stroked-button (click)="refresh()">
-      <mat-icon>refresh</mat-icon> Refresh
+      <mat-icon>refresh</mat-icon> {{ 'general.refresh' | translate }}
     </button>
   </div>
 
@@ -13,7 +13,7 @@
 
     <div class="trips-panel">
       @if (store.loading()) {
-        <div class="state-msg"><mat-spinner diameter="20"/> Cargando…</div>
+        <div class="state-msg"><mat-spinner diameter="20"/> {{ 'general.loading' | translate }}...…</div>
       }
 
       @for (trip of store.trips(); track trip.id) {
@@ -24,7 +24,7 @@
                   [style.background]="status(trip.status).bg"
                   [style.color]="status(trip.status).text">
               <mat-icon class="badge-icon">{{ status(trip.status).icon }}</mat-icon>
-              {{ status(trip.status).label }}
+              {{ status(trip.status).label | translate }}
             </span>
           </div>
 
@@ -46,16 +46,16 @@
 
           <div class="trip-actions">
             @if (canCancel(trip.status)) {
-              <button mat-icon-button class="btn-cancel-trip" (click)="cancelTrip(trip, $event)" title="Cancelar viaje" aria-label="Cancelar viaje">
+              <button mat-icon-button class="btn-cancel-trip" (click)="cancelTrip(trip, $event)" title="{{ 'trip.actions.cancel-trip' | translate }}" aria-label="{{ 'trip.actions.cancel-trip' | translate }}">
                 <mat-icon>cancel</mat-icon>
               </button>
             }
             @if (canActivate(trip.status)) {
-              <button mat-icon-button class="btn-activate-trip" (click)="activateTrip(trip, $event)" title="Activar viaje" aria-label="Activar viaje">
+              <button mat-icon-button class="btn-activate-trip" (click)="activateTrip(trip, $event)" title="{{ 'trip.actions.activate-trip' | translate }}" aria-label="{{ 'trip.actions.activate-trip' | translate }}">
                 <mat-icon>play_circle</mat-icon>
               </button>
             }
-            <button mat-icon-button class="btn-delete" (click)="deleteTrip(trip, $event)" title="Eliminar viaje" aria-label="Eliminar viaje">
+            <button mat-icon-button class="btn-delete" (click)="deleteTrip(trip, $event)" title="{{ 'trip.actions.delete-trip' | translate }}" aria-label="{{ 'trip.actions.delete-trip' | translate }}">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -63,7 +63,7 @@
       }
 
       @if (!store.loading() && store.trips().length === 0) {
-        <div class="state-msg">No hay viajes registrados.</div>
+        <div class="state-msg">{{ 'trip.monitor.empty-all' | translate }}</div>
       }
     </div>
 
@@ -83,17 +83,17 @@
             <span class="status-badge"
                   [style.background]="status(sel.status).bg"
                   [style.color]="status(sel.status).text">
-              {{ status(sel.status).label }}
+              {{ status(sel.status).label | translate }}
             </span>
           </div>
 
           <div class="detail-grid">
             <div class="detail-item">
-              <span class="detail-label">Conductor</span>
+              <span class="detail-label">{{ 'trip.list.driver' | translate }}</span>
               <span class="detail-val">{{ sel.driverName || sel.driverId }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Tipo</span>
+              <span class="detail-label">{{ 'route.fields.type' | translate }}</span>
               <span class="detail-val">
                 <span class="type-chip" [class.outbound]="sel.tripType === 'OUTBOUND'" [class.return]="sel.tripType === 'RETURN'">
                   {{ sel.tripType === 'OUTBOUND' ? 'Recojo' : sel.tripType === 'RETURN' ? 'Retorno' : (sel.tripType || '—') }}
@@ -101,26 +101,26 @@
               </span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Alumnos</span>
+              <span class="detail-label">{{ 'stakeholder.student.title' | translate }}</span>
               <span class="detail-val">{{ sel.studentsBoarded }} / {{ sel.studentsTotal }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Parada actual</span>
+              <span class="detail-label">{{ 'trip.parent.current-location' | translate }}</span>
               <span class="detail-val">{{ sel.currentStop || '—' }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Inicio</span>
+              <span class="detail-label">{{ 'option.home' | translate }}</span>
               <span class="detail-val">{{ fmtTime(sel.startTime) }}</span>
             </div>
             <div class="detail-item">
-              <span class="detail-label">Fin</span>
+              <span class="detail-label">{{ 'trip.active.end-time' | translate }}</span>
               <span class="detail-val">{{ fmtTime(sel.endTime) }}</span>
             </div>
           </div>
 
           @if (selectedRoute()?.waypoints?.length) {
             <div class="wps-mini">
-              <p class="wps-mini-title"><mat-icon class="meta-icon">location_on</mat-icon>Paradas de la ruta</p>
+              <p class="wps-mini-title"><mat-icon class="meta-icon">location_on</mat-icon>{{ 'trip.stops.route-stops' | translate }}</p>
               <div class="wps-mini-list">
                 @for (wp of selectedRoute()!.waypoints!; track wp.order; let i = $index; let last = $last) {
                   <div class="wp-mini-item" [class.wp-current]="wp.name === sel.currentStop">
@@ -141,7 +141,7 @@
       } @else {
         <div class="placeholder-msg">
           <mat-icon>touch_app</mat-icon>
-          Selecciona un viaje para ver el detalle
+          {{ 'trip.monitor.select-detail' | translate }}
         </div>
       }
     </div>

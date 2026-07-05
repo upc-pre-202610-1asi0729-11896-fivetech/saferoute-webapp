@@ -2,6 +2,7 @@ import { AfterViewInit, Component, inject, OnDestroy, signal } from '@angular/co
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { SubscriptionStore } from '../../../application/subscription-store';
+import { TranslatePipe } from '@ngx-translate/core';
 
 declare global {
   interface Window {
@@ -13,7 +14,7 @@ const PAYPAL_CLIENT_ID = 'AdUsVXwA3QKQ_3UgFaH3wJZ6NgdzwL3PuEfi-um2YHyLAPiX7yRLMK
 
 @Component({
   selector: 'app-checkout',
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './checkout.html',
   styleUrl: './checkout.css',
 })

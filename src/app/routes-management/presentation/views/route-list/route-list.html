@@ -1,13 +1,13 @@
-<div class="rm-shell">
+﻿<div class="rm-shell">
 
   <!-- Top header -->
   <div class="rm-header">
     <div>
-      <h1 class="rm-title">Gestión de Rutas</h1>
-      <p class="rm-sub">Configura y asigna rutas escolares</p>
+      <h1 class="rm-title">{{ 'route.management.title' | translate }}</h1>
+      <p class="rm-sub">{{ 'route.management.subtitle' | translate }}</p>
     </div>
     <button mat-raised-button class="btn-new" (click)="goNew()">
-      <mat-icon>add</mat-icon> Nueva Ruta
+      <mat-icon>add</mat-icon> {{ 'route.management.new' | translate }}
     </button>
   </div>
 
@@ -22,8 +22,8 @@
       @if (store.routes().length === 0 && !store.loading()) {
         <div class="rm-empty">
           <mat-icon>route</mat-icon>
-          <p>Sin rutas creadas</p>
-          <button mat-raised-button color="primary" (click)="goNew()">Nueva Ruta</button>
+          <p>{{ 'route.management.empty' | translate }}</p>
+          <button mat-raised-button color="primary" (click)="goNew()">{{ 'route.management.new' | translate }}</button>
         </div>
       }
       @for (r of store.routes(); track r.id) {
@@ -40,7 +40,7 @@
             <span class="rmc-type" [class]="r.type === 'RETURN' ? 'type-return' : 'type-outbound'">
               {{ typeIcon(r.type) }} {{ typeLabel(r.type) }}
             </span>
-            <span class="rmc-time"><mat-icon class="rmc-icon">schedule</mat-icon> {{ r.scheduledStartTime || '—' }}</span>
+            <span class="rmc-time"><mat-icon class="rmc-icon">schedule</mat-icon> {{ r.scheduledStartTime || 'â€”' }}</span>
           </div>
 
           <!-- Origin / Destination -->
@@ -59,7 +59,7 @@
           <!-- Driver / Vehicle / Students -->
           <div class="rmc-detail">
             <mat-icon class="rmc-icon">person</mat-icon>
-            <span>{{ r.driverName || '— Sin conductor —' }}</span>
+            <span>{{ r.driverName || 'â€” Sin conductor â€”' }}</span>
           </div>
           <div class="rmc-detail">
             <mat-icon class="rmc-icon">school</mat-icon>
@@ -76,14 +76,14 @@
 
           <!-- Actions -->
           <div class="rmc-actions">
-            <button mat-button class="btn-schedule" (click)="scheduleTrip(r, $event)" title="Crear viaje para hoy">
+            <button mat-button class="btn-schedule" (click)="scheduleTrip(r, $event)" title="{{ 'trip.actions.create-trip-today' | translate }}">
               <mat-icon>add_road</mat-icon>
-              Crear Viaje
+              {{ 'trip.actions.create-trip' | translate }}
             </button>
-            <button mat-icon-button class="btn-edit" (click)="goEdit(r, $event)" title="Editar ruta">
+            <button mat-icon-button class="btn-edit" (click)="goEdit(r, $event)" title="{{ 'route.management.edit' | translate }}">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button class="btn-delete" (click)="delete(r, $event)" title="Eliminar">
+            <button mat-icon-button class="btn-delete" (click)="delete(r, $event)" title="{{ 'general.delete' | translate }}">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -111,3 +111,4 @@
 
   </div>
 </div>
+

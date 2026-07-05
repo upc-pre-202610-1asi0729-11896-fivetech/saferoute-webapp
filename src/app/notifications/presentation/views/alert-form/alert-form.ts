@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,11 +10,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { NotificationStore } from '../../../application/notification-store';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-alert-form',
-  imports: [
-    ReactiveFormsModule,
+  imports: [ReactiveFormsModule,
     RouterLink,
     MatButtonModule,
     MatCardModule,
@@ -22,8 +22,7 @@ import { NotificationStore } from '../../../application/notification-store';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatProgressSpinnerModule,
-  ],
+    MatProgressSpinnerModule, TranslatePipe],
   templateUrl: './alert-form.html',
   styleUrl: './alert-form.css',
 })
@@ -56,3 +55,4 @@ export class AlertForm {
     }, () => this.router.navigate(['/notifications/alerts']));
   }
 }
+

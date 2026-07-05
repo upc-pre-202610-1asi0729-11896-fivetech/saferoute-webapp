@@ -1,8 +1,8 @@
-<div class="parent-tracking">
+﻿<div class="parent-tracking">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Track My Child's Bus</h1>
-      <p class="page-sub">Seguimiento en tiempo real del transporte de tu hijo/a</p>
+      <h1 class="page-title">{{ 'trip.parent.title' | translate }}</h1>
+      <p class="page-sub">{{ 'trip.parent.subtitle' | translate }}</p>
     </div>
     <div class="page-actions">
       <button
@@ -11,29 +11,29 @@
         [disabled]="!canSimulateTrip()"
         (click)="simulateTrip()">
         <mat-icon>{{ simulatingTrip() ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
-        <span>{{ simulatingTrip() ? 'Iniciando...' : simulationLabel() }}</span>
+        <span>{{ simulatingTrip() ? ('trip.demo.starting' | translate) : simulationLabel() }}</span>
       </button>
       @if (canRestartDemo()) {
         <button type="button" class="simulate-btn secondary" (click)="restartDemo()">
           <mat-icon>refresh</mat-icon>
-          <span>Reiniciar demo</span>
+          <span>{{ 'trip.demo.restart' | translate }}</span>
         </button>
       }
       @if (canPauseDemo()) {
         <button type="button" class="simulate-btn secondary" (click)="pauseDemo()">
           <mat-icon>pause</mat-icon>
-          <span>Pausar demo</span>
+          <span>{{ 'trip.demo.pause' | translate }}</span>
         </button>
       }
       @if (canResumeDemo()) {
         <button type="button" class="simulate-btn secondary" (click)="resumeDemo()">
           <mat-icon>play_arrow</mat-icon>
-          <span>Continuar demo</span>
+          <span>{{ 'trip.demo.resume' | translate }}</span>
         </button>
       }
       <div class="eta-badge">
         <mat-icon>schedule</mat-icon>
-        <span>ETA: {{ eta() }}</span>
+        <span>{{ 'trip.parent.eta' | translate }}: {{ eta() }}</span>
       </div>
     </div>
   </div>
@@ -43,14 +43,14 @@
   } @else if (!trackedTrip()) {
     <div class="empty-state">
       <mat-icon>directions_bus</mat-icon>
-      <p>No hay viajes activos asignados a tus hijos en este momento.</p>
+      <p>{{ 'trip.parent.empty' | translate }}</p>
       <button
         type="button"
         class="simulate-btn empty-action"
         [disabled]="!canSimulateTrip()"
         (click)="simulateTrip()">
         <mat-icon>{{ simulatingTrip() ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
-        <span>{{ simulatingTrip() ? 'Iniciando...' : 'Simular viaje' }}</span>
+        <span>{{ simulatingTrip() ? ('trip.demo.starting' | translate) : ('trip.demo.simulate-trip' | translate) }}</span>
       </button>
     </div>
   } @else {
@@ -66,21 +66,21 @@
           <div class="bus-info-item">
             <mat-icon class="info-icon">person</mat-icon>
             <div>
-              <span class="info-label">Conductor</span>
+              <span class="info-label">{{ 'trip.parent.driver' | translate }}</span>
               <span class="info-value">{{ trackedTrip()?.driverName }}</span>
             </div>
           </div>
           <div class="bus-info-item">
             <mat-icon class="info-icon">location_on</mat-icon>
             <div>
-              <span class="info-label">Ubicación actual</span>
-              <span class="info-value">{{ trackedTrip()?.currentStop || trackedTrip()?.currentLocation || '—' }}</span>
+              <span class="info-label">{{ 'trip.parent.current-location' | translate }}</span>
+              <span class="info-value">{{ trackedTrip()?.currentStop || trackedTrip()?.currentLocation || 'â€”' }}</span>
             </div>
           </div>
           <div class="bus-info-item">
             <mat-icon class="info-icon">route</mat-icon>
             <div>
-              <span class="info-label">Ruta</span>
+              <span class="info-label">{{ 'trip.parent.route' | translate }}</span>
               <span class="info-value">{{ trackedTrip()?.routeName }}</span>
             </div>
           </div>
@@ -88,7 +88,7 @@
       </div>
 
       <div class="timeline-col">
-        <h3 class="timeline-title">Recorrido del día</h3>
+        <h3 class="timeline-title">{{ 'trip.parent.timeline.title' | translate }}</h3>
         <div class="timeline">
           @for (item of timeline(); track $index; let i = $index; let last = $last) {
             <div class="timeline-item" [class.done]="item.done">
@@ -102,7 +102,7 @@
                 @if (item.time) { <span class="tl-time">{{ item.time }}</span> }
                 <span class="tl-event">{{ item.event }}</span>
                 <span class="tl-status" [class.done]="item.done" [class.pending]="!item.done">
-                  {{ item.done ? 'Completado' : 'Pendiente' }}
+                  {{ item.done ? ('trip.stops.completed' | translate) : ('trip.stops.pending' | translate) }}
                 </span>
               </div>
             </div>
@@ -111,11 +111,11 @@
 
         @if (childQrCards().length) {
           <div class="child-qr-panel">
-            <h3 class="timeline-title">QR de estudiantes</h3>
+            <h3 class="timeline-title">{{ 'trip.parent.qr-title' | translate }}</h3>
             <div class="child-qr-grid">
               @for (child of childQrCards(); track child.childId) {
                 <div class="child-qr-card">
-                  <img [src]="child.qrUrl" [alt]="'QR de ' + child.childName" />
+                  <img [src]="child.qrUrl" [alt]="'trip.parent.qr-alt' | translate: { name: child.childName }" />
                   <div class="child-qr-info">
                     <span class="child-qr-name">{{ child.childName }}</span>
                     <span class="child-qr-grade">{{ child.grade }}</span>
@@ -129,11 +129,12 @@
         <div class="alert-box">
           <mat-icon class="alert-icon">info</mat-icon>
           <div>
-            <p class="alert-title">Bus en camino</p>
-            <p class="alert-msg">Tiempo estimado de llegada: <strong>{{ eta() }}</strong></p>
+            <p class="alert-title">{{ 'trip.parent.bus-on-way' | translate }}</p>
+            <p class="alert-msg">{{ 'trip.parent.arrival-time' | translate }}: <strong>{{ eta() }}</strong></p>
           </div>
         </div>
       </div>
     </div>
   }
 </div>
+

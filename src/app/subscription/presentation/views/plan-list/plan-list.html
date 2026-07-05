@@ -1,15 +1,15 @@
-<div class="pl-shell">
+﻿<div class="pl-shell">
   <div class="pl-header">
-    <div class="pl-eyebrow">PLANES Y PRECIOS</div>
-    <h1 class="pl-title">Elige el plan ideal<br>para tu operacion</h1>
-    <p class="pl-sub">Digitaliza tu transporte escolar. Sin costos ocultos. Cancela cuando quieras.</p>
+    <div class="pl-eyebrow">{{ 'subscription.plan-selection.eyebrow' | translate }}</div>
+    <h1 class="pl-title">{{ 'subscription.plan-selection.title-main' | translate }}<br>{{ 'subscription.plan-selection.title-tail' | translate }}</h1>
+    <p class="pl-sub">{{ 'subscription.plan-selection.hero-copy' | translate }}</p>
 
     <div class="billing-toggle">
       <button class="billing-btn" [class.active]="billing() === 'monthly'"
-              (click)="billing.set('monthly')">Mensual</button>
+              (click)="billing.set('monthly')">{{ 'subscription.billing.monthly' | translate }}</button>
       <button class="billing-btn" [class.active]="billing() === 'annual'"
               (click)="billing.set('annual')">
-        Anual <span class="discount-badge">-20%</span>
+        {{ 'subscription.billing.annual' | translate }} <span class="discount-badge">-20%</span>
       </button>
     </div>
   </div>
@@ -18,10 +18,10 @@
     @for (plan of plans; track plan.key) {
       <div class="plan-card" [class.card-popular]="plan.popular" [class.card-current]="isCurrentPlan(plan.key)">
         @if (plan.popular) {
-          <div class="top-badge badge-popular">Mas Popular</div>
+          <div class="top-badge badge-popular">{{ 'subscription.plan-selection.popular' | translate }}</div>
         }
         @if (plan.badge && !plan.popular) {
-          <div class="top-badge badge-dark">{{ plan.badge }}</div>
+          <div class="top-badge badge-dark">{{ plan.badge | translate }}</div>
         }
 
         <div class="plan-head">
@@ -30,10 +30,10 @@
           </div>
           <div>
             @if (isCurrentPlan(plan.key)) {
-              <span class="current-badge">Plan Actual</span>
+              <span class="current-badge">{{ 'subscription.current-plan' | translate }}</span>
             }
-            <h2 class="plan-name">{{ plan.name }}</h2>
-            <p class="plan-subtitle">{{ plan.subtitle }}</p>
+            <h2 class="plan-name">{{ plan.nameKey | translate }}</h2>
+            <p class="plan-subtitle">{{ plan.subtitleKey | translate }}</p>
           </div>
         </div>
 
@@ -45,43 +45,43 @@
           @if (priceAfterCredit(plan)) {
             <span class="price-amount price-prorated">{{ priceAfterCredit(plan) }}</span>
           }
-          <span class="price-per">/ mes</span>
+          <span class="price-per">{{ 'subscription.monthly-suffix' | translate }}</span>
         </div>
 
         @if (priceAfterCredit(plan)) {
           <div class="price-annual price-credit">
-            Credito aplicado: -${{ proratedCredit() }} ({{ remainingDays() }} dias restantes)
+            {{ 'subscription.billing.credit-applied' | translate: { credit: proratedCredit(), days: remainingDays() } }}
           </div>
         } @else if (billing() === 'monthly') {
-          <div class="price-annual">o $ {{ annualPrice(plan.price) }} al ano con 20% off</div>
+          <div class="price-annual">{{ 'subscription.billing.annual-option' | translate: { price: annualPrice(plan.price) } }}</div>
         } @else {
           <div class="price-annual price-annual-active">
-            Facturacion anual - ahorras $ {{ annualSaving(plan.price) }}/ano
+            {{ 'subscription.billing.annual-saving' | translate: { saving: annualSaving(plan.price) } }}
           </div>
         }
 
         <ul class="feature-list">
-          @for (f of plan.features; track f.label) {
+          @for (f of plan.features; track f.labelKey) {
             <li class="feature-item" [class.feat-disabled]="!f.included">
               @if (f.included) {
                 <mat-icon class="feat-icon feat-check">check</mat-icon>
               } @else {
                 <mat-icon class="feat-icon feat-x">close</mat-icon>
               }
-              <span>{{ f.label }}</span>
+              <span>{{ f.labelKey | translate }}</span>
             </li>
           }
         </ul>
 
         @if (isCurrentPlan(plan.key)) {
-          <button class="btn-plan btn-current" disabled>Plan Actual</button>
+          <button class="btn-plan btn-current" disabled>{{ 'subscription.current-plan' | translate }}</button>
         } @else {
           <button class="btn-plan" [class.btn-popular]="plan.popular"
                   (click)="subscribe(plan)" [disabled]="store.loading() || !canChoosePlan(plan.key)">
             @if (store.loading()) {
               <mat-spinner diameter="18"/>
             } @else {
-              {{ planActionLabel(plan) }}
+              {{ planActionLabel(plan) | translate }}
             }
           </button>
         }
@@ -93,3 +93,4 @@
     <p class="pl-error">{{ store.error() }}</p>
   }
 </div>
+

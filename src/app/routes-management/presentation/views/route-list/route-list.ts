@@ -13,6 +13,7 @@ import { RoutesManagementStore } from '../../../application/routes-management.st
 import { Route } from '../../../domain/model/route-entity';
 import { OrsService, Waypoint } from '../../../../shared/infrastructure/ors-service';
 import { TripStore } from '../../../../trip/application/trip-store';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 (L.Icon.Default.prototype as any)._getIconUrl = undefined;
 L.Icon.Default.mergeOptions({
@@ -23,7 +24,7 @@ L.Icon.Default.mergeOptions({
 
 @Component({
   selector: 'app-route-list',
-  imports: [MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule],
+  imports: [MatButtonModule, MatIconModule, MatChipsModule, MatProgressSpinnerModule, TranslatePipe],
   templateUrl: './route-list.html',
   styleUrl: './route-list.css'
 })
@@ -33,6 +34,7 @@ export class RouteList implements AfterViewInit, OnDestroy {
   private router    = inject(Router);
   private ors       = inject(OrsService);
   private snack     = inject(MatSnackBar);
+  private translate = inject(TranslateService);
   @ViewChild('mapEl', { static: true }) mapEl!: ElementRef<HTMLDivElement>;
 
   selectedId   = signal<number | null>(null);
@@ -111,7 +113,7 @@ export class RouteList implements AfterViewInit, OnDestroy {
     this.polyline = null;
   }
 
-  typeLabel(type: string): string { return type === 'RETURN' ? 'Retorno' : 'Recojo'; }
+  typeLabel(type: string): string { return this.translate.instant(type === 'RETURN' ? 'route.type.return' : 'route.type.outbound'); }
   typeIcon(type: string):  string { return type === 'RETURN' ? '←' : '→'; }
   originName(r: Route):    string { return r.waypoints?.[0]?.name ?? '—'; }
   destName(r: Route):      string { return r.waypoints?.[r.waypoints.length - 1]?.name ?? '—'; }
@@ -121,7 +123,7 @@ export class RouteList implements AfterViewInit, OnDestroy {
   goEdit(r: Route, e: Event): void { e.stopPropagation(); this.router.navigate(['/routes-management/routes', r.id, 'edit']); }
   delete(r: Route, e: Event): void {
     e.stopPropagation();
-    if (!confirm(`¿Eliminar "${r.name}"?`)) return;
+    if (!confirm(this.translate.instant('route.confirm.delete-route', { name: r.name }))) return;
     this.store.deleteRoute(r.id);
     if (this.selectedId() === r.id) this.selectedId.set(null);
   }
@@ -129,7 +131,7 @@ export class RouteList implements AfterViewInit, OnDestroy {
   scheduleTrip(r: Route, e: Event): void {
     e.stopPropagation();
     if (!r.driverId) {
-      this.snack.open('Asigna un conductor a la ruta antes de crear un viaje', 'OK', { duration: 3500 });
+      this.snack.open(this.translate.instant('route.feedback.assign-driver-before-trip'), 'OK', { duration: 3500 });
       return;
     }
     // Keep TripStore route cache in sync so the driver view gets waypoints immediately
@@ -161,6 +163,6 @@ export class RouteList implements AfterViewInit, OnDestroy {
       currentLocation:    null,
       organizationId:     r.organizationId ?? 1,
     });
-    this.snack.open(`Viaje programado para ${r.name} — ${today}`, 'OK', { duration: 3500 });
+    this.snack.open(this.translate.instant('route.feedback.trip-scheduled-for', { route: r.name, date: today }), 'OK', { duration: 3500 });
   }
 }

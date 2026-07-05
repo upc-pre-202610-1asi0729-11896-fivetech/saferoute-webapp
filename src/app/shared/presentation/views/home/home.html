@@ -15,13 +15,13 @@
         <div class="metric-card">
           <mat-icon class="metric-icon">{{ m.icon }}</mat-icon>
           <span class="metric-value">{{ m.value }}</span>
-          <span class="metric-label">{{ m.label }}</span>
+          <span class="metric-label">{{ m.label | translate }}</span>
         </div>
       }
     </div>
 
     @if (cards().length > 0) {
-      <h2 class="actions-title">What would you like to do?</h2>
+      <h2 class="actions-title">{{ 'home.actions-title' | translate }}</h2>
       <div class="card-grid">
         @for (card of cards(); track card.route) {
           <mat-card class="dashboard-card" (click)="navigate(card.route)">

@@ -1,12 +1,13 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+﻿import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SubscriptionStore } from '../../../application/subscription-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface PlanFeatureRow {
-  label: string;
+  labelKey: string;
   included: boolean;
 }
 
@@ -14,8 +15,8 @@ interface PlanConfig {
   key: string;                   // BASIC | INTERMEDIATE | COMPLETE
   icon: string;
   iconColor: string;
-  name: string;
-  subtitle: string;
+  nameKey: string;
+  subtitleKey: string;
   price: number;
   popular?: boolean;
   badge?: string;
@@ -25,64 +26,64 @@ interface PlanConfig {
 const PLANS: PlanConfig[] = [
   {
     key: 'BASIC', icon: 'shield', iconColor: '#94a3b8',
-    name: 'Básico',
-    subtitle: 'Ideal para grupos pequeños de padres organizados',
+    nameKey: 'subscription.plan-tier.basic',
+    subtitleKey: 'subscription.plan-card.basic-subtitle',
     price: 9.99,
     features: [
-      { label: 'Hasta 2 rutas activas',            included: true  },
-      { label: 'Hasta 2 conductores',              included: true  },
-      { label: 'Registro de alumnos',              included: true  },
-      { label: 'Marcación de abordaje digital',    included: true  },
-      { label: 'Inicio y cierre de trayecto',      included: true  },
-      { label: 'Reporte de incidencias',           included: true  },
-      { label: 'Bitácora de viajes',               included: true  },
-      { label: 'Notificaciones de abordaje',       included: true  },
-      { label: 'Alertas de proximidad',            included: false },
-      { label: 'Cámara en vivo del bus',           included: false },
-      { label: 'Historial de asistencia mensual',  included: false },
-      { label: 'GPS en tiempo real',               included: false },
+      { labelKey: 'subscription.features.routes-2',            included: true  },
+      { labelKey: 'subscription.features.drivers-2',              included: true  },
+      { labelKey: 'subscription.features.students',              included: true  },
+      { labelKey: 'subscription.features.digital-boarding',    included: true  },
+      { labelKey: 'subscription.features.trip-lifecycle',      included: true  },
+      { labelKey: 'subscription.features.incidents',           included: true  },
+      { labelKey: 'subscription.features.trip-log',               included: true  },
+      { labelKey: 'subscription.features.boarding-notifications',       included: true  },
+      { labelKey: 'subscription.features.proximity-alerts',            included: false },
+      { labelKey: 'subscription.features.live-camera',           included: false },
+      { labelKey: 'subscription.features.monthly-attendance',  included: false },
+      { labelKey: 'subscription.features.realtime-gps',               included: false },
     ]
   },
   {
     key: 'INTERMEDIATE', icon: 'star', iconColor: '#F59E0B',
-    name: 'Intermedio',
-    subtitle: 'Para flotas medianas que buscan mayor visibilidad',
+    nameKey: 'subscription.plan-tier.intermediate',
+    subtitleKey: 'subscription.plan-card.intermediate-subtitle',
     price: 24.99,
     popular: true,
     features: [
-      { label: 'Hasta 6 rutas activas',            included: true  },
-      { label: 'Hasta 6 conductores',              included: true  },
-      { label: 'Registro de alumnos',              included: true  },
-      { label: 'Marcación de abordaje digital',    included: true  },
-      { label: 'Inicio y cierre de trayecto',      included: true  },
-      { label: 'Reporte de incidencias',           included: true  },
-      { label: 'Bitácora de viajes',               included: true  },
-      { label: 'Notificaciones de abordaje',       included: true  },
-      { label: 'Alertas de proximidad',      included: true  },
-      { label: 'Cámara en vivo del bus',     included: true  },
-      { label: 'Historial de asistencia',    included: true  },
-      { label: 'GPS en tiempo real',               included: false },
+      { labelKey: 'subscription.features.routes-6',            included: true  },
+      { labelKey: 'subscription.features.drivers-6',              included: true  },
+      { labelKey: 'subscription.features.students',              included: true  },
+      { labelKey: 'subscription.features.digital-boarding',    included: true  },
+      { labelKey: 'subscription.features.trip-lifecycle',      included: true  },
+      { labelKey: 'subscription.features.incidents',           included: true  },
+      { labelKey: 'subscription.features.trip-log',               included: true  },
+      { labelKey: 'subscription.features.boarding-notifications',       included: true  },
+      { labelKey: 'subscription.features.proximity-alerts',      included: true  },
+      { labelKey: 'subscription.features.live-camera',     included: true  },
+      { labelKey: 'subscription.features.attendance-history',    included: true  },
+      { labelKey: 'subscription.features.realtime-gps',               included: false },
     ]
   },
   {
     key: 'COMPLETE', icon: 'verified', iconColor: '#64748b',
-    name: 'Completo',
-    subtitle: 'Solución total para empresas de transporte escolar',
+    nameKey: 'subscription.plan-tier.complete',
+    subtitleKey: 'subscription.plan-card.complete-subtitle',
     price: 49.99,
-    badge: 'Todo incluido',
+    badge: 'subscription.plan-card.all-included',
     features: [
-      { label: 'Hasta 20 rutas activas',           included: true  },
-      { label: 'Hasta 20 conductores',             included: true  },
-      { label: 'Registro de alumnos',              included: true  },
-      { label: 'Marcación de abordaje digital',    included: true  },
-      { label: 'Inicio y cierre de trayecto',      included: true  },
-      { label: 'Reporte de incidencias',           included: true  },
-      { label: 'Bitácora de viajes',               included: true  },
-      { label: 'Notificaciones de abordaje',       included: true  },
-      { label: 'Alertas de proximidad',      included: true  },
-      { label: 'Cámara en vivo del bus',     included: true  },
-      { label: 'Historial de asistencia',    included: true  },
-      { label: 'GPS en tiempo real',    included: true  },
+      { labelKey: 'subscription.features.routes-20',           included: true  },
+      { labelKey: 'subscription.features.drivers-20',             included: true  },
+      { labelKey: 'subscription.features.students',              included: true  },
+      { labelKey: 'subscription.features.digital-boarding',    included: true  },
+      { labelKey: 'subscription.features.trip-lifecycle',      included: true  },
+      { labelKey: 'subscription.features.incidents',           included: true  },
+      { labelKey: 'subscription.features.trip-log',               included: true  },
+      { labelKey: 'subscription.features.boarding-notifications',       included: true  },
+      { labelKey: 'subscription.features.proximity-alerts',      included: true  },
+      { labelKey: 'subscription.features.live-camera',     included: true  },
+      { labelKey: 'subscription.features.attendance-history',    included: true  },
+      { labelKey: 'subscription.features.realtime-gps',    included: true  },
     ]
   }
 ];
@@ -91,7 +92,7 @@ const PLAN_ORDER: Record<string, number> = { BASIC: 1, INTERMEDIATE: 2, STANDARD
 
 @Component({
   selector: 'app-plan-list',
-  imports: [MatIconModule, MatProgressSpinnerModule],
+  imports: [MatIconModule, MatProgressSpinnerModule, TranslatePipe],
   templateUrl: './plan-list.html',
   styleUrl: './plan-list.css'
 })
@@ -158,9 +159,9 @@ export class PlanList implements OnInit {
   }
 
   planActionLabel(plan: PlanConfig): string {
-    if (this.isCurrentPlan(plan.key)) return 'Plan Actual';
-    if (!this.canChoosePlan(plan.key)) return 'No disponible para upgrade';
-    return this.store.subscription() ? 'Upgradear ahora' : 'Contratar ahora';
+    if (this.isCurrentPlan(plan.key)) return 'subscription.current-plan';
+    if (!this.canChoosePlan(plan.key)) return 'subscription.actions.not-available-upgrade';
+    return this.store.subscription() ? 'subscription.actions.upgrade-now' : 'subscription.actions.subscribe-now';
   }
 
   priceAfterCredit(plan: PlanConfig): string | null {
@@ -189,3 +190,6 @@ export class PlanList implements OnInit {
     });
   }
 }
+
+
+

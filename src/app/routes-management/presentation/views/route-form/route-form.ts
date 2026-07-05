@@ -20,6 +20,7 @@ import { OrsService } from '../../../../shared/infrastructure/ors-service';
 import { TripStore } from '../../../../trip/application/trip-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { StakeholderStore } from '../../../../stakeholder/application/stakeholder-store';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface UserOption   { id: number; name: string; }
 interface ChildOption  { id: number; name: string; grade?: string; }
@@ -29,12 +30,10 @@ const END_STOP_NAME = 'Llegada';
 
 @Component({
   selector: 'app-route-form',
-  imports: [
-    ReactiveFormsModule, FormsModule,
+  imports: [ReactiveFormsModule, FormsModule,
     MatFormFieldModule, MatInputModule,
     MatSelectModule, MatButtonModule, MatIconModule, MatCardModule,
-    MatProgressSpinnerModule
-  ],
+    MatProgressSpinnerModule, TranslatePipe],
   templateUrl: './route-form.html',
   styleUrl: './route-form.css'
 })
@@ -48,6 +47,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
   private ors       = inject(OrsService);
   private snack     = inject(MatSnackBar);
   private auth      = inject(AuthStore);
+  private translate = inject(TranslateService);
 
   isEdit   = false;
   routeId: number | null = null;
@@ -245,7 +245,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
 
   submit(): void {
     if (this.form.invalid || this.waypoints().length < 2) {
-      this.snack.open('Define el inicio y la llegada de la ruta antes de guardar', 'OK', { duration: 3000 });
+      this.snack.open(this.translate.instant('route.feedback.define-start-end'), 'OK', { duration: 3000 });
       return;
     }
     const v = this.form.getRawValue();
@@ -286,7 +286,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
     this.saving.set(true);
     if (this.isEdit) {
       this.store.updateRoute(route);
-      this.snack.open('Ruta actualizada', 'OK', { duration: 3000 });
+      this.snack.open(this.translate.instant('route.feedback.updated'), 'OK', { duration: 3000 });
     } else {
       this.store.addRoute(route);
       // Auto-create a SCHEDULED trip when route has a driver assigned
@@ -313,7 +313,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
           organizationId:     route.organizationId ?? 1,
         });
       }
-      this.snack.open('Ruta creada' + (route.driverId ? ' y viaje programado' : ''), 'OK', { duration: 3500 });
+      this.snack.open(this.translate.instant(route.driverId ? 'route.feedback.created-and-trip-scheduled' : 'route.feedback.created'), 'OK', { duration: 3500 });
     }
     this.router.navigate(['/routes-management/routes']);
   }
@@ -340,7 +340,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
     const lastIndex = this.waypoints().length - 1;
     if (index === 0) return START_STOP_NAME;
     if (lastIndex > 0 && index === lastIndex) return END_STOP_NAME;
-    return 'Parada intermedia';
+    return this.translate.instant('route.form.intermediate-stop');
   }
 
   private normalizeWaypointRoles(waypoints: RouteWaypoint[]): RouteWaypoint[] {

@@ -3,8 +3,8 @@
   <!-- ══ HEADER ══ -->
   <div class="ah-header">
     <div>
-      <h1 class="ah-title">Attendance History</h1>
-      <p class="ah-sub">View student check-in and check-out records</p>
+      <h1 class="ah-title">{{ 'trip.attendance.title' | translate }}</h1>
+      <p class="ah-sub">{{ 'trip.attendance.subtitle' | translate }}</p>
     </div>
   </div>
 
@@ -12,33 +12,33 @@
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-left">
-        <div class="stat-label">Total Trips</div>
+        <div class="stat-label">{{ 'trip.attendance.total-trips' | translate }}</div>
         <div class="stat-value">{{ totalTrips() }}</div>
-        <div class="stat-note">This month</div>
+        <div class="stat-note">{{ 'trip.attendance.this-month' | translate }}</div>
       </div>
       <mat-icon class="stat-icon icon-blue">calendar_today</mat-icon>
     </div>
     <div class="stat-card">
       <div class="stat-left">
-        <div class="stat-label">Present Rate</div>
+        <div class="stat-label">{{ 'trip.attendance.present-rate' | translate }}</div>
         <div class="stat-value stat-green">{{ presentRate() }}</div>
-        <div class="stat-note">+2.1% vs last month</div>
+        <div class="stat-note">{{ 'trip.attendance.vs-last-month' | translate }}</div>
       </div>
       <mat-icon class="stat-icon icon-green">check_circle</mat-icon>
     </div>
     <div class="stat-card">
       <div class="stat-left">
-        <div class="stat-label">Late Check-ins</div>
+        <div class="stat-label">{{ 'trip.attendance.late-checkins' | translate }}</div>
         <div class="stat-value stat-amber">{{ lateCheckIns() }}</div>
-        <div class="stat-note">This month</div>
+        <div class="stat-note">{{ 'trip.attendance.this-month' | translate }}</div>
       </div>
       <mat-icon class="stat-icon icon-amber">schedule</mat-icon>
     </div>
     <div class="stat-card">
       <div class="stat-left">
-        <div class="stat-label">Absences</div>
+        <div class="stat-label">{{ 'trip.attendance.absences' | translate }}</div>
         <div class="stat-value stat-red">{{ absences() }}</div>
-        <div class="stat-note">This month</div>
+        <div class="stat-note">{{ 'trip.attendance.this-month' | translate }}</div>
       </div>
       <mat-icon class="stat-icon icon-red">cancel</mat-icon>
     </div>
@@ -82,11 +82,11 @@
       </div>
 
       <div class="cal-legend">
-        <span class="legend-title">Legend</span>
+        <span class="legend-title">{{ 'trip.attendance.legend' | translate }}</span>
         <div class="legend-items">
-          <div class="legend-item"><span class="leg-dot dot-green"></span> All Present</div>
-          <div class="legend-item"><span class="leg-dot dot-amber"></span> Late Check-in</div>
-          <div class="legend-item"><span class="leg-dot dot-red"></span> Absence Recorded</div>
+          <div class="legend-item"><span class="leg-dot dot-green"></span> {{ 'trip.attendance.all-present' | translate }}</div>
+          <div class="legend-item"><span class="leg-dot dot-amber"></span> {{ 'trip.attendance.late-checkin' | translate }}</div>
+          <div class="legend-item"><span class="leg-dot dot-red"></span> {{ 'trip.attendance.absence-recorded' | translate }}</div>
         </div>
       </div>
     </div>
@@ -100,16 +100,16 @@
             <div class="detail-route">{{ routeLabel() }}</div>
           }
         </div>
-        <button class="btn-export">Export Report</button>
+        <button class="btn-export">{{ 'trip.attendance.export-report' | translate }}</button>
       </div>
 
       <table class="attend-table">
         <thead>
           <tr>
-            <th>STUDENT NAME</th>
-            <th>CHECK-IN</th>
-            <th>CHECK-OUT</th>
-            <th>STATUS</th>
+            <th>{{ 'stakeholder.student.name' | translate }}</th>
+            <th>{{ 'trip.attendance.check-in' | translate }}</th>
+            <th>{{ 'trip.attendance.check-out' | translate }}</th>
+            <th>{{ 'general.status' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -127,7 +127,7 @@
             </tr>
           }
           @if (!dailyRecords().length) {
-            <tr><td colspan="4" class="no-data">Sin registros para este día</td></tr>
+            <tr><td colspan="4" class="no-data">{{ 'trip.attendance.empty-day' | translate }}</td></tr>
           }
         </tbody>
       </table>

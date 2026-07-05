@@ -1,4 +1,4 @@
-import { Component, ViewChild, computed, effect, inject, signal } from '@angular/core';
+﻿import { Component, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import * as QRCode from 'qrcode';
@@ -7,13 +7,14 @@ import { AuthStore } from '../../../../iam/application/auth-store';
 import { StakeholderStore } from '../../../../stakeholder/application/stakeholder-store';
 import { ChildEntity } from '../../../../stakeholder/domain/model/student-entity';
 import { TripMap } from '../../../../shared/presentation/components/trip-map/trip-map';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface TimelineItem { time: string; event: string; done: boolean; icon: string }
 interface ChildQrCard { childId: number; childName: string; grade: string; qrUrl: string }
 
 @Component({
   selector: 'app-parent-tracking',
-  imports: [MatIconModule, MatProgressSpinnerModule, TripMap],
+  imports: [MatIconModule, MatProgressSpinnerModule, TripMap, TranslatePipe],
   templateUrl: './parent-tracking.html',
   styleUrl: './parent-tracking.css'
 })
@@ -23,6 +24,7 @@ export class ParentTracking {
   protected store = inject(TripStore);
   protected auth = inject(AuthStore);
   private stakeholderStore = inject(StakeholderStore);
+  private translate = inject(TranslateService);
 
   parents = computed(() => this.stakeholderStore.parents());
   children = computed(() => this.stakeholderStore.children());
@@ -80,7 +82,9 @@ export class ParentTracking {
   canResumeDemo = computed(() => this.demoRunning() && this.demoPaused());
   canRestartDemo = computed(() => !!this.simulationRoute()?.driverId && !!this.trackedTrip() && !this.simulatingTrip());
 
-  simulationLabel = computed(() => this.trackedTrip() ? 'Iniciar demo' : 'Simular viaje');
+  simulationLabel = computed(() => this.trackedTrip()
+    ? this.t('trip.demo.start')
+    : this.t('trip.demo.simulate-trip'));
 
   waypoints = computed(() => this.trackedRoute()?.waypoints ?? []);
 
@@ -92,12 +96,12 @@ export class ParentTracking {
     const completed = t.status === 'COMPLETED';
     const items: TimelineItem[] = [];
     if (t.scheduledStartTime) {
-      items.push({ time: t.scheduledStartTime, event: 'Bus salió del punto inicial', done: !!t.startTime, icon: 'flag' });
+      items.push({ time: t.scheduledStartTime, event: this.t('trip.parent.timeline.started'), done: !!t.startTime, icon: 'flag' });
     }
     wps.forEach((wp, i) => {
       items.push({
         time: '',
-        event: `Parada ${i + 1} — ${wp.name}`,
+        event: `Parada ${i + 1} â€” ${wp.name}`,
         done: completed || (currentIdx >= 0 && i <= currentIdx),
         icon: 'location_on'
       });
@@ -107,10 +111,10 @@ export class ParentTracking {
 
   eta = computed(() => {
     const t = this.trackedTrip();
-    if (!t) return '—';
+    if (!t) return 'â€”';
     if (t.endTime) return new Date(t.endTime).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
     if (t.scheduledStartTime) return t.scheduledStartTime;
-    return '—';
+    return 'â€”';
   });
 
   constructor() {
@@ -234,4 +238,9 @@ export class ParentTracking {
 
     this.childQrCards.set(cards);
   }
+
+  protected t(key: string, params?: Record<string, unknown>): string {
+    return this.translate.instant(key, params);
+  }
 }
+

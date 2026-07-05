@@ -9,17 +9,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StakeholderStore, ParentEntity, ChildEntity } from '../../../application/stakeholder-store';
 import { VehicleEntity } from '../../../domain/model/vehicle-entity';
 import { AuthStore } from '../../../../iam/application/auth-store';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 type MainTab = 'usuarios' | 'logistica';
 type UsersTab = 'padres' | 'alumnos';
 
 @Component({
   selector: 'app-student-management',
-  imports: [
-    ReactiveFormsModule, MatButtonModule, MatIconModule,
+  imports: [ReactiveFormsModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatProgressSpinnerModule
-  ],
+    MatProgressSpinnerModule, TranslatePipe],
   templateUrl: './student-management.html',
   styleUrl: './student-management.css'
 })
@@ -27,6 +26,7 @@ export class StudentManagement {
   protected store = inject(StakeholderStore);
   private fb = inject(FormBuilder);
   private auth = inject(AuthStore);
+  private translate = inject(TranslateService);
 
   // ── Tab state ──
   mainTab  = signal<MainTab>('usuarios');
@@ -68,9 +68,9 @@ export class StudentManagement {
   }
 
   boardingLabel(s: string): string {
-    if (s === 'ABORDADO')  return 'Abordado';
-    if (s === 'EN_ESPERA') return 'En Espera';
-    return 'Ausente';
+    if (s === 'ABORDADO')  return this.translate.instant('stakeholder.boarding.boarded');
+    if (s === 'EN_ESPERA') return this.translate.instant('stakeholder.boarding.waiting');
+    return this.translate.instant('stakeholder.boarding.absent');
   }
 
   boardingClass(s: string): string {
@@ -130,7 +130,7 @@ export class StudentManagement {
   }
 
   deleteParent(id: number | string): void {
-    if (!confirm('¿Eliminar este padre/madre y sus hijos?')) return;
+    if (!confirm(this.translate.instant('stakeholder.confirm.delete-parent'))) return;
     this.store.deleteParent(id);
   }
 
@@ -174,7 +174,7 @@ export class StudentManagement {
   }
 
   deleteChild(id: number | string): void {
-    if (!confirm('¿Eliminar este alumno?')) return;
+    if (!confirm(this.translate.instant('stakeholder.confirm.delete-student'))) return;
     this.store.deleteChild(id);
   }
 
@@ -224,7 +224,7 @@ export class StudentManagement {
   }
 
   deleteDriver(id: number): void {
-    if (!confirm('¿Eliminar este conductor?')) return;
+    if (!confirm(this.translate.instant('stakeholder.confirm.delete-driver'))) return;
     this.store.deleteDriver(id);
   }
 
@@ -265,7 +265,7 @@ export class StudentManagement {
   }
 
   deleteVehicle(id: number): void {
-    if (!confirm('¿Eliminar este vehículo?')) return;
+    if (!confirm(this.translate.instant('stakeholder.confirm.delete-vehicle'))) return;
     this.store.deleteVehicle(id);
   }
 }

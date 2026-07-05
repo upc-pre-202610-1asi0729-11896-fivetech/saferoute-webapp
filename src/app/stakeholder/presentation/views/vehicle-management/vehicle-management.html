@@ -1,12 +1,12 @@
-<div class="vm-shell">
+﻿<div class="vm-shell">
 
   <!-- Header -->
   <div class="vm-header">
     <div>
-      <h1 class="vm-title">Gestión de Vehículos</h1>
-      <p class="vm-sub">Administra la flota de tu organización</p>
+      <h1 class="vm-title">{{ 'stakeholder.vehicle.management-title' | translate }}</h1>
+      <p class="vm-sub">{{ 'stakeholder.vehicle.management-subtitle' | translate }}</p>
     </div>
-    <button class="btn-add" (click)="openCreate()">+ Agregar Vehículo</button>
+    <button class="btn-add" (click)="openCreate()">+ {{ 'stakeholder.actions.add-vehicle' | translate }}</button>
   </div>
 
   @if (store.loading()) {
@@ -22,10 +22,10 @@
     <table class="vm-table">
       <thead>
         <tr>
-          <th>Placa</th>
-          <th>Modelo</th>
-          <th class="col-center">Capacidad</th>
-          <th class="col-center">Estado</th>
+          <th>{{ 'stakeholder.vehicle.plate' | translate }}</th>
+          <th>{{ 'stakeholder.vehicle.model' | translate }}</th>
+          <th class="col-center">{{ 'stakeholder.vehicle.capacity' | translate }}</th>
+          <th class="col-center">{{ 'general.status' | translate }}</th>
           <th style="width:110px"></th>
         </tr>
       </thead>
@@ -43,10 +43,10 @@
               </span>
             </td>
             <td class="col-actions">
-              <button class="icon-btn" (click)="openEdit(v)" aria-label="Editar">
+              <button class="icon-btn" (click)="openEdit(v)" aria-label="{{ 'general.edit' | translate }}">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button class="icon-btn danger" (click)="remove(v.id)" aria-label="Eliminar">
+              <button class="icon-btn danger" (click)="remove(v.id)" aria-label="{{ 'general.delete' | translate }}">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -56,7 +56,7 @@
             <td colspan="5">
               <div class="vm-empty">
                 <mat-icon>directions_bus</mat-icon>
-                <p>No hay vehículos registrados. Agrega el primero.</p>
+                <p>{{ 'stakeholder.vehicle.empty-add-first' | translate }}</p>
               </div>
             </td>
           </tr>
@@ -70,26 +70,26 @@
 @if (showDialog()) {
   <div class="vm-backdrop" (click)="cancel()">
     <div class="vm-dialog" (click)="$event.stopPropagation()">
-      <h2 class="vm-dialog-title">{{ isEdit() ? 'Editar Vehículo' : 'Nuevo Vehículo' }}</h2>
+      <h2 class="vm-dialog-title">{{ (isEdit() ? 'general.edit' : 'general.new') | translate }} {{ 'stakeholder.vehicle.singular' | translate }}</h2>
 
       <form [formGroup]="vehicleForm" (ngSubmit)="save()" class="vm-form">
         <mat-form-field appearance="outline" class="full">
-          <mat-label>Placa</mat-label>
-          <input matInput formControlName="plate" placeholder="ABC-123" />
+          <mat-label>{{ 'stakeholder.vehicle.plate' | translate }}</mat-label>
+          <input matInput formControlName="plate" [placeholder]="'stakeholder.placeholders.plate-short' | translate" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full">
-          <mat-label>Modelo</mat-label>
-          <input matInput formControlName="model" placeholder="Mercedes Sprinter" />
+          <mat-label>{{ 'stakeholder.vehicle.model' | translate }}</mat-label>
+          <input matInput formControlName="model" [placeholder]="'stakeholder.placeholders.vehicle-model' | translate" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full">
-          <mat-label>Capacidad</mat-label>
+          <mat-label>{{ 'stakeholder.vehicle.capacity' | translate }}</mat-label>
           <input matInput type="number" formControlName="capacity" min="1" />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full">
-          <mat-label>Estado</mat-label>
+          <mat-label>{{ 'general.status' | translate }}</mat-label>
           <mat-select formControlName="status">
             @for (s of statuses; track s) {
               <mat-option [value]="s">{{ s }}</mat-option>
@@ -98,7 +98,7 @@
         </mat-form-field>
 
         <div class="vm-actions">
-          <button type="button" mat-button (click)="cancel()">Cancelar</button>
+          <button type="button" mat-button (click)="cancel()">{{ 'general.cancel' | translate }}</button>
           <button type="submit" mat-flat-button color="primary" [disabled]="vehicleForm.invalid">
             {{ isEdit() ? 'Guardar' : 'Crear' }}
           </button>
@@ -107,3 +107,5 @@
     </div>
   </div>
 }
+
+

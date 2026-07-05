@@ -68,7 +68,7 @@
                 </button>
               }
               @if (canActivate(t.status)) {
-                <button mat-icon-button class="btn-activate-trip" (click)="activateTrip(t.id)" aria-label="Activate trip" title="Activate trip">
+                <button mat-icon-button class="btn-activate-trip" (click)="activateTrip(t.id)" [attr.aria-label]="'trip.actions.activate-trip' | translate" [title]="'trip.actions.activate-trip' | translate">
                   <mat-icon>play_circle</mat-icon>
                 </button>
               }

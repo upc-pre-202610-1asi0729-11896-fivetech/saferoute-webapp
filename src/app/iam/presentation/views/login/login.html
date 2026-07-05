@@ -1,4 +1,4 @@
-<div class="auth-bg">
+﻿<div class="auth-bg">
   <div class="auth-card">
 
     <!-- Logo -->
@@ -10,7 +10,7 @@
       <span class="logo-name">SafeRoute</span>
     </div>
 
-    <p class="auth-subtitle">Sign In</p>
+    <p class="auth-subtitle">{{ 'iam.sign-in.title' | translate }}</p>
 
     <!-- Role toggle -->
     <mat-button-toggle-group class="mode-toggle" [value]="mode()" (change)="setMode($event.value)">
@@ -32,19 +32,19 @@
         <input class="field-input" type="email" formControlName="email" autocomplete="email"
                [placeholder]="'iam.fields.email' | translate">
         @if (form.controls.email.hasError('required') && form.controls.email.touched) {
-          <span class="field-error">Email requerido</span>
+          <span class="field-error">{{ 'iam.errors.email-required' | translate }}</span>
         }
         @if (form.controls.email.hasError('email') && form.controls.email.touched) {
-          <span class="field-error">Email inválido</span>
+          <span class="field-error">{{ 'iam.errors.invalid-email' | translate }}</span>
         }
       </div>
 
       <div class="field-wrap">
         <label class="field-label">{{ 'iam.fields.password' | translate }}</label>
         <input class="field-input" type="password" formControlName="password" autocomplete="current-password"
-               placeholder="••••••••">
+               [placeholder]="'iam.fields.password' | translate">
         @if (form.controls.password.hasError('required') && form.controls.password.touched) {
-          <span class="field-error">Contraseña requerida</span>
+          <span class="field-error">{{ 'iam.errors.password-required' | translate }}</span>
         }
       </div>
 
@@ -71,3 +71,4 @@
 
   </div>
 </div>
+

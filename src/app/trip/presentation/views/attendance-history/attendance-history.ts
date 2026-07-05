@@ -4,6 +4,7 @@ import { TripEntity, TripStore } from '../../../application/trip-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { StakeholderStore } from '../../../../stakeholder/application/stakeholder-store';
 import { AttendanceResource } from '../../../infrastructure/trip-response';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface DayAttendance {
   date: string;          // YYYY-MM-DD
@@ -19,7 +20,7 @@ interface StudentRecord {
 
 @Component({
   selector: 'app-attendance-history',
-  imports: [MatIconModule],
+  imports: [MatIconModule, TranslatePipe],
   templateUrl: './attendance-history.html',
   styleUrl:    './attendance-history.css'
 })

@@ -15,6 +15,7 @@ import { NotificationStore } from '../../../../notifications/application/notific
 import { OrsService } from '../../../../shared/infrastructure/ors-service';
 import { environment } from '../../../../../environments/environment';
 import { Html5Qrcode } from 'html5-qrcode';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 const EMERGENCY_PHONE = '+51900000000';
 
@@ -41,7 +42,7 @@ interface BoardingQrPayload {
 
 @Component({
   selector: 'app-active-trip',
-  imports: [FormsModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatChipsModule],
+  imports: [FormsModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatChipsModule, TranslatePipe],
   templateUrl: './active-trip.html',
   styleUrl: './active-trip.css'
 })
@@ -51,6 +52,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   private notifications   = inject(NotificationStore);
   private ors             = inject(OrsService);
   private snack           = inject(MatSnackBar);
+  private translate       = inject(TranslateService);
   @ViewChild('mapEl', { static: true }) mapEl!: ElementRef<HTMLDivElement>;
 
   // ── State ──
@@ -118,9 +120,9 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
 
   statusLabel = computed(() => {
     const s = this.selectedTrip()?.status;
-    if (s === 'EN_ROUTE')   return 'En Ruta';
-    if (s === 'SCHEDULED')  return 'Programado';
-    if (s === 'COMPLETED')  return 'Completado';
+    if (s === 'EN_ROUTE')   return this.t('trip.status.en-route');
+    if (s === 'SCHEDULED')  return this.t('trip.status.scheduled');
+    if (s === 'COMPLETED')  return this.t('trip.status.completed');
     return s ?? '—';
   });
 
@@ -131,7 +133,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
 
   currentBoardingLabel = computed(() => {
     const id = this.boardingChildId();
-    return id ? `Alumno #${id}` : 'Alumno';
+    return id ? this.t('trip.active.boarding.student-with-id', { id }) : this.t('trip.active.boarding.student');
   });
 
   tripTypeLabel(type?: string): string {
@@ -246,8 +248,10 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
       this.currentWpIdx.set(idx >= 0 ? idx : 0);
     } else if (trip?.status === 'COMPLETED') {
       this.currentWpIdx.set(wps.length - 1);
+      this.completedBoardingStops.set(new Set());
     } else {
       this.currentWpIdx.set(-1);
+      this.completedBoardingStops.set(new Set());
     }
     this.refreshStopColors();
     if (this.currentWpIdx() >= 0 && wps[this.currentWpIdx()]) {
@@ -396,7 +400,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   // ── Public actions ──
   startSim(): void {
     if (!this.isEnRoute() || !this.waypoints().length) return;
-    if (this.orsLoading()) { this.snack.open('Calculando ruta…', 'OK', { duration: 1500 }); return; }
+    if (this.orsLoading()) { this.snack.open(this.t('trip.active.feedback.calculating-route'), 'OK', { duration: 1500 }); return; }
     if (this.currentWpIdx() < 0) this.currentWpIdx.set(0);
     this.simRunning.set(true);
     this.scheduleNext();
@@ -411,6 +415,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   }
   resetSim(): void {
     this.pauseSim();
+    this.completedBoardingStops.set(new Set());
     const trip = this.selectedTrip();
     if (trip?.status === 'COMPLETED') {
       const route = this.selectedRoute();
@@ -418,8 +423,9 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
       this.store.startDemoTripFromRoute(route, created => {
         this.selectedTripId.set(created.id);
         this.currentWpIdx.set(0);
+        this.completedBoardingStops.set(new Set());
         setTimeout(() => this.loadRoadAndBuild(), 0);
-        this.snack.open('Demo reiniciado con un nuevo viaje activo', 'OK', { duration: 3000 });
+        this.snack.open(this.t('trip.active.feedback.demo-restarted'), 'OK', { duration: 3000 });
       });
       return;
     }
@@ -447,7 +453,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     this.completedBoardingStops.set(new Set());
     if (this.waypoints()[0]) this.placeBusAt(this.waypoints()[0]);
     this.refreshStopColors();
-    this.snack.open(`Viaje iniciado — ${updated.routeName}`, 'OK', { duration: 3000 });
+    this.snack.open(this.t('trip.active.feedback.trip-started', { route: updated.routeName }), 'OK', { duration: 3000 });
   }
 
   prepareBoardingAtStop(stopIndex: number): void {
@@ -477,7 +483,11 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     this.markCurrentBoardingStopDone();
     this.store.updateBoarding(trip.id, childId, state);
     this.notifyBoarding(state, childId);
-    this.snack.open(state === 'BOARDED' ? 'Asistencia marcada por QR' : 'Alumno marcado ausente', 'OK', { duration: 3000 });
+    this.snack.open(
+      state === 'BOARDED' ? this.t('trip.active.feedback.boarded') : this.t('trip.active.feedback.absent'),
+      'OK',
+      { duration: 3000 }
+    );
     setTimeout(() => this.resumeAfterBoardingPause(childId), 450);
   }
 
@@ -497,7 +507,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
       this.html5QrCode = new Html5Qrcode('boarding-qr-reader');
       this.scannerStatus.set('ready');
       this.scannerError.set('');
-      this.scannerMessage.set('Apunta la camara al QR del alumno.');
+      this.scannerMessage.set(this.t('trip.active.boarding.scan-hint'));
       await this.html5QrCode.start(
         { facingMode: 'environment' },
         { fps: 30, qrbox: { width: 220, height: 220 } },
@@ -506,7 +516,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
       );
     } catch (error) {
       this.scannerStatus.set('error');
-      this.scannerError.set('No se pudo activar la camara. Permite el acceso o usa el boton de respaldo.');
+      this.scannerError.set(this.t('trip.active.boarding.camera-error'));
       console.warn('Camera access failed', error);
     }
   }
@@ -515,18 +525,18 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     if (this.qrHandlingSuccess) return;
     const payload = this.parseBoardingQr(rawValue);
     if (!payload) {
-      this.showQrError('QR no reconocido para SafeRoute.');
+      this.showQrError(this.t('trip.active.boarding.qr-unknown'));
       return;
     }
 
     const trip = this.selectedTrip();
     const expectedChildId = this.boardingChildId();
     if (!trip || payload.tripId !== trip.id || payload.childId !== expectedChildId) {
-      this.showQrError('El QR pertenece a otro viaje o alumno.');
+      this.showQrError(this.t('trip.active.boarding.qr-mismatch'));
       return;
     }
 
-    this.scannerMessage.set('QR valido. Marcando abordaje...');
+    this.scannerMessage.set(this.t('trip.active.boarding.qr-valid'));
     this.qrHandlingSuccess = true;
     this.markBoarding('BOARDED');
   }
@@ -619,10 +629,10 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   }
 
   private async notifyBoarding(state: 'BOARDED' | 'ABSENT', childId: number): Promise<void> {
-    const title = state === 'BOARDED' ? 'Abordaje confirmado' : 'Alumno ausente';
+    const title = state === 'BOARDED' ? this.t('trip.active.notification.boarded-title') : this.t('trip.active.notification.absent-title');
     const body = state === 'BOARDED'
-      ? `Alumno #${childId} abordo el bus. Se notificara al correo del apoderado.`
-      : `Alumno #${childId} fue marcado como ausente.`;
+      ? this.t('trip.active.notification.boarded-body', { childId })
+      : this.t('trip.active.notification.absent-body', { childId });
     if (!('Notification' in window)) return;
     const permission = Notification.permission === 'default'
       ? await Notification.requestPermission()
@@ -648,7 +658,15 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
       endTime: new Date().toISOString(),
       studentsBoarded: trip.studentsTotal ?? trip.studentsBoarded
     });
-    this.snack.open(auto ? 'Llegada a destino: viaje finalizado automaticamente' : 'Viaje finalizado', 'OK', { duration: 3000 });
+    this.snack.open(
+      auto ? this.t('trip.active.feedback.trip-auto-finished') : this.t('trip.active.feedback.trip-finished'),
+      'OK',
+      { duration: 3000 }
+    );
+  }
+
+  private t(key: string, params?: Record<string, unknown>): string {
+    return this.translate.instant(key, params);
   }
 
   // ── Emergency ──
@@ -670,7 +688,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
 
   submitEmergencyReport(): void {
     if (!this.emergencyDesc.trim()) {
-      this.snack.open('Describe el incidente', 'OK', { duration: 2500 });
+      this.snack.open(this.t('notification.incident.describe-incident'), 'OK', { duration: 2500 });
       return;
     }
     const trip = this.selectedTrip();
@@ -681,7 +699,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
       date:     new Date().toISOString(),
       tripId:   trip?.id,
     });
-    this.snack.open('Reporte enviado', 'OK', { duration: 3000 });
+    this.snack.open(this.t('notification.incident.report-sent'), 'OK', { duration: 3000 });
     this.emergencyDialog.set(false);
   }
 }

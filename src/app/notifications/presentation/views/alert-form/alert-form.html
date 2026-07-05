@@ -1,43 +1,43 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h1>Nueva alerta</h1>
-      <p>Registra una alerta operacional para la organizacion.</p>
+      <h1>{{ 'notification.alert.new-alert' | translate }}</h1>
+      <p>{{ 'notification.alert.form-subtitle' | translate }}</p>
     </div>
     <a mat-stroked-button routerLink="/notifications/alerts">
       <mat-icon>arrow_back</mat-icon>
-      Volver
+      {{ 'general.back' | translate }}
     </a>
   </div>
 
   <mat-card>
     <form [formGroup]="form" (ngSubmit)="submit()" class="alert-form">
       <mat-form-field appearance="outline">
-        <mat-label>ID de viaje</mat-label>
+        <mat-label>{{ 'trip.list.id' | translate }}</mat-label>
         <input matInput formControlName="tripId">
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Email destinatario para Resend</mat-label>
+        <mat-label>{{ 'notification.alert.recipient-email' | translate }}</mat-label>
         <input matInput formControlName="recipientEmail" type="email" autocomplete="email">
-        <mat-hint>Opcional. Si lo dejas vacio, se usara el email del administrador.</mat-hint>
+        <mat-hint>{{ 'notification.alert.recipient-help' | translate }}</mat-hint>
         @if (form.controls.recipientEmail.hasError('email')) {
-          <mat-error>Ingresa un email valido</mat-error>
+          <mat-error>{{ 'iam.errors.invalid-email' | translate }}</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Mensaje</mat-label>
+        <mat-label>{{ 'notification.alert.message' | translate }}</mat-label>
         <textarea matInput rows="5" formControlName="message"></textarea>
         @if (form.controls.message.hasError('required')) {
-          <mat-error>El mensaje es obligatorio</mat-error>
+          <mat-error>{{ 'notification.alert.message-required' | translate }}</mat-error>
         }
         @if (form.controls.message.hasError('minlength')) {
-          <mat-error>Describe la alerta con mas detalle</mat-error>
+          <mat-error>{{ 'notification.alert.message-placeholder' | translate }}</mat-error>
         }
       </mat-form-field>
 
-      <mat-checkbox formControlName="priority">Prioridad alta</mat-checkbox>
+      <mat-checkbox formControlName="priority">{{ 'notification.alert.high-priority' | translate }}</mat-checkbox>
 
       @if (store.error()) {
         <p class="error">{{ store.error() }}</p>

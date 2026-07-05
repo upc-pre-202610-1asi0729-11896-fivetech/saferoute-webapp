@@ -10,6 +10,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { NotificationStore } from '../../../application/notification-store';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface IncidentItem {
   id: string;
@@ -33,12 +34,10 @@ interface NotifItem {
 
 @Component({
   selector: 'app-incident-report',
-  imports: [
-    ReactiveFormsModule,
+  imports: [ReactiveFormsModule,
     RouterLink,
     MatButtonModule, MatIconModule, MatFormFieldModule,
-    MatInputModule, MatSelectModule, MatDialogModule, MatChipsModule
-  ],
+    MatInputModule, MatSelectModule, MatDialogModule, MatChipsModule, TranslatePipe],
   templateUrl: './incident-report.html',
   styleUrl: './incident-report.css'
 })
@@ -55,15 +54,15 @@ export class IncidentReport implements OnInit {
   filterStatus = signal('ALL');
 
   readonly INCIDENT_TYPES = [
-    { value: 'ALL',            label: 'Todos los tipos' },
-    { value: 'RETRASO',        label: 'Retraso' },
-    { value: 'AVERIA',         label: 'Avería' },
-    { value: 'ACCIDENTE',      label: 'Accidente' },
-    { value: 'COMPORTAMIENTO', label: 'Comportamiento' },
-    { value: 'EMERGENCIA',     label: 'Emergencia' },
-    { value: 'OTRO',           label: 'Otro' }
+    { value: 'ALL',            label: 'notification.incident.all-types' },
+    { value: 'RETRASO',        label: 'notification.incident.delay' },
+    { value: 'AVERIA',         label: 'notification.incident.breakdown-short' },
+    { value: 'ACCIDENTE',      label: 'notification.incident.accident' },
+    { value: 'COMPORTAMIENTO', label: 'notification.incident.behavior' },
+    { value: 'EMERGENCIA',     label: 'notification.incident.emergency' },
+    { value: 'OTRO',           label: 'notification.incident.other' }
   ];
-  readonly SEVERITY_LABELS: Record<string, string>  = { LOW: 'Leve', MEDIUM: 'Moderado', HIGH: 'Grave' };
+  readonly SEVERITY_LABELS: Record<string, string>  = { LOW: 'notification.severity.low', MEDIUM: 'notification.severity.medium', HIGH: 'notification.severity.high' };
   readonly SEVERITY_COLORS: Record<string, string>  = { LOW: '#22c55e', MEDIUM: '#f59e0b', HIGH: '#ef4444' };
   readonly TYPE_ICONS: Record<string, string> = {
     RETRASO: 'schedule', AVERIA: 'build', ACCIDENTE: 'warning',

@@ -1,12 +1,12 @@
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h1>Organizacion</h1>
-      <p>Gestiona los datos principales de la institucion.</p>
+      <h1>{{ 'option.organization' | translate }}</h1>
+      <p>{{ 'iam.organization-management.subtitle' | translate }}</p>
     </div>
     <button mat-stroked-button type="button" (click)="load()">
       <mat-icon>refresh</mat-icon>
-      Actualizar
+      {{ 'general.refresh' | translate }}
     </button>
   </div>
 
@@ -17,21 +17,21 @@
   } @else if (!canEdit()) {
     <mat-card class="state-card">
       <mat-icon>business</mat-icon>
-      <p>No hay una organizacion asociada al usuario actual.</p>
+      <p>{{ 'iam.organization-management.empty-current' | translate }}</p>
     </mat-card>
   } @else {
     <mat-card>
       <form [formGroup]="form" (ngSubmit)="save()" class="org-form">
         <mat-form-field appearance="outline">
-          <mat-label>Nombre</mat-label>
+          <mat-label>{{ 'iam.fields.organization-name' | translate }}</mat-label>
           <input matInput formControlName="name" autocomplete="organization">
           @if (form.controls.name.hasError('required')) {
-            <mat-error>El nombre es obligatorio</mat-error>
+            <mat-error>{{ 'general.name-required' | translate }}</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Identificador legal</mat-label>
+          <mat-label>{{ 'iam.organization.legal-id' | translate }}</mat-label>
           <input matInput formControlName="legalIdentifier">
         </mat-form-field>
 

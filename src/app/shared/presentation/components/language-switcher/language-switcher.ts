@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import {TranslateService} from '@ngx-translate/core';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 /**
  * Switches the active locale used by the translation service.
@@ -8,7 +8,8 @@ import {TranslateService} from '@ngx-translate/core';
 @Component({
   selector: 'app-language-switcher',
   imports: [
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    TranslatePipe
   ],
   templateUrl: './language-switcher.html',
   styleUrl: './language-switcher.css'
@@ -37,8 +38,9 @@ export class LanguageSwitcher {
     this.translate = inject(TranslateService);
     this.translate.addLangs(['en', 'es']);
     this.translate.setDefaultLang('en');
+    const savedLanguage = localStorage.getItem('saferoute-language');
     if (!this.translate.currentLang) {
-      this.translate.use('en');
+      this.translate.use(savedLanguage ?? 'en');
     }
     this.currentLang = this.translate.currentLang ?? 'en';
     this.languages = ['en', 'es'];
@@ -51,6 +53,7 @@ export class LanguageSwitcher {
    * @param language - The language code to switch to (e.g., 'en', 'es')
    */
   useLanguage(language: string) {
+    localStorage.setItem('saferoute-language', language);
     this.translate.use(language);
     this.currentLang = language;
   }

@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StakeholderStore } from '../../../application/stakeholder-store';
 import { VehicleEntity } from '../../../domain/model/vehicle-entity';
 import { AuthStore } from '../../../../iam/application/auth-store';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 /**
  * Vehicle management view (Fleet assets).
@@ -19,10 +20,8 @@ import { AuthStore } from '../../../../iam/application/auth-store';
  */
 @Component({
   selector: 'app-vehicle-management',
-  imports: [
-    ReactiveFormsModule, MatButtonModule, MatIconModule,
-    MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule
-  ],
+  imports: [ReactiveFormsModule, MatButtonModule, MatIconModule,
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatProgressSpinnerModule, TranslatePipe],
   templateUrl: './vehicle-management.html',
   styleUrl: './vehicle-management.css'
 })
@@ -30,6 +29,7 @@ export class VehicleManagement implements OnInit {
   protected store = inject(StakeholderStore);
   private auth = inject(AuthStore);
   private fb = inject(FormBuilder);
+  private translate = inject(TranslateService);
 
   /** Operational status options offered by the form (match the backend VehicleStatus enum). */
   readonly statuses = ['ACTIVE', 'MAINTENANCE', 'INACTIVE'];
@@ -96,7 +96,7 @@ export class VehicleManagement implements OnInit {
   }
 
   remove(id: number): void {
-    if (!confirm('¿Eliminar este vehículo?')) return;
+    if (!confirm(this.translate.instant('stakeholder.confirm.delete-vehicle'))) return;
     this.store.deleteVehicle(id);
   }
 }
