@@ -32,7 +32,7 @@ export class Checkout implements AfterViewInit, OnDestroy {
   readonly status = signal<'idle' | 'success' | 'error' | 'cancelled'>('idle');
   readonly sdkReady = signal(false);
 
-  private orgId: number | null = null;
+  private orgId: string | null = null;
   private scriptEl: HTMLScriptElement | null = null;
   private buttonsRendered = false;
 
@@ -43,7 +43,7 @@ export class Checkout implements AfterViewInit, OnDestroy {
     this.planTier.set(params.get('tier') ?? '');
     this.credit.set(params.get('credit') ?? '');
     this.mode.set(params.get('mode') === 'upgrade' ? 'upgrade' : 'new');
-    this.orgId = params.get('orgId') ? Number(params.get('orgId')) : null;
+    this.orgId = params.get('orgId');
   }
 
   ngAfterViewInit(): void {
@@ -117,13 +117,14 @@ export class Checkout implements AfterViewInit, OnDestroy {
           return;
         }
         const onSuccess = () => {
+          const cameFromLanding = this.auth.isCheckoutPending();
           this.auth.completeCheckout();
           this.status.set('success');
-          if (this.mode() === 'upgrade') {
-            setTimeout(() => this.router.navigate(['/subscription/status']), 1800);
-          } else {
+          if (cameFromLanding) {
             this.auth.clearSession();
             setTimeout(() => this.router.navigate(['/iam/sign-in']), 2500);
+          } else {
+            setTimeout(() => this.router.navigate(['/subscription/status']), 1800);
           }
         };
         const onError = () => this.status.set('error');
@@ -148,6 +149,6 @@ export class Checkout implements AfterViewInit, OnDestroy {
       this.auth.signOut();
       return;
     }
-    this.router.navigate([this.mode() === 'upgrade' ? '/subscription/status' : '/iam/sign-in']);
+    this.router.navigate(['/subscription/status']);
   }
 }
