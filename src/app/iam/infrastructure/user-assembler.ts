@@ -9,10 +9,10 @@ export class UserAssembler implements BaseAssembler<UserEntity, UserResource, Us
   toEntityFromResource(resource: UserResource): UserEntity {
     return {
       id: resource.id,
-      firstName: resource.firstName,
-      lastName: resource.lastName,
-      email: resource.email,
-      role: resource.role as Role,
+      firstName: resource.firstName ?? resource.username,
+      lastName: resource.lastName ?? '',
+      email: resource.email ?? resource.username,
+      role: this.toFrontendRole(resource.role ?? resource.roles?.[0] ?? '') as Role,
       organizationId: resource.organizationId
     };
   }
@@ -20,10 +20,12 @@ export class UserAssembler implements BaseAssembler<UserEntity, UserResource, Us
   toResourceFromEntity(entity: UserEntity): UserResource {
     return {
       id: entity.id,
+      username: entity.email,
       firstName: entity.firstName,
       lastName: entity.lastName,
       email: entity.email,
       role: entity.role,
+      roles: [entity.role === Role.ADMIN ? 'ROLE_ADMINISTRATOR' : `ROLE_${entity.role}`],
       organizationId: entity.organizationId
     };
   }
@@ -33,5 +35,10 @@ export class UserAssembler implements BaseAssembler<UserEntity, UserResource, Us
       ? (response as unknown as UserResource[])
       : (response.users ?? []);
     return list.map(r => this.toEntityFromResource(r));
+  }
+
+  private toFrontendRole(role: string): string {
+    const normalized = role.replace(/^ROLE_/, '');
+    return normalized === 'ADMINISTRATOR' ? Role.ADMIN : normalized || Role.PARENT;
   }
 }

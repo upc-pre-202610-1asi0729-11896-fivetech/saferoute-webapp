@@ -19,8 +19,7 @@ import { environment } from '../../../environments/environment';
  */
 export class RouteApiEndpoint {
   private readonly url = `${environment.platformProviderJavaApiBaseUrl}/routes`;
-  // Driver names live in IAM (json-server users / db.json), not in the DDD route. Resolve them here.
-  private readonly usersUrl = `${environment.platformProviderApiBaseUrl}/users`;
+  private readonly driversUrl = `${environment.platformProviderApiBaseUrl}/drivers`;
   private readonly assembler = new RouteAssembler();
 
   constructor(private http: HttpClient) {}
@@ -62,14 +61,13 @@ export class RouteApiEndpoint {
 
   getAll(organizationId?: number): Observable<Route[]> {
     const routesUrl = organizationId ? `${this.url}?organizationId=${organizationId}` : this.url;
-    const usersUrl = organizationId ? `${this.usersUrl}?organizationId=${organizationId}` : this.usersUrl;
     return forkJoin({
       routeArr: this.http.get<RouteResource[]>(routesUrl),
-      users: this.http.get<any[]>(usersUrl).pipe(catchError(() => of([] as any[])))
+      drivers: this.http.get<any[]>(this.driversUrl).pipe(catchError(() => of([] as any[])))
     }).pipe(
-      switchMap(({ routeArr, users }) => {
+      switchMap(({ routeArr, drivers }) => {
         const driverName = new Map<number, string>(
-          (users ?? []).map(u => [u.id, `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim()])
+          (drivers ?? []).map(driver => [Number(driver.id), driver.fullName ?? ''])
         );
         const routes = this.assembler.toEntitiesFromResponse(routeArr);
         if (routes.length === 0) return of([] as Route[]);

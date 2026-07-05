@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { BaseApi } from '../../shared/infrastructure/base-api';
 import { TripEntity } from '../domain/model/trip-entity';
 import { RouteEntity } from '../domain/model/route-entity';
 import { AttendanceResource, IncidentResource, StartTripRequest, UpdateBoardingRequest, ReportIncidentRequest } from './trip-response';
@@ -12,8 +13,10 @@ import { TripApiEndpoint } from './trip-api-endpoint';
  * (store &rarr; api facade &rarr; endpoint). Exposes the backend's DDD operations.</p>
  */
 @Injectable({ providedIn: 'root' })
-export class TripApi {
-  constructor(private readonly endpoint: TripApiEndpoint) {}
+export class TripApi extends BaseApi {
+  constructor(private readonly endpoint: TripApiEndpoint) {
+    super();
+  }
 
   getTrips(organizationId?: number): Observable<TripEntity[]> { return this.endpoint.getTrips(organizationId); }
   getTripById(id: number): Observable<TripEntity> { return this.endpoint.getTripById(id); }
@@ -21,6 +24,8 @@ export class TripApi {
 
   startTrip(req: StartTripRequest): Observable<TripEntity> { return this.endpoint.startTrip(req); }
   completeTrip(id: number): Observable<TripEntity> { return this.endpoint.completeTrip(id); }
+  cancelTrip(id: number): Observable<TripEntity> { return this.endpoint.cancelTrip(id); }
+  activateTrip(id: number): Observable<TripEntity> { return this.endpoint.activateTrip(id); }
   updateBoarding(tripId: number, req: UpdateBoardingRequest): Observable<TripEntity> { return this.endpoint.updateBoarding(tripId, req); }
   reportIncident(tripId: number, req: ReportIncidentRequest): Observable<TripEntity> { return this.endpoint.reportIncident(tripId, req); }
   deleteTrip(id: number): Observable<void> { return this.endpoint.deleteTrip(id); }

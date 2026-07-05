@@ -52,7 +52,7 @@ export class TripForm implements OnInit {
           date: trip.scheduledDate ?? new Date().toISOString().split('T')[0]
         });
       } else {
-        this.router.navigate(['/trip/list']);
+        this.router.navigate(['/trip/all']);
       }
     }
   }
@@ -76,8 +76,8 @@ export class TripForm implements OnInit {
         scheduledDate: v.date!
       });
     }
-    this.router.navigate(['/trip/list']);
+    this.router.navigate(['/trip/all']);
   }
 
-  cancel(): void { this.router.navigate(['/trip/list']); }
+  cancel(): void { this.router.navigate(['/trip/all']); }
 }

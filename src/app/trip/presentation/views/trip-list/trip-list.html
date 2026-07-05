@@ -61,12 +61,21 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>{{ 'general.actions' | translate }}</th>
           <td mat-cell *matCellDef="let t">
-            <button mat-icon-button (click)="goEdit(t.id)" title="{{ 'general.edit' | translate }}">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="deleteTrip(t.id)" title="{{ 'general.delete' | translate }}">
-              <mat-icon>delete</mat-icon>
-            </button>
+            <div class="actions-cell">
+              @if (canCancel(t.status)) {
+                <button mat-icon-button class="btn-cancel-trip" (click)="cancelTrip(t.id)" [attr.aria-label]="'general.cancel' | translate" title="{{ 'general.cancel' | translate }}">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              }
+              @if (canActivate(t.status)) {
+                <button mat-icon-button class="btn-activate-trip" (click)="activateTrip(t.id)" aria-label="Activate trip" title="Activate trip">
+                  <mat-icon>play_circle</mat-icon>
+                </button>
+              }
+              <button mat-icon-button class="btn-delete" (click)="deleteTrip(t.id)" [attr.aria-label]="'general.delete' | translate" title="{{ 'general.delete' | translate }}">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
           </td>
         </ng-container>
 

@@ -1,3 +1,12 @@
 .loading-center { display: flex; justify-content: center; padding: 48px; }
 .error-card mat-card-content { display: flex; align-items: center; gap: 8px; }
 .full-width { width: 100%; }
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 136px;
+}
+.btn-cancel-trip { color: #f59e0b !important; }
+.btn-activate-trip { color: #16a34a !important; }
+.btn-delete { color: #dc2626 !important; }

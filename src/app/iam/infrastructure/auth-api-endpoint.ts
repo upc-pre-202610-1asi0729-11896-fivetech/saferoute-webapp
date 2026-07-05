@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import {
   SignInRequest,
@@ -9,39 +9,37 @@ import {
   SignUpRequest,
   UserResource,
   OrganizationResource,
-  CreateOrganizationRequest
+  CreateOrganizationRequest,
 } from './user-response';
 
-const DB_KEY = 'saferoute.db';
-
-function getDb(): any {
-  try {
-    return JSON.parse(localStorage.getItem(DB_KEY) || '{}');
-  } catch {
-    return {};
-  }
+interface BackendSignInResponse {
+  id: number;
+  username: string;
+  token: string;
 }
 
-function saveDb(db: any): void {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
+function roleToBackend(role: string): string {
+  if (role === 'ADMIN') return 'ROLE_ADMINISTRATOR';
+  return role.startsWith('ROLE_') ? role : `ROLE_${role}`;
 }
 
-function seedDb(): void {
-  if (localStorage.getItem(DB_KEY)) return;
-  const db = {
-    users: [
-      { id: 1, firstName: 'Admin', lastName: 'SafeRoute', email: 'admin@saferoute.com', password: 'admin123', role: 'ADMIN', organizationId: 1 },
-      { id: 2, firstName: 'Carlos', lastName: 'Ramos', email: 'driver@saferoute.com', password: 'driver123', role: 'DRIVER', organizationId: 1 },
-      { id: 3, firstName: 'Maria', lastName: 'Lopez', email: 'parent@saferoute.com', password: 'parent123', role: 'PARENT', organizationId: 1 }
-    ],
-    organizations: [
-      { id: 1, name: 'SafeRoute School Transport', status: 'ACTIVE', createdAt: '2024-01-01' }
-    ],
-    nextUserId: 4,
-    nextOrgId: 2
-  };
-  saveDb(db);
+function normalizeError(error: HttpErrorResponse): Error {
+  if (error.status === 0) return new Error('No se pudo conectar con el backend de SafeRoute');
+  if (error.status === 400) return new Error('Solicitud invalida. Revisa los campos enviados.');
+  if (error.status === 401) return new Error('Credenciales invalidas o sesion expirada.');
+  if (error.status === 403) return new Error('No tienes permisos para realizar esta accion.');
+  if (error.status === 404) return new Error('Recurso no encontrado en el backend.');
+  if (error.status === 409) return new Error('Ya existe un registro con esos datos.');
+  if (error.status >= 500) return new Error('El backend reporto un error interno.');
+  return new Error(error.message || 'Error inesperado al consumir el backend.');
 }
+
+const DEMO_USER_PROFILES: Record<string, { firstName: string; lastName: string; email: string }> = {
+  'admin@saferoute.pe': { firstName: 'Mathias', lastName: 'De La Cruz', email: 'admin@saferoute.pe' },
+  'driver@saferoute.pe': { firstName: 'Carlos', lastName: 'Ramirez', email: 'driver@saferoute.pe' },
+  'parent@saferoute.pe': { firstName: 'Rosita', lastName: 'Nery', email: 'parent@saferoute.pe' },
+  'anonimo020606@gmail.com': { firstName: 'Rosita', lastName: 'Nery', email: 'anonimo020606@gmail.com' },
+};
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiEndpoint {
@@ -51,113 +49,107 @@ export class AuthApiEndpoint {
   private readonly usersPath = environment.platformProviderUsersEndpointPath;
   private readonly orgsPath = environment.platformProviderOrganizationsEndpointPath;
 
-  constructor(private http: HttpClient) {
-    if (environment.useFakeAuth) seedDb();
-  }
+  constructor(private http: HttpClient) {}
 
   signIn(req: SignInRequest): Observable<SignInResponse> {
-    if (environment.useFakeAuth) {
-      return this.fakeSignIn(req);
-    }
-    // Query json-server's /users endpoint with email and password
-    return this.http.get<UserResource[]>(`${this.base}${this.usersPath}?email=${req.email}&password=${req.password}`).pipe(
-      map(users => {
-        if (!users || users.length === 0) {
-          throw new Error('invalid-credentials');
-        }
-        const user = users[0];
-        const token = `fake-token-${user.id}-${Date.now()}`;
-        return { token, id: user.id, role: user.role, organizationId: user.organizationId };
-      }),
-      catchError(err => throwError(() => err))
-    );
+    return this.http
+      .post<BackendSignInResponse>(`${this.base}${this.signInPath}`, {
+        username: req.email,
+        password: req.password,
+      })
+      .pipe(
+        switchMap(auth =>
+          this.getUserById(auth.id).pipe(
+            map(user => ({
+              token: auth.token,
+              id: auth.id,
+              username: auth.username,
+              role: this.toFrontendRole(user.roles?.[0]),
+              organizationId: user.organizationId,
+            })),
+          ),
+        ),
+        catchError(err => throwError(() => normalizeError(err))),
+      );
   }
 
   signUp(req: SignUpRequest): Observable<UserResource> {
-    if (environment.useFakeAuth) {
-      return this.fakeSignUp(req);
-    }
-    // json-server supports POST directly to the collection for creation
-    return this.http.post<UserResource>(`${this.base}${this.usersPath}`, req).pipe(
-      catchError(err => throwError(() => err))
-    );
+    return this.http
+      .post<UserResource>(`${this.base}${this.signUpPath}`, {
+        username: req.email,
+        password: req.password,
+        organizationId: req.organizationId?.toString(),
+        roles: [roleToBackend(req.role)],
+      })
+      .pipe(catchError(err => throwError(() => normalizeError(err))));
   }
 
   getUsers(): Observable<UserResource[]> {
-    if (environment.useFakeAuth) {
-      const db = getDb();
-      return of(db.users ?? []);
-    }
     return this.http.get<UserResource[]>(`${this.base}${this.usersPath}`).pipe(
-      map(r => Array.isArray(r) ? r : (r as any).users ?? []),
-      catchError(err => throwError(() => err))
+      map(users => (users ?? []).map(user => this.withDisplayFields(user))),
+      catchError(err => throwError(() => normalizeError(err))),
     );
   }
 
   getUserById(id: number): Observable<UserResource> {
-    if (environment.useFakeAuth) {
-      const db = getDb();
-      const user = (db.users ?? []).find((u: any) => u.id === id);
-      return user ? of(user) : throwError(() => new Error('User not found'));
-    }
     return this.http.get<UserResource>(`${this.base}${this.usersPath}/${id}`).pipe(
-      catchError(err => throwError(() => err))
+      map(user => this.withDisplayFields(user)),
+      catchError(err => throwError(() => normalizeError(err))),
     );
   }
 
-  getOrganizationById(id: number): Observable<OrganizationResource> {
-    if (environment.useFakeAuth) {
-      const db = getDb();
-      const org = (db.organizations ?? []).find((o: any) => o.id === id);
-      return org ? of(org) : throwError(() => new Error('Organization not found'));
-    }
+  getOrganizationById(id: number | string): Observable<OrganizationResource> {
     return this.http.get<OrganizationResource>(`${this.base}${this.orgsPath}/${id}`).pipe(
-      catchError(err => throwError(() => err))
+      map(org => ({ ...org, status: org.status ?? 'ACTIVE', createdAt: org.createdAt ?? '' })),
+      catchError(err => throwError(() => err instanceof Error ? err : normalizeError(err))),
     );
   }
 
   createOrganization(req: CreateOrganizationRequest): Observable<OrganizationResource> {
-    if (environment.useFakeAuth) {
-      const db = getDb();
-      const org: OrganizationResource = { id: db.nextOrgId++, name: req.name, status: 'ACTIVE', createdAt: new Date().toISOString().split('T')[0] };
-      db.organizations = [...(db.organizations ?? []), org];
-      saveDb(db);
-      return of(org);
-    }
-    return this.http.post<OrganizationResource>(`${this.base}${this.orgsPath}`, req).pipe(
-      catchError(err => throwError(() => err))
-    );
+    return this.http
+      .post<OrganizationResource>(`${this.base}${this.orgsPath}`, {
+        name: req.name,
+        legalIdentifier: req.legalIdentifier || `RUC-${Date.now()}`,
+      })
+      .pipe(
+        map(org => ({ ...org, id: org.id as unknown as number })),
+        catchError(err => throwError(() => normalizeError(err))),
+      );
   }
 
-  updateOrganization(id: number, req: Partial<CreateOrganizationRequest>): Observable<OrganizationResource> {
-    if (environment.useFakeAuth) {
-      const db = getDb();
-      const idx = (db.organizations ?? []).findIndex((o: any) => o.id === id);
-      if (idx === -1) return throwError(() => new Error('Organization not found'));
-      db.organizations[idx] = { ...db.organizations[idx], ...req };
-      saveDb(db);
-      return of(db.organizations[idx]);
-    }
-    return this.http.put<OrganizationResource>(`${this.base}${this.orgsPath}/${id}`, req).pipe(
-      catchError(err => throwError(() => err))
-    );
+  updateOrganization(id: number | string, req: Partial<CreateOrganizationRequest>): Observable<OrganizationResource> {
+    return this.http
+      .put<OrganizationResource>(`${this.base}${this.orgsPath}/${id}`, {
+        name: req.name,
+        legalIdentifier: req.legalIdentifier,
+      })
+      .pipe(
+        map(org => ({ ...org, status: org.status ?? 'ACTIVE', createdAt: org.createdAt ?? '' })),
+        catchError(err => throwError(() => normalizeError(err))),
+      );
   }
 
-  private fakeSignIn(req: SignInRequest): Observable<SignInResponse> {
-    const db = getDb();
-    const user = (db.users ?? []).find((u: any) => u.email === req.email && u.password === req.password);
-    if (!user) return throwError(() => new Error('invalid-credentials'));
-    const token = `fake-token-${user.id}-${Date.now()}`;
-    return of({ token, id: user.id, role: user.role, organizationId: user.organizationId });
+  private withDisplayFields(user: UserResource): UserResource {
+    const username = user.username ?? user.email ?? '';
+    const demoProfile = DEMO_USER_PROFILES[username.toLowerCase()];
+    const [first, ...rest] = username.split('@')[0].split(/[._-]/).filter(Boolean);
+    const role = this.toFrontendRole(user.roles?.[0] ?? user.role ?? '');
+    return {
+      ...user,
+      username,
+      email: user.email ?? demoProfile?.email ?? username,
+      firstName: user.firstName ?? demoProfile?.firstName ?? this.capitalize(first || username),
+      lastName: user.lastName ?? demoProfile?.lastName ?? this.capitalize(rest.join(' ')),
+      role,
+    };
   }
 
-  private fakeSignUp(req: SignUpRequest): Observable<UserResource> {
-    const db = getDb();
-    const exists = (db.users ?? []).some((u: any) => u.email === req.email);
-    if (exists) return throwError(() => new Error('Email already registered'));
-    const user = { id: db.nextUserId++, ...req };
-    db.users = [...(db.users ?? []), user];
-    saveDb(db);
-    return of(user);
+  private toFrontendRole(role: string): string {
+    const normalized = role.replace(/^ROLE_/, '');
+    return normalized === 'ADMINISTRATOR' ? 'ADMIN' : normalized || 'PARENT';
+  }
+
+  private capitalize(value: string): string {
+    return value ? value.charAt(0).toUpperCase() + value.slice(1) : '';
   }
 }

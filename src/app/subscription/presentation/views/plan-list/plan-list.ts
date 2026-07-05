@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SubscriptionStore } from '../../../application/subscription-store';
@@ -57,9 +58,9 @@ const PLANS: PlanConfig[] = [
       { label: 'Reporte de incidencias',           included: true  },
       { label: 'Bitácora de viajes',               included: true  },
       { label: 'Notificaciones de abordaje',       included: true  },
-      { label: 'Alertas de proximidad (US19)',      included: true  },
-      { label: 'Cámara en vivo del bus (US21)',     included: true  },
-      { label: 'Historial de asistencia (US22)',    included: true  },
+      { label: 'Alertas de proximidad',      included: true  },
+      { label: 'Cámara en vivo del bus',     included: true  },
+      { label: 'Historial de asistencia',    included: true  },
       { label: 'GPS en tiempo real',               included: false },
     ]
   },
@@ -78,13 +79,15 @@ const PLANS: PlanConfig[] = [
       { label: 'Reporte de incidencias',           included: true  },
       { label: 'Bitácora de viajes',               included: true  },
       { label: 'Notificaciones de abordaje',       included: true  },
-      { label: 'Alertas de proximidad (US19)',      included: true  },
-      { label: 'Cámara en vivo del bus (US21)',     included: true  },
-      { label: 'Historial de asistencia (US22)',    included: true  },
-      { label: 'GPS en tiempo real (US18/US45)',    included: true  },
+      { label: 'Alertas de proximidad',      included: true  },
+      { label: 'Cámara en vivo del bus',     included: true  },
+      { label: 'Historial de asistencia',    included: true  },
+      { label: 'GPS en tiempo real',    included: true  },
     ]
   }
 ];
+
+const PLAN_ORDER: Record<string, number> = { BASIC: 1, INTERMEDIATE: 2, STANDARD: 2, COMPLETE: 3, PREMIUM: 3 };
 
 @Component({
   selector: 'app-plan-list',
@@ -92,18 +95,43 @@ const PLANS: PlanConfig[] = [
   templateUrl: './plan-list.html',
   styleUrl: './plan-list.css'
 })
-export class PlanList {
+export class PlanList implements OnInit {
   protected store = inject(SubscriptionStore);
   protected auth  = inject(AuthStore);
+  private router = inject(Router);
 
   billing = signal<'monthly' | 'annual'>('monthly');
   plans   = PLANS;
 
+  ngOnInit(): void {
+    const orgId = this.auth.currentUser()?.organizationId;
+    if (orgId) this.store.loadSubscription(orgId);
+  }
+
   currentPlanKey = computed(() => {
     const sub = this.store.subscription();
-    const plan = this.store.plans().find(p => p.id === sub?.planId);
+    const plan = this.store.plans().find(p => p.id.toString() === sub?.planId?.toString());
     if (!plan) return null;
-    return plan.name.toUpperCase(); // BASIC | INTERMEDIATE | COMPLETE
+    return (plan.tier ?? plan.name).toUpperCase();
+  });
+
+  remainingDays = computed(() => {
+    const sub = this.store.subscription();
+    if (!sub?.endDate) return 0;
+    return Math.max(0, Math.ceil((new Date(sub.endDate).getTime() - Date.now()) / 86_400_000));
+  });
+
+  totalDays = computed(() => {
+    const sub = this.store.subscription();
+    if (!sub?.startDate || !sub?.endDate) return 30;
+    return Math.max(1, Math.ceil((new Date(sub.endDate).getTime() - new Date(sub.startDate).getTime()) / 86_400_000));
+  });
+
+  proratedCredit = computed(() => {
+    const sub = this.store.subscription();
+    const currentPlan = this.store.plans().find(p => p.id.toString() === sub?.planId?.toString());
+    if (!currentPlan || !this.remainingDays()) return 0;
+    return Number(((this.remainingDays() / this.totalDays()) * currentPlan.price).toFixed(2));
   });
 
   annualPrice(monthly: number): string {
@@ -123,12 +151,41 @@ export class PlanList {
     return this.currentPlanKey() === key;
   }
 
+  canChoosePlan(key: string): boolean {
+    const current = this.currentPlanKey();
+    if (!current) return true;
+    return (PLAN_ORDER[key] ?? 0) > (PLAN_ORDER[current] ?? 0);
+  }
+
+  planActionLabel(plan: PlanConfig): string {
+    if (this.isCurrentPlan(plan.key)) return 'Plan Actual';
+    if (!this.canChoosePlan(plan.key)) return 'No disponible para upgrade';
+    return this.store.subscription() ? 'Upgradear ahora' : 'Contratar ahora';
+  }
+
+  priceAfterCredit(plan: PlanConfig): string | null {
+    const current = this.currentPlanKey();
+    const credit = this.proratedCredit();
+    if (!current || !credit || !this.canChoosePlan(plan.key)) return null;
+    return Math.max(0, Number(this.displayPrice(plan.price)) - credit).toFixed(2);
+  }
+
   subscribe(plan: PlanConfig): void {
-    const storeplan = this.store.plans().find(p => p.name.toUpperCase() === plan.key);
+    if (!this.canChoosePlan(plan.key)) return;
+    const storeplan = this.store.plans().find(p => (p.tier ?? p.name).toUpperCase() === plan.key);
     if (!storeplan) return;
-    this.store.selectPlan(storeplan);
     const orgId = this.auth.currentUser()?.organizationId;
     if (!orgId) return;
-    this.store.subscribe(orgId);
+    const finalPrice = this.priceAfterCredit(plan) ?? this.displayPrice(plan.price);
+    this.router.navigate(['/checkout'], {
+      queryParams: {
+        mode: this.store.subscription() ? 'upgrade' : 'new',
+        plan: storeplan.name,
+        price: `$${finalPrice}`,
+        tier: plan.key,
+        orgId,
+        credit: this.priceAfterCredit(plan) ? this.proratedCredit() : undefined,
+      },
+    });
   }
 }

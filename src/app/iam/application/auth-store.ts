@@ -2,7 +2,7 @@ import { computed, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserEntity, OrganizationEntity } from '../domain/model/user-entity';
 import { Role } from '../domain/model/role-enum';
-import { AuthApiEndpoint } from '../infrastructure/auth-api-endpoint';
+import { IamApi } from '../infrastructure/iam-api';
 import { SignInRequest, SignUpRequest, CreateOrganizationRequest } from '../infrastructure/user-response';
 
 const TOKEN_KEY = 'saferoute.token';
@@ -27,7 +27,7 @@ export class AuthStore {
   readonly isDriver = computed(() => this._currentUser()?.role === Role.DRIVER);
   readonly isParent = computed(() => this._currentUser()?.role === Role.PARENT);
 
-  constructor(private api: AuthApiEndpoint, private router: Router) {
+  constructor(private api: IamApi, private router: Router) {
     const token = localStorage.getItem(TOKEN_KEY);
     const userJson = localStorage.getItem(USER_KEY);
     if (token) this._token.set(token);
@@ -47,10 +47,10 @@ export class AuthStore {
           next: userResource => {
             const user: UserEntity = {
               id: userResource.id,
-              firstName: userResource.firstName,
-              lastName: userResource.lastName,
-              email: userResource.email,
-              role: userResource.role as Role,
+              firstName: userResource.firstName ?? userResource.username,
+              lastName: userResource.lastName ?? '',
+              email: userResource.email ?? userResource.username,
+              role: (userResource.role ?? res.role ?? Role.PARENT) as Role,
               organizationId: userResource.organizationId
             };
             this._currentUser.set(user);
@@ -133,9 +133,13 @@ export class AuthStore {
     const user = this._currentUser();
     if (!user?.organizationId) return;
     this.api.getOrganizationById(user.organizationId).subscribe({
-      next: org => this._organization.set({ id: org.id, name: org.name, status: org.status, createdAt: org.createdAt }),
+      next: org => this.setOrganization({ id: org.id, name: org.name, legalIdentifier: org.legalIdentifier, status: org.status ?? 'ACTIVE', createdAt: org.createdAt ?? '' }),
       error: () => { /* silently ignore */ }
     });
+  }
+
+  setOrganization(organization: OrganizationEntity): void {
+    this._organization.set(organization);
   }
 
   /** Clears auth state without navigating (used before redirecting externally) */

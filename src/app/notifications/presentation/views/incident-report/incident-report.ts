@@ -1,4 +1,5 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
 import { AuthStore } from '../../../../iam/application/auth-store';
+import { NotificationStore } from '../../../application/notification-store';
 
 interface IncidentItem {
   id: string;
@@ -29,13 +31,11 @@ interface NotifItem {
   read: boolean;
 }
 
-const INCIDENTS_KEY = 'saferoute.incidents';
-const NOTIFS_KEY = 'saferoute.notifications';
-
 @Component({
   selector: 'app-incident-report',
   imports: [
     ReactiveFormsModule,
+    RouterLink,
     MatButtonModule, MatIconModule, MatFormFieldModule,
     MatInputModule, MatSelectModule, MatDialogModule, MatChipsModule
   ],
@@ -44,13 +44,11 @@ const NOTIFS_KEY = 'saferoute.notifications';
 })
 export class IncidentReport implements OnInit {
   private auth = inject(AuthStore);
+  private store = inject(NotificationStore);
   private fb = inject(FormBuilder);
 
   activeTab = signal<'incidents' | 'notifications'>('incidents');
   showDialog = signal(false);
-
-  private _incidents = signal<IncidentItem[]>([]);
-  private _notifications = signal<NotifItem[]>([]);
 
   filterType = signal('ALL');
   filterSeverity = signal('ALL');
@@ -77,7 +75,17 @@ export class IncidentReport implements OnInit {
   };
 
   filteredIncidents = computed(() => {
-    let list = this._incidents();
+    let list = this.store.incidents().map(item => ({
+      id: item.id.toString(),
+      tripId: item.tripId ? Number(item.tripId) : null,
+      routeName: '',
+      type: item.type,
+      severity: (item.severity || 'LOW') as 'LOW' | 'MEDIUM' | 'HIGH',
+      description: item.description ?? item.message,
+      reportedBy: '',
+      timestamp: item.date,
+      status: item.status ?? 'OPEN',
+    }));
     if (this.filterType()     !== 'ALL') list = list.filter(i => i.type     === this.filterType());
     if (this.filterSeverity() !== 'ALL') list = list.filter(i => i.severity === this.filterSeverity());
     if (this.filterStatus()   !== 'ALL') list = list.filter(i => i.status   === this.filterStatus());
@@ -85,10 +93,16 @@ export class IncidentReport implements OnInit {
   });
 
   visibleNotifs = computed(() =>
-    [...this._notifications()].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    this.store.notifications().map(item => ({
+      id: item.id.toString(),
+      message: item.body,
+      type: item.type ?? item.title,
+      timestamp: item.date,
+      read: item.read,
+    })).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
   );
 
-  unreadCount = computed(() => this._notifications().filter(n => !n.read).length);
+  unreadCount = computed(() => this.store.notifications().filter(n => !n.read).length);
 
   isAdmin = computed(() => this.auth.isAdmin());
 
@@ -100,18 +114,7 @@ export class IncidentReport implements OnInit {
   });
 
   ngOnInit(): void {
-    this._incidents.set(this.loadIncidents());
-    this._notifications.set(this.loadNotifs());
-  }
-
-  private loadIncidents(): IncidentItem[] {
-    try { return JSON.parse(localStorage.getItem(INCIDENTS_KEY) || '[]'); }
-    catch { return []; }
-  }
-
-  private loadNotifs(): NotifItem[] {
-    try { return JSON.parse(localStorage.getItem(NOTIFS_KEY) || '[]'); }
-    catch { return []; }
+    this.store.loadNotifications(this.auth.currentUser()?.id);
   }
 
   openDialog(): void {
@@ -133,31 +136,28 @@ export class IncidentReport implements OnInit {
       timestamp:   new Date().toISOString(),
       status:      'OPEN'
     };
-    this._incidents.update(list => [incident, ...list]);
-    const stored = this.loadIncidents();
-    stored.push(incident);
-    localStorage.setItem(INCIDENTS_KEY, JSON.stringify(stored));
+    this.store.reportIncident({
+      tripId: incident.tripId ?? undefined,
+      type: incident.type,
+      severity: incident.severity,
+      message: incident.description,
+      description: incident.description,
+      date: incident.timestamp,
+      status: incident.status,
+    });
     this.showDialog.set(false);
   }
 
   resolveIncident(inc: IncidentItem): void {
-    this._incidents.update(list =>
-      list.map(i => i.id === inc.id ? { ...i, status: 'RESOLVED' as const } : i)
-    );
-    const stored = this.loadIncidents().map(i => i.id === inc.id ? { ...i, status: 'RESOLVED' } : i);
-    localStorage.setItem(INCIDENTS_KEY, JSON.stringify(stored));
+    this.store.clearError();
   }
 
   markRead(n: NotifItem): void {
-    this._notifications.update(list => list.map(x => x.id === n.id ? { ...x, read: true } : x));
-    const stored = this.loadNotifs().map(x => x.id === n.id ? { ...x, read: true } : x);
-    localStorage.setItem(NOTIFS_KEY, JSON.stringify(stored));
+    this.store.markAsRead(n.id);
   }
 
   markAllRead(): void {
-    this._notifications.update(list => list.map(x => ({ ...x, read: true })));
-    const stored = this.loadNotifs().map(x => ({ ...x, read: true }));
-    localStorage.setItem(NOTIFS_KEY, JSON.stringify(stored));
+    this.store.markAllAsRead();
   }
 
   fmt(ts: string): string {

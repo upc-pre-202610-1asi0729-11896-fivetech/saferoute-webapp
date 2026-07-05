@@ -41,6 +41,14 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
   private placeholderLine: L.Polyline | null = null;
   private roadLine: L.Polyline | null = null;
   private renderToken = 0;
+  private simulationTimer: ReturnType<typeof setInterval> | null = null;
+  private simulationPath: L.LatLngTuple[] = [];
+  private simulationWaypointIndices: number[] = [];
+  private simulationProgress = 0;
+  private simulationStride = 0;
+  private simulationNextWaypoint = 0;
+  private simulationDone?: () => void;
+  private simulationWaypointReached?: (index: number) => void;
 
   private readonly busIcon = L.divIcon({
     html: `
@@ -62,10 +70,18 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.map && (changes['waypoints'] || changes['currentStop'])) this.render();
+    if (!this.map) return;
+    if (changes['waypoints']) {
+      this.render();
+      return;
+    }
+    if (changes['currentStop'] && !this.hasSimulationState()) {
+      this.render();
+    }
   }
 
   ngOnDestroy(): void {
+    this.stopRouteSimulation();
     this.map?.remove();
     this.map = null;
   }
@@ -76,6 +92,46 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
   getBusMarker(): L.Marker | null { return this.busMarker; }
   /** Public: move bus to a position */
   moveBus(pos: L.LatLngTuple): void { this.busMarker?.setLatLng(pos); }
+  /** Public: visually animates the bus across the rendered route. */
+  startRouteSimulation(onDone?: () => void, onWaypointReached?: (index: number) => void): boolean {
+    const path = this.getSimulationPath();
+    if (!this.busMarker || path.length < 2) return false;
+
+    this.stopRouteSimulation();
+    this.clearSimulationState();
+    this.simulationPath = path;
+    this.simulationWaypointIndices = this.getWaypointPathIndices(path);
+    this.simulationProgress = 0;
+    this.simulationNextWaypoint = 0;
+    this.simulationDone = onDone;
+    this.simulationWaypointReached = onWaypointReached;
+
+    const totalSteps = Math.max(path.length * 10, 180);
+    this.simulationStride = (path.length - 1) / totalSteps;
+    this.busMarker.setLatLng(path[0]);
+    this.notifyReachedWaypoints(0);
+    this.runSimulationTimer();
+    return true;
+  }
+
+  pauseRouteSimulation(): boolean {
+    if (!this.simulationTimer) return false;
+    this.clearSimulationTimer();
+    this.setBusMoving(false);
+    return true;
+  }
+
+  resumeRouteSimulation(): boolean {
+    if (!this.busMarker || this.simulationPath.length < 2 || this.simulationTimer) return false;
+    this.runSimulationTimer();
+    return true;
+  }
+
+  stopRouteSimulation(): void {
+    this.clearSimulationTimer();
+    this.setBusMoving(false);
+    this.clearSimulationState();
+  }
 
   private injectStyles(): void {
     if (document.getElementById('sr-bus-styles')) return;
@@ -95,6 +151,7 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
 
   private clear(): void {
     if (!this.map) return;
+    this.stopRouteSimulation();
     this.layers.forEach(l => this.map!.removeLayer(l));
     this.layers = [];
     if (this.busMarker)        { this.map.removeLayer(this.busMarker);        this.busMarker = null; }
@@ -153,5 +210,112 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
         console.warn('ORS failed, keeping straight line', e);
       }
     }
+  }
+
+  private getSimulationPath(): L.LatLngTuple[] {
+    const roadPoints = this.roadLine?.getLatLngs();
+    if (roadPoints?.length) {
+      return (roadPoints as L.LatLng[]).map(p => [p.lat, p.lng] as L.LatLngTuple);
+    }
+    return (this.waypoints ?? []).map(wp => [wp.lat, wp.lng] as L.LatLngTuple);
+  }
+
+  private getWaypointPathIndices(path: L.LatLngTuple[]): number[] {
+    let searchFrom = 0;
+    return (this.waypoints ?? []).map(wp => {
+      let bestIdx = searchFrom;
+      let bestDistance = Number.POSITIVE_INFINITY;
+      for (let i = searchFrom; i < path.length; i++) {
+        const distance = Math.hypot(path[i][0] - wp.lat, path[i][1] - wp.lng);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIdx = i;
+        }
+      }
+      searchFrom = bestIdx;
+      return bestIdx;
+    });
+  }
+
+  private runSimulationTimer(): void {
+    const frameMs = 1000 / 30;
+    this.setBusMoving(true);
+    this.simulationTimer = setInterval(() => {
+      const path = this.simulationPath;
+      this.simulationProgress += this.simulationStride;
+      if (this.simulationProgress >= path.length - 1) {
+        this.busMarker?.setLatLng(path[path.length - 1]);
+        this.notifyReachedWaypoints(path.length - 1);
+        const done = this.simulationDone;
+        this.stopRouteSimulation();
+        done?.();
+        return;
+      }
+
+      const idx = Math.floor(this.simulationProgress);
+      this.notifyReachedWaypoints(idx);
+      const t = this.simulationProgress - idx;
+      const a = path[idx];
+      const b = path[Math.min(idx + 1, path.length - 1)];
+      this.busMarker?.setLatLng([
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t
+      ]);
+      this.rotateBus(this.getBearing(a, b));
+    }, frameMs);
+  }
+
+  private notifyReachedWaypoints(pathIndex: number): void {
+    while (
+      this.simulationNextWaypoint < this.simulationWaypointIndices.length
+      && pathIndex >= this.simulationWaypointIndices[this.simulationNextWaypoint]
+    ) {
+      this.simulationWaypointReached?.(this.simulationNextWaypoint);
+      this.simulationNextWaypoint += 1;
+    }
+  }
+
+  private clearSimulationState(): void {
+    this.simulationPath = [];
+    this.simulationWaypointIndices = [];
+    this.simulationProgress = 0;
+    this.simulationStride = 0;
+    this.simulationNextWaypoint = 0;
+    this.simulationDone = undefined;
+    this.simulationWaypointReached = undefined;
+  }
+
+  private clearSimulationTimer(): void {
+    if (this.simulationTimer) {
+      clearInterval(this.simulationTimer);
+      this.simulationTimer = null;
+    }
+  }
+
+  private hasSimulationState(): boolean {
+    return !!this.simulationTimer || this.simulationPath.length > 0;
+  }
+
+  private setBusMoving(moving: boolean): void {
+    const el = this.busMarker?.getElement();
+    if (!el) return;
+    el.querySelector('.sr-bus-pulse')?.classList.toggle('active', moving);
+  }
+
+  private rotateBus(deg: number): void {
+    const wrap = this.busMarker?.getElement()?.querySelector('.sr-bus-wrap') as HTMLElement | null;
+    if (wrap) wrap.style.transform = `rotate(${deg}deg)`;
+  }
+
+  private getBearing(a: L.LatLngTuple, b: L.LatLngTuple): number {
+    const toRad = (d: number) => d * Math.PI / 180;
+    const toDeg = (r: number) => r * 180 / Math.PI;
+    const lat1 = toRad(a[0]);
+    const lat2 = toRad(b[0]);
+    const dLng = toRad(b[1] - a[1]);
+    const y = Math.sin(dLng) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2)
+      - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+    return (toDeg(Math.atan2(y, x)) + 360) % 360;
   }
 }

@@ -4,9 +4,37 @@
       <h1 class="page-title">Track My Child's Bus</h1>
       <p class="page-sub">Seguimiento en tiempo real del transporte de tu hijo/a</p>
     </div>
-    <div class="eta-badge">
-      <mat-icon>schedule</mat-icon>
-      <span>ETA: {{ eta() }}</span>
+    <div class="page-actions">
+      <button
+        type="button"
+        class="simulate-btn"
+        [disabled]="!canSimulateTrip()"
+        (click)="simulateTrip()">
+        <mat-icon>{{ simulatingTrip() ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+        <span>{{ simulatingTrip() ? 'Iniciando...' : simulationLabel() }}</span>
+      </button>
+      @if (canRestartDemo()) {
+        <button type="button" class="simulate-btn secondary" (click)="restartDemo()">
+          <mat-icon>refresh</mat-icon>
+          <span>Reiniciar demo</span>
+        </button>
+      }
+      @if (canPauseDemo()) {
+        <button type="button" class="simulate-btn secondary" (click)="pauseDemo()">
+          <mat-icon>pause</mat-icon>
+          <span>Pausar demo</span>
+        </button>
+      }
+      @if (canResumeDemo()) {
+        <button type="button" class="simulate-btn secondary" (click)="resumeDemo()">
+          <mat-icon>play_arrow</mat-icon>
+          <span>Continuar demo</span>
+        </button>
+      }
+      <div class="eta-badge">
+        <mat-icon>schedule</mat-icon>
+        <span>ETA: {{ eta() }}</span>
+      </div>
     </div>
   </div>
 
@@ -16,6 +44,14 @@
     <div class="empty-state">
       <mat-icon>directions_bus</mat-icon>
       <p>No hay viajes activos asignados a tus hijos en este momento.</p>
+      <button
+        type="button"
+        class="simulate-btn empty-action"
+        [disabled]="!canSimulateTrip()"
+        (click)="simulateTrip()">
+        <mat-icon>{{ simulatingTrip() ? 'hourglass_empty' : 'play_arrow' }}</mat-icon>
+        <span>{{ simulatingTrip() ? 'Iniciando...' : 'Simular viaje' }}</span>
+      </button>
     </div>
   } @else {
     <div class="tracking-grid">
@@ -72,6 +108,23 @@
             </div>
           }
         </div>
+
+        @if (childQrCards().length) {
+          <div class="child-qr-panel">
+            <h3 class="timeline-title">QR de estudiantes</h3>
+            <div class="child-qr-grid">
+              @for (child of childQrCards(); track child.childId) {
+                <div class="child-qr-card">
+                  <img [src]="child.qrUrl" [alt]="'QR de ' + child.childName" />
+                  <div class="child-qr-info">
+                    <span class="child-qr-name">{{ child.childName }}</span>
+                    <span class="child-qr-grade">{{ child.grade }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
 
         <div class="alert-box">
           <mat-icon class="alert-icon">info</mat-icon>

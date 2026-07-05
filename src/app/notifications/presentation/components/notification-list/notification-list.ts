@@ -15,7 +15,7 @@ import { NotificationStore } from '../../../application/notification-store';
 export class NotificationList {
   protected store = inject(NotificationStore);
 
-  markRead(id: number): void {
+  markRead(id: number | string): void {
     this.store.markAsRead(id);
   }
 }

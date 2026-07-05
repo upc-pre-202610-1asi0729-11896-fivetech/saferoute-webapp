@@ -50,7 +50,7 @@ export class VehicleManagement implements OnInit {
 
   /** Resolves the organization id from the authenticated user (defaults to 1 in dev). */
   private orgId(): number {
-    return this.auth.currentUser()?.organizationId ?? 1;
+    return Number(this.auth.currentUser()?.organizationId ?? 1);
   }
 
   ngOnInit(): void {
@@ -66,7 +66,7 @@ export class VehicleManagement implements OnInit {
 
   openEdit(v: VehicleEntity): void {
     this.isEdit.set(true);
-    this.editId.set(v.id);
+    this.editId.set(Number(v.id));
     this.vehicleForm.patchValue({
       plate: v.plate, model: v.model, capacity: v.capacity, status: v.status ?? 'ACTIVE'
     });

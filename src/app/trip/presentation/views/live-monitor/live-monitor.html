@@ -43,6 +43,22 @@
                    [style.background]="trip.status === 'COMPLETED' ? 'var(--green)' : 'var(--amber)'"></div>
             </div>
           }
+
+          <div class="trip-actions">
+            @if (canCancel(trip.status)) {
+              <button mat-icon-button class="btn-cancel-trip" (click)="cancelTrip(trip, $event)" title="Cancelar viaje" aria-label="Cancelar viaje">
+                <mat-icon>cancel</mat-icon>
+              </button>
+            }
+            @if (canActivate(trip.status)) {
+              <button mat-icon-button class="btn-activate-trip" (click)="activateTrip(trip, $event)" title="Activar viaje" aria-label="Activar viaje">
+                <mat-icon>play_circle</mat-icon>
+              </button>
+            }
+            <button mat-icon-button class="btn-delete" (click)="deleteTrip(trip, $event)" title="Eliminar viaje" aria-label="Eliminar viaje">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
       }
 

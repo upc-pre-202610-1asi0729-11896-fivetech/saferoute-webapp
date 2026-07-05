@@ -1,11 +1,13 @@
 import { BaseResource, BaseResponse } from '../../shared/infrastructure/base-response';
 
 export interface UserResource extends BaseResource {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-  organizationId?: number;
+  username: string;
+  organizationId?: number | string;
+  roles: string[];
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  role?: string;
 }
 
 export interface UsersResponse extends BaseResponse {
@@ -14,8 +16,9 @@ export interface UsersResponse extends BaseResponse {
 
 export interface OrganizationResource extends BaseResource {
   name: string;
-  status: string;
-  createdAt: string;
+  legalIdentifier?: string;
+  status?: string;
+  createdAt?: string;
 }
 
 export interface SignInRequest {
@@ -26,8 +29,9 @@ export interface SignInRequest {
 export interface SignInResponse {
   token: string;
   id: number;
-  role: string;
-  organizationId?: number;
+  username: string;
+  role?: string;
+  organizationId?: number | string;
 }
 
 export interface SignUpRequest {
@@ -36,9 +40,10 @@ export interface SignUpRequest {
   email: string;
   password: string;
   role: string;
-  organizationId?: number;
+  organizationId?: number | string;
 }
 
 export interface CreateOrganizationRequest {
   name: string;
+  legalIdentifier?: string;
 }

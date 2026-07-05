@@ -104,7 +104,7 @@
                             </tr>
                           </thead>
                           <tbody>
-                            @for (child of childrenOf(parent.id); track child.id) {
+                            @for (child of childrenOf(parent.id); track childTrack(child, $index)) {
                               <tr class="child-row">
                                 <td>{{ child.name }}</td>
                                 <td>{{ child.grade }}</td>
@@ -157,7 +157,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (child of children(); track child.id) {
+              @for (child of children(); track childTrack(child, $index)) {
                 <tr class="child-row">
                   <td>{{ child.name }}</td>
                   <td class="muted-cell">{{ parents().find(p => p.id === child.parentId)?.name ?? '—' }}</td>
@@ -299,6 +299,15 @@
         <div class="field"><label>Nombre completo</label><input formControlName="name" placeholder="Ej. Rosita Nery"></div>
         <div class="field"><label>Email</label><input formControlName="email" type="email" placeholder="correo@ejemplo.com"></div>
         <div class="field"><label>Teléfono</label><input formControlName="phone" placeholder="999-888-777"></div>
+        <div class="field">
+          <label>Contraseña</label>
+          <div class="password-row">
+            <input formControlName="password" [type]="parentPasswordVisible() ? 'text' : 'password'" placeholder="Contraseña inicial">
+            <button type="button" class="password-toggle" (click)="parentPasswordVisible.set(!parentPasswordVisible())">
+              <mat-icon>{{ parentPasswordVisible() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+        </div>
         <div class="dialog-actions">
           <button type="button" class="btn-cancel" (click)="showParentDialog.set(false)">Cancelar</button>
           <button type="submit" class="btn-save" [disabled]="parentForm.invalid">{{ isEdit() ? 'Actualizar' : 'Agregar' }}</button>
@@ -317,6 +326,14 @@
         <button class="icon-btn" (click)="showChildDialog.set(false)"><mat-icon>close</mat-icon></button>
       </div>
       <form [formGroup]="childForm" (ngSubmit)="saveChild()" class="dialog-form">
+        <div class="field">
+          <label>Padre/Madre asignado</label>
+          <select formControlName="parentId">
+            @for (parent of parents(); track parent.id) {
+              <option [value]="parent.id">{{ parent.name }}</option>
+            }
+          </select>
+        </div>
         <div class="field"><label>Nombre del alumno</label><input formControlName="name" placeholder="Ej. Lucía Nery"></div>
         <div class="field"><label>Grado/Sección</label><input formControlName="grade" placeholder="Ej. 3ro B"></div>
         <div class="field">

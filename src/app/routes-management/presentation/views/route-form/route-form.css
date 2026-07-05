@@ -325,6 +325,22 @@
   border-bottom-color: var(--amber);
 }
 
+.rf-wp-role {
+  display: inline-flex;
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #475569;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.rf-wp-role.endpoint {
+  background: #e0f2fe;
+  color: #075985;
+}
+
 .rf-wp-student {
   height: 30px;
   border: 1.5px solid #e2e8f0;
@@ -342,6 +358,12 @@
 
 .rf-wp-student:focus {
   border-color: var(--amber);
+}
+
+.rf-wp-student:disabled {
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: not-allowed;
 }
 
 .rf-wp-coords {

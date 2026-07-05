@@ -6,5 +6,5 @@ const mySubscription = () => import('./views/my-subscription/my-subscription').t
 export const subscriptionRoutes: Routes = [
   { path: 'plans', loadComponent: planList, title: 'SafeRoute - Plans' },
   { path: 'status', loadComponent: mySubscription, title: 'SafeRoute - My Subscription' },
-  { path: '', redirectTo: 'plans', pathMatch: 'full' }
+  { path: '', redirectTo: 'status', pathMatch: 'full' }
 ];

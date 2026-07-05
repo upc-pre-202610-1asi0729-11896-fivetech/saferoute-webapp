@@ -1,41 +1,57 @@
 <div class="sub-shell">
-
-  <!-- ══ HEADER ══ -->
   <div class="sub-header">
     <div>
-      <h1 class="sub-title">Mi Suscripción</h1>
-      <p class="sub-sub">Gestiona tu plan y facturación</p>
+      <h1 class="sub-title">Mi Suscripcion</h1>
+      <p class="sub-sub">Plan actual, vigencia y cambios de plan</p>
     </div>
     <a class="btn-plans" routerLink="/subscription/plans">
-      <mat-icon>menu</mat-icon> Ver Planes
+      <mat-icon>menu</mat-icon>
+      Ver todos los planes
     </a>
   </div>
 
   @if (store.loading()) {
     <div class="sub-loading"><mat-spinner diameter="44"/></div>
-  } @else if (store.subscription()) {
+  } @else {
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span class="summary-label">Plan actual</span>
+        <strong>{{ store.subscription() ? planLabel() : 'Sin plan activo' }}</strong>
+        <small>{{ store.subscription()?.status ?? 'PENDIENTE' }}</small>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Dias restantes</span>
+        <strong>{{ remainingDays() }}</strong>
+        <small>de {{ totalDays() }} dias</small>
+      </div>
+      <div class="summary-card">
+        <span class="summary-label">Vence</span>
+        <strong>{{ formatDate(store.subscription()?.endDate ?? '') }}</strong>
+        <small>Inicio: {{ formatDate(store.subscription()?.startDate ?? '') }}</small>
+      </div>
+    </div>
 
     <div class="sub-grid">
-
-      <!-- ── LEFT: Plan card ── -->
       <div class="plan-card">
         <div class="plan-card-top">
           <span class="plan-star">★</span>
           <div>
-            <h2 class="plan-name">{{ planLabel() }}</h2>
-            <span class="plan-badge-active">● Activo</span>
+            <h2 class="plan-name">{{ store.subscription() ? planLabel() : 'Activa un plan' }}</h2>
+            <span class="plan-badge-active" [class.plan-badge-empty]="!store.subscription()">
+              {{ store.subscription() ? '● Activo' : 'Sin suscripcion' }}
+            </span>
           </div>
         </div>
 
         <div class="plan-price">
-          <span class="price-amt">$ {{ store.subscription()!.planPrice ?? 24.99 }}</span>
+          <span class="price-amt">$ {{ currentPlan()?.price ?? store.subscription()?.planPrice ?? 0 }}</span>
           <span class="price-per"> / mes</span>
         </div>
 
         <div class="plan-remaining">
-          <span class="remain-label">Días restantes</span>
+          <span class="remain-label">Dias restantes</span>
           <span class="remain-val" [class.remain-warn]="remainingDays() <= 10">
-            {{ remainingDays() }} días
+            {{ remainingDays() }} dias
           </span>
         </div>
         <div class="progress-track">
@@ -44,28 +60,27 @@
 
         <div class="plan-dates">
           <div class="plan-date-item">
-            <span class="date-icon">📅</span>
+            <mat-icon class="date-icon">event</mat-icon>
             <div>
               <div class="date-lbl">INICIO</div>
-              <div class="date-val">{{ formatDate(store.subscription()!.startDate) }}</div>
+              <div class="date-val">{{ formatDate(store.subscription()?.startDate ?? '') }}</div>
             </div>
           </div>
           <div class="plan-date-item">
-            <span class="date-icon">📅</span>
+            <mat-icon class="date-icon">event_available</mat-icon>
             <div>
               <div class="date-lbl">VENCE</div>
-              <div class="date-val">{{ formatDate(store.subscription()!.endDate) }}</div>
+              <div class="date-val">{{ formatDate(store.subscription()?.endDate ?? '') }}</div>
             </div>
           </div>
         </div>
 
-        <a class="btn-upgrade" routerLink="/subscription/plans">⬆ Cambiar Plan</a>
-        <button class="btn-cancel" (click)="cancel()">✕ Cancelar Suscripción</button>
+        @if (store.subscription()) {
+          <button class="btn-cancel" (click)="cancel()">Cancelar Suscripcion</button>
+        }
       </div>
 
-      <!-- ── RIGHT: Features + Org info ── -->
       <div class="plan-detail-col">
-
         <div class="detail-card">
           <div class="detail-card-title">
             <mat-icon class="detail-title-icon">check_circle</mat-icon>
@@ -80,35 +95,55 @@
 
         <div class="detail-card">
           <div class="detail-card-title">
+            <mat-icon class="detail-title-icon">upgrade</mat-icon>
+            Upgrade de plan
+          </div>
+
+          @if (upgradePlans().length === 0) {
+            <p class="muted-copy">No hay otros planes disponibles desde el backend.</p>
+          } @else {
+            <div class="upgrade-grid">
+              @for (plan of upgradePlans(); track plan.id) {
+                <div class="upgrade-card">
+                  <div>
+                    <h3>{{ plan.name }}</h3>
+                    <p>$ {{ plan.price }} / mes</p>
+                    <span>{{ plan.maxRoutes }} rutas · {{ plan.maxDrivers }} conductores</span>
+                  </div>
+                  <button class="btn-upgrade" (click)="choosePlan(plan.id)" [disabled]="store.loading()">
+                    {{ store.subscription() ? 'Upgradear' : 'Activar' }}
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="detail-card">
+          <div class="detail-card-title">
             <mat-icon class="detail-title-icon">apartment</mat-icon>
-            Información de organización
+            Informacion de organizacion
           </div>
           <div class="org-rows">
             <div class="org-row">
-              <span class="org-lbl">Organización</span>
-              <span class="org-val">org-{{ store.subscription()!.organizationId }}</span>
+              <span class="org-lbl">Organizacion</span>
+              <span class="org-val">org-{{ store.subscription()?.organizationId ?? auth.currentUser()?.organizationId ?? '-' }}</span>
             </div>
             <div class="org-row">
-              <span class="org-lbl">ID Suscripción</span>
-              <span class="org-val">sub-{{ store.subscription()!.id }}</span>
+              <span class="org-lbl">ID Suscripcion</span>
+              <span class="org-val">{{ store.subscription()?.id ?? '-' }}</span>
             </div>
             <div class="org-row">
               <span class="org-lbl">Estado</span>
-              <span class="org-status-chip">Activo</span>
+              <span class="org-status-chip">{{ store.subscription()?.status ?? 'Sin plan' }}</span>
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
-  } @else {
-
-    <div class="sub-empty">
-      <mat-icon class="empty-icon">workspace_premium</mat-icon>
-      <p>No tienes una suscripción activa.</p>
-      <a class="btn-upgrade" routerLink="/subscription/plans">Ver planes disponibles</a>
-    </div>
-
+    @if (store.error()) {
+      <p class="sub-error">{{ store.error() }}</p>
+    }
   }
 </div>

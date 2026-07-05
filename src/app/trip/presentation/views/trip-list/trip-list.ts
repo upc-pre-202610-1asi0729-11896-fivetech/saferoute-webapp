@@ -32,7 +32,16 @@ export class TripList {
   }
 
   goNew(): void { this.router.navigate(['/trip/new']); }
-  goEdit(id: number): void { this.router.navigate(['/trip/edit', id]); }
+
+  canCancel(status: string): boolean {
+    return status === 'EN_ROUTE' || status === 'IN_PROGRESS' || status === 'SCHEDULED';
+  }
+
+  canActivate(status: string): boolean { return status === 'CANCELLED'; }
+
+  cancelTrip(id: number): void { this.store.cancelTrip(id); }
+
+  activateTrip(id: number): void { this.store.activateTrip(id); }
 
   deleteTrip(id: number): void { this.store.deleteTrip(id); }
 }

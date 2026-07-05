@@ -5,7 +5,6 @@ import {
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -20,10 +19,13 @@ import { Route, RouteWaypoint } from '../../../domain/model/route-entity';
 import { OrsService } from '../../../../shared/infrastructure/ors-service';
 import { TripStore } from '../../../../trip/application/trip-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
-import { environment } from '../../../../../environments/environment';
+import { StakeholderStore } from '../../../../stakeholder/application/stakeholder-store';
 
 interface UserOption   { id: number; name: string; }
 interface ChildOption  { id: number; name: string; grade?: string; }
+
+const START_STOP_NAME = 'Inicio';
+const END_STOP_NAME = 'Llegada';
 
 @Component({
   selector: 'app-route-form',
@@ -42,7 +44,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
   private router    = inject(Router);
   private store     = inject(RoutesManagementStore);
   private tripStore = inject(TripStore);
-  private http      = inject(HttpClient);
+  private stakeholderStore = inject(StakeholderStore);
   private ors       = inject(OrsService);
   private snack     = inject(MatSnackBar);
   private auth      = inject(AuthStore);
@@ -51,8 +53,19 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
   routeId: number | null = null;
   saving      = signal(false);
   orsLoading  = signal(false);
-  drivers     = signal<UserOption[]>([]);
-  children    = signal<ChildOption[]>([]);
+  drivers     = computed<UserOption[]>(() =>
+    this.stakeholderStore.students().map(driver => ({
+      id: Number(driver.id),
+      name: `${driver.firstName} ${driver.lastName}`.trim() || driver.email,
+    }))
+  );
+  children    = computed<ChildOption[]>(() =>
+    this.stakeholderStore.children().map(child => ({
+      id: Number(child.id),
+      name: child.name,
+      grade: child.grade,
+    }))
+  );
   waypoints   = signal<RouteWaypoint[]>([]);
 
   form = this.fb.group({
@@ -69,22 +82,8 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
   private previewLine: L.Polyline | null  = null;
 
   ngOnInit(): void {
-    const base  = environment.platformProviderApiBaseUrl;
     const orgId = this.auth.currentUser()?.organizationId;
-    const q     = orgId ? `?organizationId=${orgId}` : '';
-
-    this.http.get<any[]>(`${base}/users${q}`).subscribe(users => {
-      this.drivers.set(
-        users
-          .filter(u => u.role === 'DRIVER')
-          .map(u => ({ id: u.id, name: `${u.firstName} ${u.lastName}` }))
-      );
-    });
-
-    this.http.get<any[]>(`${base}/children${q}`).subscribe({
-      next: kids => this.children.set(kids.map(k => ({ id: k.id, name: k.name, grade: k.grade }))),
-      error: () => { /* endpoint may not exist */ }
-    });
+    if (orgId) this.stakeholderStore.loadAll(orgId);
 
     this.param.params.subscribe(params => {
       this.routeId = params['id'] ? +params['id'] : null;
@@ -99,7 +98,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
             scheduledStartTime: r.scheduledStartTime,
             driverId: r.driverId
           });
-          this.waypoints.set([...r.waypoints]);
+          this.waypoints.set(this.normalizeWaypointRoles([...r.waypoints]));
           setTimeout(() => this.refreshMarkersAndOrs(), 300);
         }
       }
@@ -121,15 +120,21 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
     }).addTo(this.map);
 
     this.map.on('click', (e: L.LeafletMouseEvent) => {
-      const order = this.waypoints().length + 1;
+      const current = this.waypoints();
+      const isStart = current.length === 0;
+      const isEnd = current.length === 1;
       const wp: RouteWaypoint = {
-        order,
-        name: `Parada ${order}`,
+        order: current.length + 1,
+        name: isStart ? START_STOP_NAME : isEnd ? END_STOP_NAME : `Parada ${current.length}`,
         lat: +e.latlng.lat.toFixed(6),
         lng: +e.latlng.lng.toFixed(6),
         studentId: null
       };
-      this.waypoints.update(ws => [...ws, wp]);
+      this.waypoints.update(ws => this.normalizeWaypointRoles(
+        ws.length >= 2
+          ? [...ws.slice(0, -1), wp, ws[ws.length - 1]]
+          : [...ws, wp]
+      ));
       this.refreshMarkersAndOrs();
     });
   }
@@ -208,7 +213,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
     this.waypoints.update(ws => {
       const copy = [...ws];
       copy[index] = { ...copy[index], name };
-      return copy;
+      return this.normalizeWaypointRoles(copy);
     });
     // Re-update tooltip on markers
     if (this.markers[index]) {
@@ -217,6 +222,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateWaypointStudent(index: number, studentId: number | null): void {
+    if (this.isFixedEndpoint(index)) return;
     this.waypoints.update(ws => {
       const copy = [...ws];
       copy[index] = { ...copy[index], studentId: studentId ?? null };
@@ -225,33 +231,33 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
   }
 
   removeWaypoint(index: number): void {
+    if (this.isFixedEndpoint(index)) return;
     this.waypoints.update(ws =>
-      ws.filter((_, i) => i !== index).map((w, i) => ({ ...w, order: i + 1 }))
+      this.normalizeWaypointRoles(ws.filter((_, i) => i !== index))
     );
     this.refreshMarkersAndOrs();
   }
 
   clearWaypoints(): void {
-    this.waypoints.set([]);
-    this.markers.forEach(m => m.remove());
-    this.markers = [];
-    this.previewLine?.remove();
-    this.previewLine = null;
-    this.roadPolyline?.remove();
-    this.roadPolyline = null;
+    this.waypoints.update(ws => ws.length >= 2 ? this.normalizeWaypointRoles([ws[0], ws[ws.length - 1]]) : []);
+    this.refreshMarkersAndOrs();
   }
 
   submit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.waypoints().length < 2) {
+      this.snack.open('Define el inicio y la llegada de la ruta antes de guardar', 'OK', { duration: 3000 });
+      return;
+    }
     const v = this.form.getRawValue();
     const selectedDriver = this.drivers().find(d => d.id === v.driverId);
+    const finalWaypoints = this.normalizeWaypointRoles(this.waypoints());
 
     // Collect studentIds from waypoints (deduplicated)
     const studentIds = [...new Set(
-      this.waypoints().map(w => w.studentId).filter((id): id is number => id != null)
+      finalWaypoints.map(w => w.studentId).filter((id): id is number => id != null)
     )];
 
-    const orgId = this.auth.currentUser()?.organizationId ?? 1;
+    const orgId = Number(this.auth.currentUser()?.organizationId ?? 1);
     const route = new Route({
       id: this.routeId ?? 0,
       name: v.name,
@@ -264,7 +270,7 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
       vehiclePlate: '',
       studentIds,
       organizationId: orgId,
-      waypoints: this.waypoints()
+      waypoints: finalWaypoints
     });
 
     // Sync to TripStore so drivers immediately get waypoints when a trip is created
@@ -319,5 +325,33 @@ export class RouteForm implements OnInit, AfterViewInit, OnDestroy {
   childName(id: number | null | undefined): string {
     if (!id) return '';
     return this.children().find(c => c.id === id)?.name ?? '';
+  }
+
+  canSaveRoute(): boolean {
+    return this.form.valid && this.waypoints().length >= 2 && !this.saving();
+  }
+
+  isFixedEndpoint(index: number): boolean {
+    const lastIndex = this.waypoints().length - 1;
+    return index === 0 || (lastIndex > 0 && index === lastIndex);
+  }
+
+  waypointRole(index: number): string {
+    const lastIndex = this.waypoints().length - 1;
+    if (index === 0) return START_STOP_NAME;
+    if (lastIndex > 0 && index === lastIndex) return END_STOP_NAME;
+    return 'Parada intermedia';
+  }
+
+  private normalizeWaypointRoles(waypoints: RouteWaypoint[]): RouteWaypoint[] {
+    return waypoints.map((wp, index) => {
+      const lastIndex = waypoints.length - 1;
+      const fixedEndpoint = index === 0 || (lastIndex > 0 && index === lastIndex);
+      return {
+        ...wp,
+        order: index + 1,
+        studentId: fixedEndpoint ? null : wp.studentId ?? null
+      };
+    });
   }
 }

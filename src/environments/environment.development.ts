@@ -1,16 +1,14 @@
 export const environment = {
   production: false,
-  // Local json-server (server/db.json) for IAM / Stakeholder / Subscription / Notifications.
-  // The json-server rewriter maps /api/v1/* -> /*, so this base URL works the same as Azure.
-  platformProviderApiBaseUrl: 'http://localhost:3000/api/v1',
-  // Spring Boot (Java) backend — Fleet bounded context. Only routes-management targets this.
-  platformProviderJavaApiBaseUrl: 'https://saferoute-os.azurewebsites.net/api/v1',
+  apiBaseUrl: 'http://localhost:8080/api/v1',
+  platformProviderApiBaseUrl: 'http://localhost:8080/api/v1',
+  platformProviderJavaApiBaseUrl: 'http://localhost:8080/api/v1',
   platformProviderRoutesEndpointPath: '/routes',
   platformProviderStopsEndpointPath: '/stops',
   platformProviderUsersEndpointPath: '/users',
   platformProviderOrganizationsEndpointPath: '/organizations',
-  platformProviderSignInEndpointPath: '/sign-in',
-  platformProviderSignUpEndpointPath: '/sign-up',
+  platformProviderSignInEndpointPath: '/authentication/sign-in',
+  platformProviderSignUpEndpointPath: '/authentication/sign-up',
   platformProviderTripsEndpointPath: '/trips',
   platformProviderIncidentsEndpointPath: '/incidents',
   platformProviderNotificationsEndpointPath: '/notifications',
@@ -18,6 +16,8 @@ export const environment = {
   platformProviderVehiclesEndpointPath: '/vehicles',
   platformProviderParentsEndpointPath: '/parents',
   platformProviderChildrenEndpointPath: '/children',
+  platformProviderDriversEndpointPath: '/drivers',
+  platformProviderStudentGroupsEndpointPath: '/student-groups',
   platformProviderPlansEndpointPath: '/plans',
   platformProviderSubscriptionsEndpointPath: '/subscriptions',
   logoProviderApiBaseUrl: 'https://img.logo.dev/',
@@ -26,5 +26,4 @@ export const environment = {
   orsApiKey:
     'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjNhMjJlYzkyNWRkMTQyMjJiNTgxYzc1NWRhYWM4NDA1IiwiaCI6Im11cm11cjY0In0=',
   simulationStepMs: 15000,
-  useFakeAuth: false,
 };

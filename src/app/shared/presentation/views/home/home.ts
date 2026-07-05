@@ -1,15 +1,12 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { Role } from '../../../../iam/domain/model/role-enum';
-import { environment } from '../../../../../environments/environment';
+import { HomeDashboardStore } from '../../../application/home-dashboard-store';
 
 interface DashboardCard {
   label: string;
@@ -32,32 +29,11 @@ interface Metric {
 })
 export class Home implements OnInit {
   protected auth = inject(AuthStore);
+  protected dashboard = inject(HomeDashboardStore);
   private router = inject(Router);
-  private http = inject(HttpClient);
-
-  private routes = signal<any[]>([]);
-  private trips = signal<any[]>([]);
-  private users = signal<any[]>([]);
-  private parents = signal<any[]>([]);
-  private children = signal<any[]>([]);
 
   ngOnInit(): void {
-    const base  = environment.platformProviderApiBaseUrl;
-    const orgId = this.auth.currentUser()?.organizationId;
-    const q     = orgId ? `?organizationId=${orgId}` : '';
-    forkJoin({
-      routes:   this.http.get<any[]>(`${base}/routes${q}`).pipe(catchError(() => of([]))),
-      trips:    this.http.get<any[]>(`${base}/trips${q}`).pipe(catchError(() => of([]))),
-      users:    this.http.get<any[]>(`${base}/users${q}`).pipe(catchError(() => of([]))),
-      parents:  this.http.get<any[]>(`${base}/parents${q}`).pipe(catchError(() => of([]))),
-      children: this.http.get<any[]>(`${base}/children${q}`).pipe(catchError(() => of([])))
-    }).subscribe(d => {
-      this.routes.set(d.routes ?? []);
-      this.trips.set(d.trips ?? []);
-      this.users.set(d.users ?? []);
-      this.parents.set(d.parents ?? []);
-      this.children.set(d.children ?? []);
-    });
+    this.dashboard.load(this.auth.currentUser()?.organizationId);
   }
 
   roleIcon = computed(() => {
@@ -79,8 +55,8 @@ export class Home implements OnInit {
   metrics = computed<Metric[]>(() => {
     const user = this.auth.currentUser();
     const role = user?.role;
-    const trips = this.trips();
-    const routes = this.routes();
+    const trips = this.dashboard.trips();
+    const routes = this.dashboard.routes();
 
     if (role === Role.DRIVER) {
       const myRoutes = routes.filter(r => r.driverId === user?.id);
@@ -93,11 +69,11 @@ export class Home implements OnInit {
     }
 
     if (role === Role.PARENT) {
-      const me = this.parents().find(p => p.email === user?.email);
-      const kids = me ? this.children().filter(c => c.parentId === me.id) : [];
+      const me = this.dashboard.parents().find(p => p.email === user?.email || p.email === user?.email);
+      const kids = me ? this.dashboard.children().filter(c => c.parentId === me.id) : [];
       const kidIds = kids.map(c => c.id);
       const liveTrips = trips.filter(t => t.status === 'EN_ROUTE' && kidIds.some(id => (t.studentIds || []).includes(id)));
-      const assignedRoutes = routes.filter(r => r.studentIds?.some((id: number) => kidIds.includes(id)));
+      const assignedRoutes = routes.filter(r => r.studentIds?.some((id: number | string) => kidIds.map(String).includes(String(id))));
       return [
         { icon: 'school',          value: kids.length,           label: 'My Children' },
         { icon: 'directions_bus',  value: liveTrips.length,      label: 'Trips Active' },
@@ -109,7 +85,7 @@ export class Home implements OnInit {
     return [
       { icon: 'route',           value: routes.length,                                          label: 'Routes' },
       { icon: 'directions_bus',  value: trips.filter(t => t.status === 'EN_ROUTE').length,    label: 'Trips in Route' },
-      { icon: 'group',           value: this.users().length,                                  label: 'Users' }
+      { icon: 'group',           value: this.dashboard.users().length,                        label: 'Users' }
     ];
   });
 

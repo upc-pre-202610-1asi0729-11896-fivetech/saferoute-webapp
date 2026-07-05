@@ -1,8 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TripStore } from '../../../application/trip-store';
+import { TripEntity, TripStore } from '../../../application/trip-store';
 import { AuthStore } from '../../../../iam/application/auth-store';
 import { StakeholderStore } from '../../../../stakeholder/application/stakeholder-store';
+import { AttendanceResource } from '../../../infrastructure/trip-response';
 
 interface DayAttendance {
   date: string;          // YYYY-MM-DD
@@ -26,6 +27,8 @@ export class AttendanceHistory {
   private tripStore = inject(TripStore);
   private auth      = inject(AuthStore);
   private stkStore  = inject(StakeholderStore);
+  private loadedAttendanceTrips = new Set<number>();
+  private attendancesByTrip = signal<Record<number, AttendanceResource[]>>({});
 
   // ── Calendar state ──
   today        = new Date();
@@ -71,17 +74,33 @@ export class AttendanceHistory {
     const user = this.auth.currentUser();
     const parents = this.stkStore.parents();
     const children = this.stkStore.children();
-    const parent = parents.find(p => p.email === user?.email);
+    const email = user?.email?.toLowerCase();
+    const parent = parents.find(p => p.email?.toLowerCase() === email);
     if (!parent) return [] as number[];
-    return children.filter(c => c.parentId === parent.id).map(c => c.id);
+    return children
+      .filter(c => Number(c.parentId) === Number(parent.id))
+      .map(c => Number(c.id))
+      .filter(id => Number.isFinite(id));
   });
 
   private tripsWithMyKids = computed(() => {
     const ids = this.myChildIds();
     return this.tripStore.trips().filter(t =>
-      t.studentIds && ids.some(id => t.studentIds!.includes(id))
+      t.studentIds && ids.some(id => t.studentIds!.some(studentId => Number(studentId) === id))
     );
   });
+
+  constructor() {
+    const orgId = this.auth.currentUser()?.organizationId;
+    if (orgId) {
+      this.stkStore.loadAll(orgId);
+      this.tripStore.loadAll(Number(orgId));
+    }
+
+    effect(() => {
+      this.tripsWithMyKids().forEach(trip => this.loadAttendances(trip.id));
+    });
+  }
 
   // ── Summary stats ──
   totalTrips = computed(() => this.tripsWithMyKids().length);
@@ -89,8 +108,11 @@ export class AttendanceHistory {
   presentRate = computed(() => {
     const trips = this.tripsWithMyKids();
     if (!trips.length) return '—';
-    const completed = trips.filter(t => t.status === 'COMPLETED').length;
-    return (completed / trips.length * 100).toFixed(1) + '%';
+    const childIds = this.myChildIds();
+    const records = trips.flatMap(trip => childIds.map(childId => this.attendanceFor(trip.id, childId)));
+    if (!records.length) return '—';
+    const present = records.filter(att => att?.boardingState === 'BOARDED' || att?.boardingState === 'DROPPED_OFF').length;
+    return (present / records.length * 100).toFixed(1) + '%';
   });
 
   lateCheckIns = computed(() =>
@@ -98,21 +120,21 @@ export class AttendanceHistory {
   );
 
   absences = computed(() =>
-    this.tripsWithMyKids().filter(t => {
-      const kids = this.myChildIds();
-      return kids.some(id => !t.studentIds?.includes(id));
-    }).length
+    this.tripsWithMyKids().reduce((total, trip) =>
+      total + this.myChildIds().filter(childId => this.attendanceFor(trip.id, childId)?.boardingState === 'ABSENT').length, 0)
   );
 
   // Dot color for a calendar day
   private dotForDate(dateStr: string): 'green' | 'amber' | 'red' | null {
-    const trips = this.tripsWithMyKids().filter(t => t.scheduledDate === dateStr);
+    const trips = this.tripsWithMyKids().filter(t => this.dateForTrip(t) === dateStr);
     if (!trips.length) return null;
     const allDone = trips.every(t => t.status === 'COMPLETED');
     if (allDone) return 'green';
+    const hasAbsence = trips.some(t => this.myChildIds().some(childId => this.attendanceFor(t.id, childId)?.boardingState === 'ABSENT'));
+    if (hasAbsence) return 'red';
     const hasActive = trips.some(t => t.status === 'EN_ROUTE');
     if (hasActive) return 'amber';
-    return 'red';
+    return 'green';
   }
 
   dayNumber(d: DayAttendance | null): number {
@@ -141,7 +163,7 @@ export class AttendanceHistory {
   });
 
   dailyTrip = computed(() =>
-    this.tripsWithMyKids().find(t => t.scheduledDate === this.selectedDate())
+    this.tripsWithMyKids().find(t => this.dateForTrip(t) === this.selectedDate())
   );
 
   dailyRecords = computed<StudentRecord[]>(() => {
@@ -156,20 +178,22 @@ export class AttendanceHistory {
       }));
     }
 
-    return kids.filter(c => myIds.includes(c.id)).map(c => {
-      const boarded = trip.studentIds?.includes(c.id) ?? false;
-      if (boarded && trip.status === 'COMPLETED') {
+    return kids.filter(c => myIds.includes(Number(c.id))).map(c => {
+      const attendance = this.attendanceFor(trip.id, Number(c.id));
+      const assignedToTrip = trip.studentIds?.some(id => Number(id) === Number(c.id)) ?? false;
+      const state = attendance?.boardingState ?? (assignedToTrip ? 'PENDING' : 'ABSENT');
+      if (state === 'DROPPED_OFF' || (state === 'BOARDED' && trip.status === 'COMPLETED')) {
         return {
           studentName: c.name,
-          checkIn:  trip.startTime ? this.formatTime(trip.startTime) : '07:00 AM',
+          checkIn:  attendance?.boardedAt ? this.formatTime(attendance.boardedAt) : trip.startTime ? this.formatTime(trip.startTime) : '07:00 AM',
           checkOut: trip.endTime   ? this.formatTime(trip.endTime)   : '03:30 PM',
           status: 'present' as const
         };
       }
-      if (boarded) {
+      if (state === 'BOARDED' || state === 'PENDING') {
         return {
           studentName: c.name,
-          checkIn:  trip.startTime ? this.formatTime(trip.startTime) : '07:45 AM',
+          checkIn:  attendance?.boardedAt ? this.formatTime(attendance.boardedAt) : trip.startTime ? this.formatTime(trip.startTime) : null,
           checkOut: null,
           status: 'late' as const
         };
@@ -180,6 +204,25 @@ export class AttendanceHistory {
 
   private formatTime(iso: string): string {
     return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  private dateForTrip(trip: TripEntity): string {
+    if (trip.scheduledDate) return trip.scheduledDate;
+    const source = trip.startTime ?? trip.endTime;
+    return source ? new Date(source).toISOString().slice(0, 10) : this.today.toISOString().slice(0, 10);
+  }
+
+  private attendanceFor(tripId: number, childId: number): AttendanceResource | undefined {
+    return this.attendancesByTrip()[tripId]?.find(item => Number(item.childId) === Number(childId));
+  }
+
+  private loadAttendances(tripId: number): void {
+    if (this.loadedAttendanceTrips.has(tripId)) return;
+    this.loadedAttendanceTrips.add(tripId);
+    this.tripStore.getAttendances(tripId).subscribe({
+      next: data => this.attendancesByTrip.update(current => ({ ...current, [tripId]: data ?? [] })),
+      error: () => this.attendancesByTrip.update(current => ({ ...current, [tripId]: [] })),
+    });
   }
 
   routeLabel = computed(() => this.dailyTrip()?.routeName ?? '');

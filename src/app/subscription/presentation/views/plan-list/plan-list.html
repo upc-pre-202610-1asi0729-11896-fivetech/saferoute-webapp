@@ -1,12 +1,9 @@
 <div class="pl-shell">
-
-  <!-- ══ HEADER ══ -->
   <div class="pl-header">
     <div class="pl-eyebrow">PLANES Y PRECIOS</div>
-    <h1 class="pl-title">Elige el plan ideal<br>para tu operación</h1>
+    <h1 class="pl-title">Elige el plan ideal<br>para tu operacion</h1>
     <p class="pl-sub">Digitaliza tu transporte escolar. Sin costos ocultos. Cancela cuando quieras.</p>
 
-    <!-- Billing toggle -->
     <div class="billing-toggle">
       <button class="billing-btn" [class.active]="billing() === 'monthly'"
               (click)="billing.set('monthly')">Mensual</button>
@@ -17,46 +14,52 @@
     </div>
   </div>
 
-  <!-- ══ PLANS GRID ══ -->
   <div class="pl-grid">
     @for (plan of plans; track plan.key) {
       <div class="plan-card" [class.card-popular]="plan.popular" [class.card-current]="isCurrentPlan(plan.key)">
-
-        <!-- Top badge -->
         @if (plan.popular) {
-          <div class="top-badge badge-popular">Más Popular</div>
+          <div class="top-badge badge-popular">Mas Popular</div>
         }
         @if (plan.badge && !plan.popular) {
           <div class="top-badge badge-dark">{{ plan.badge }}</div>
         }
 
-        <!-- Plan head -->
         <div class="plan-head">
           <div class="plan-icon-wrap" [class.icon-popular]="plan.popular">
             <mat-icon [style.color]="plan.iconColor">{{ plan.icon }}</mat-icon>
           </div>
           <div>
             @if (isCurrentPlan(plan.key)) {
-              <span class="current-badge">✓ Plan Actual</span>
+              <span class="current-badge">Plan Actual</span>
             }
             <h2 class="plan-name">{{ plan.name }}</h2>
             <p class="plan-subtitle">{{ plan.subtitle }}</p>
           </div>
         </div>
 
-        <!-- Price -->
         <div class="plan-price-row">
           <span class="price-currency">$</span>
-          <span class="price-amount">{{ displayPrice(plan.price) }}</span>
+          <span class="price-amount" [class.price-strike]="priceAfterCredit(plan)">
+            {{ displayPrice(plan.price) }}
+          </span>
+          @if (priceAfterCredit(plan)) {
+            <span class="price-amount price-prorated">{{ priceAfterCredit(plan) }}</span>
+          }
           <span class="price-per">/ mes</span>
         </div>
-        @if (billing() === 'monthly') {
-          <div class="price-annual">o $ {{ annualPrice(plan.price) }} al año con 20% off</div>
+
+        @if (priceAfterCredit(plan)) {
+          <div class="price-annual price-credit">
+            Credito aplicado: -${{ proratedCredit() }} ({{ remainingDays() }} dias restantes)
+          </div>
+        } @else if (billing() === 'monthly') {
+          <div class="price-annual">o $ {{ annualPrice(plan.price) }} al ano con 20% off</div>
         } @else {
-          <div class="price-annual price-annual-active">Facturación anual — ahorras $ {{ annualSaving(plan.price) }}/año</div>
+          <div class="price-annual price-annual-active">
+            Facturacion anual - ahorras $ {{ annualSaving(plan.price) }}/ano
+          </div>
         }
 
-        <!-- Features -->
         <ul class="feature-list">
           @for (f of plan.features; track f.label) {
             <li class="feature-item" [class.feat-disabled]="!f.included">
@@ -70,20 +73,18 @@
           }
         </ul>
 
-        <!-- CTA -->
         @if (isCurrentPlan(plan.key)) {
           <button class="btn-plan btn-current" disabled>Plan Actual</button>
         } @else {
           <button class="btn-plan" [class.btn-popular]="plan.popular"
-                  (click)="subscribe(plan)" [disabled]="store.loading()">
+                  (click)="subscribe(plan)" [disabled]="store.loading() || !canChoosePlan(plan.key)">
             @if (store.loading()) {
               <mat-spinner diameter="18"/>
             } @else {
-              Elegir {{ plan.name }}
+              {{ planActionLabel(plan) }}
             }
           </button>
         }
-
       </div>
     }
   </div>
@@ -91,5 +92,4 @@
   @if (store.error()) {
     <p class="pl-error">{{ store.error() }}</p>
   }
-
 </div>

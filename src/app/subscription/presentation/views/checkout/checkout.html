@@ -1,7 +1,5 @@
 <div class="co-bg">
   <div class="co-wrap">
-
-    <!-- Logo -->
     <div class="co-logo">
       <svg width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M24 4L8 11V24C8 33.6 15.04 42.56 24 44C32.96 42.56 40 33.6 40 24V11L24 4Z" fill="#F59E0B"/>
@@ -9,44 +7,41 @@
       <span class="co-logo-name">SafeRoute</span>
     </div>
 
-    <!-- Sandbox pill -->
     <div class="co-sandbox-pill">
       <span class="co-dot"></span>
-      Sandbox — entorno de prueba
+      Sandbox - entorno de prueba
     </div>
 
-    <!-- Card -->
     <div class="co-card">
-
-      <h1 class="co-title">Finaliza tu suscripción</h1>
+      <h1 class="co-title">{{ mode() === 'upgrade' ? 'Actualiza tu plan' : 'Finaliza tu suscripcion' }}</h1>
       <p class="co-subtitle">Revisa tu plan y completa el pago de forma segura.</p>
 
-      <!-- Order summary -->
       <div class="co-order">
         <div class="co-order-label">Resumen de orden</div>
         <div class="co-order-plan">{{ planName() }}</div>
         @if (planPrice()) {
           <div class="co-order-price">{{ planPrice() }} / mes</div>
         }
+        @if (credit()) {
+          <div class="co-order-price">Credito aplicado: -${{ credit() }}</div>
+        }
       </div>
 
       <hr class="co-divider" />
 
-      <!-- Success state -->
       @if (status() === 'success') {
         <div class="co-msg co-msg-success">
-          <span class="co-msg-icon">✅</span>
+          <span class="co-msg-icon">OK</span>
           <div>
-            <strong>¡Pago realizado con éxito!</strong>
-            <p>Redirigiendo a tu cuenta en unos segundos…</p>
+            <strong>Pago realizado con exito</strong>
+            <p>Actualizando tu cuenta en unos segundos...</p>
           </div>
         </div>
       }
 
-      <!-- Cancelled state -->
       @if (status() === 'cancelled') {
         <div class="co-msg co-msg-warn">
-          <span class="co-msg-icon">⚠️</span>
+          <span class="co-msg-icon">!</span>
           <div>
             <strong>Pago cancelado</strong>
             <p>Puedes intentarlo de nuevo cuando quieras.</p>
@@ -54,25 +49,23 @@
         </div>
       }
 
-      <!-- Error state -->
       @if (status() === 'error') {
         <div class="co-msg co-msg-error">
-          <span class="co-msg-icon">❌</span>
+          <span class="co-msg-icon">X</span>
           <div>
             <strong>Error al procesar el pago</strong>
-            <p>Intenta nuevamente o elige otro método.</p>
+            <p>Intenta nuevamente con PayPal sandbox.</p>
           </div>
         </div>
       }
 
-      <!-- PayPal buttons (hidden once done) -->
       @if (status() === 'idle' || status() === 'cancelled' || status() === 'error') {
         <div class="co-pay-label">Pagar con PayPal</div>
 
         @if (!sdkReady()) {
           <div class="co-spinner-wrap">
             <div class="co-spinner"></div>
-            Cargando opciones de pago…
+            Cargando opciones de pago...
           </div>
         }
 
@@ -80,10 +73,8 @@
       }
 
       <div class="co-back-link">
-        <button class="co-btn-link" (click)="goBack()">← Volver al inicio de sesión</button>
+        <button class="co-btn-link" (click)="goBack()">Volver</button>
       </div>
-
     </div>
-
   </div>
 </div>

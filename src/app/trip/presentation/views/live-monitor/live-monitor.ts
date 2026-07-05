@@ -58,6 +58,31 @@ export class LiveMonitor {
 
   refresh(): void { this.store.reload(); }
 
+  canCancel(status: string): boolean {
+    return status === 'EN_ROUTE' || status === 'IN_PROGRESS' || status === 'SCHEDULED';
+  }
+
+  canActivate(status: string): boolean { return status === 'CANCELLED'; }
+
+  cancelTrip(trip: TripEntity, event: Event): void {
+    event.stopPropagation();
+    if (!confirm(`Cancelar viaje #${trip.id}?`)) return;
+    this.store.cancelTrip(trip.id);
+  }
+
+  activateTrip(trip: TripEntity, event: Event): void {
+    event.stopPropagation();
+    if (!confirm(`Activar viaje #${trip.id}?`)) return;
+    this.store.activateTrip(trip.id);
+  }
+
+  deleteTrip(trip: TripEntity, event: Event): void {
+    event.stopPropagation();
+    if (!confirm(`Eliminar viaje #${trip.id}?`)) return;
+    this.store.deleteTrip(trip.id);
+    if (this.selectedId() === trip.id) this.selectedId.set(null);
+  }
+
   fmtTime(iso?: string | null): string {
     if (!iso) return '—';
     return new Date(iso).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });

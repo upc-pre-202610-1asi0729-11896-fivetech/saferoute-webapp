@@ -65,6 +65,18 @@ export class TripApiEndpoint {
     );
   }
 
+  cancelTrip(id: number): Observable<TripEntity> {
+    return this.http.post<TripResource>(`${this.tripsUrl}/${id}/cancellation`, {}).pipe(
+      map(r => TripAssembler.toTripEntity(r))
+    );
+  }
+
+  activateTrip(id: number): Observable<TripEntity> {
+    return this.http.post<TripResource>(`${this.tripsUrl}/${id}/activation`, {}).pipe(
+      map(r => TripAssembler.toTripEntity(r))
+    );
+  }
+
   updateBoarding(tripId: number, req: UpdateBoardingRequest): Observable<TripEntity> {
     return this.http.patch<TripResource>(`${this.tripsUrl}/${tripId}/attendances`, req).pipe(
       map(r => TripAssembler.toTripEntity(r))

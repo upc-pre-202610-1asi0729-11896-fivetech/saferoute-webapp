@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { StakeholderStore, ParentEntity, ChildEntity } from '../../../application/stakeholder-store';
 import { VehicleEntity } from '../../../domain/model/vehicle-entity';
+import { AuthStore } from '../../../../iam/application/auth-store';
 
 type MainTab = 'usuarios' | 'logistica';
 type UsersTab = 'padres' | 'alumnos';
@@ -25,38 +26,40 @@ type UsersTab = 'padres' | 'alumnos';
 export class StudentManagement {
   protected store = inject(StakeholderStore);
   private fb = inject(FormBuilder);
+  private auth = inject(AuthStore);
 
   // ── Tab state ──
   mainTab  = signal<MainTab>('usuarios');
   usersTab = signal<UsersTab>('padres');
 
   // ── Expand state (parent rows) ──
-  expanded = signal<Set<number>>(new Set([1, 2])); // Rosita + Carmen pre-expanded
+  expanded = signal<Set<number | string>>(new Set([1, 2])); // Rosita + Carmen pre-expanded
 
   // ── Dialog state ──
   showParentDialog = signal(false);
   showChildDialog  = signal(false);
   isEdit    = signal(false);
-  editId    = signal<number | null>(null);
-  editParentId = signal<number | null>(null);
+  editId    = signal<number | string | null>(null);
+  editParentId = signal<number | string | null>(null);
+  parentPasswordVisible = signal(false);
 
   // ── Computed ──
   parents  = computed(() => this.store.parents());
   children = computed(() => this.store.children());
 
-  childrenOf(parentId: number): ChildEntity[] {
-    return this.children().filter(c => c.parentId === parentId);
+  childrenOf(parentId: number | string): ChildEntity[] {
+    return this.children().filter(c => c.parentId.toString() === parentId.toString());
   }
 
   initials(name: string): string {
     return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
   }
 
-  isExpanded(id: number): boolean {
+  isExpanded(id: number | string): boolean {
     return this.expanded().has(id);
   }
 
-  toggleExpand(id: number): void {
+  toggleExpand(id: number | string): void {
     this.expanded.update(s => {
       const next = new Set(s);
       if (next.has(id)) next.delete(id); else next.add(id);
@@ -76,23 +79,34 @@ export class StudentManagement {
     return 'chip-red';
   }
 
+  childTrack(child: ChildEntity, index: number): string {
+    return `${child.parentId}:${child.id}:${child.name}:${child.grade}:${index}`;
+  }
+
   // ── Parent form ──
   parentForm = this.fb.group({
     name:           ['', Validators.required],
     email:          ['', [Validators.required, Validators.email]],
     phone:          ['', Validators.required],
+    password:       ['', Validators.required],
     status:         [true]
   });
 
   openCreateParent(): void {
     this.isEdit.set(false); this.editId.set(null);
-    this.parentForm.reset({ name: '', email: '', phone: '', status: true });
+    this.parentForm.get('password')?.setValidators(Validators.required);
+    this.parentForm.get('password')?.updateValueAndValidity();
+    this.parentPasswordVisible.set(false);
+    this.parentForm.reset({ name: '', email: '', phone: '', password: 'parent123', status: true });
     this.showParentDialog.set(true);
   }
 
   openEditParent(p: ParentEntity): void {
     this.isEdit.set(true); this.editId.set(p.id);
-    this.parentForm.patchValue({ name: p.name, email: p.email, phone: p.phone, status: p.status });
+    this.parentForm.get('password')?.setValidators(Validators.required);
+    this.parentForm.get('password')?.updateValueAndValidity();
+    this.parentPasswordVisible.set(false);
+    this.parentForm.patchValue({ name: p.name, email: p.email, phone: p.phone, password: 'parent123', status: p.status });
     this.showParentDialog.set(true);
   }
 
@@ -101,35 +115,45 @@ export class StudentManagement {
     const v = this.parentForm.getRawValue();
     if (this.isEdit() && this.editId() !== null) {
       const orig = this.parents().find(p => p.id === this.editId())!;
-      this.store.updateParent({ ...orig, name: v.name!, email: v.email!, phone: v.phone!, status: v.status! });
+      this.store.updateParent({ ...orig, name: v.name!, email: v.email!, phone: v.phone!, password: v.password!, status: v.status! });
     } else {
-      this.store.createParent({ name: v.name!, email: v.email!, phone: v.phone!, status: true, organizationId: 1 });
+      this.store.createParent({
+        name: v.name!,
+        email: v.email!,
+        phone: v.phone!,
+        password: v.password!,
+        status: true,
+        organizationId: this.auth.currentUser()?.organizationId ?? 1
+      });
     }
     this.showParentDialog.set(false);
   }
 
-  deleteParent(id: number): void {
+  deleteParent(id: number | string): void {
     if (!confirm('¿Eliminar este padre/madre y sus hijos?')) return;
     this.store.deleteParent(id);
   }
 
   // ── Child form ──
   childForm = this.fb.group({
+    parentId:      [null as number | string | null, Validators.required],
     name:          ['', Validators.required],
     grade:         ['', Validators.required],
     boardingStatus:['ABORDADO', Validators.required],
     status:        [true]
   });
 
-  openCreateChild(parentId: number): void {
-    this.isEdit.set(false); this.editId.set(null); this.editParentId.set(parentId);
-    this.childForm.reset({ name: '', grade: '', boardingStatus: 'ABORDADO', status: true });
+  openCreateChild(parentId: number | string): void {
+    const targetParentId = parentId || this.parents()[0]?.id || null;
+    if (!targetParentId) return;
+    this.isEdit.set(false); this.editId.set(null); this.editParentId.set(targetParentId);
+    this.childForm.reset({ parentId: targetParentId, name: '', grade: '', boardingStatus: 'ABORDADO', status: true });
     this.showChildDialog.set(true);
   }
 
   openEditChild(c: ChildEntity): void {
     this.isEdit.set(true); this.editId.set(c.id); this.editParentId.set(c.parentId);
-    this.childForm.patchValue({ name: c.name, grade: c.grade, boardingStatus: c.boardingStatus, status: c.status });
+    this.childForm.patchValue({ parentId: c.parentId, name: c.name, grade: c.grade, boardingStatus: c.boardingStatus, status: c.status });
     this.showChildDialog.set(true);
   }
 
@@ -138,18 +162,18 @@ export class StudentManagement {
     const v = this.childForm.getRawValue();
     if (this.isEdit() && this.editId() !== null) {
       const orig = this.children().find(c => c.id === this.editId())!;
-      this.store.updateChild({ ...orig, name: v.name!, grade: v.grade!, boardingStatus: v.boardingStatus as any, status: v.status! });
+      this.store.updateChild({ ...orig, parentId: v.parentId!, name: v.name!, grade: v.grade!, boardingStatus: v.boardingStatus as any, status: v.status! });
     } else {
       this.store.createChild({
         name: v.name!, grade: v.grade!,
         boardingStatus: v.boardingStatus as any,
-        status: true, parentId: this.editParentId()!, organizationId: 1
+        status: true, parentId: v.parentId!, organizationId: this.auth.currentUser()?.organizationId ?? 1
       });
     }
     this.showChildDialog.set(false);
   }
 
-  deleteChild(id: number): void {
+  deleteChild(id: number | string): void {
     if (!confirm('¿Eliminar este alumno?')) return;
     this.store.deleteChild(id);
   }
@@ -193,7 +217,7 @@ export class StudentManagement {
       const orig = this.drivers().find(d => d.id === this.editDriverId())!;
       this.store.updateDriver({ ...orig, firstName: v.firstName!, lastName: v.lastName!, email: v.email! });
     } else {
-      this.store.createDriver({ firstName: v.firstName!, lastName: v.lastName!, email: v.email!, password: v.password!, role: 'DRIVER', organizationId: 1 });
+      this.store.createDriver({ firstName: v.firstName!, lastName: v.lastName!, email: v.email!, password: v.password!, role: 'DRIVER', organizationId: this.auth.currentUser()?.organizationId ?? 1 });
     }
     this.driverForm.get('password')?.setValidators(Validators.required);
     this.showDriverDialog.set(false);
@@ -235,7 +259,7 @@ export class StudentManagement {
       const orig = this.vehicles().find(x => x.id === this.editVehicleId())!;
       this.store.updateVehicle({ ...orig, plate: v.plate!, model: v.model!, capacity: Number(v.capacity), status: v.status! });
     } else {
-      this.store.createVehicle({ plate: v.plate!, model: v.model!, capacity: Number(v.capacity), status: v.status!, organizationId: 1 });
+      this.store.createVehicle({ plate: v.plate!, model: v.model!, capacity: Number(v.capacity), status: v.status!, organizationId: this.auth.currentUser()?.organizationId ?? 1 });
     }
     this.showVehicleDialog.set(false);
   }

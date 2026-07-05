@@ -194,6 +194,35 @@
   outline: none; transition: border-color 0.15s; font-family: var(--sans); background: #fff;
 }
 .field input:focus, .field select:focus { border-color: var(--navy); }
+.password-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+}
+.password-row input {
+  flex: 1;
+  min-width: 0;
+}
+.password-toggle {
+  width: 42px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.password-toggle:hover {
+  border-color: #cbd5e1;
+  color: var(--dark);
+}
+.password-toggle mat-icon {
+  font-size: 1rem !important;
+  width: 1rem !important;
+  height: 1rem !important;
+}
 .dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.25rem; }
 .btn-cancel {
   padding: 0.45rem 1rem; border: 1.5px solid #e2e8f0; border-radius: 8px;

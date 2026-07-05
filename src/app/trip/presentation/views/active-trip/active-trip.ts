@@ -14,6 +14,7 @@ import { AuthStore } from '../../../../iam/application/auth-store';
 import { NotificationStore } from '../../../../notifications/application/notification-store';
 import { OrsService } from '../../../../shared/infrastructure/ors-service';
 import { environment } from '../../../../../environments/environment';
+import { Html5Qrcode } from 'html5-qrcode';
 
 const EMERGENCY_PHONE = '+51900000000';
 
@@ -30,6 +31,13 @@ const STEP_MS = environment.simulationStepMs;
 const CAR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#1a1a2e">
   <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
 </svg>`;
+
+interface BoardingQrPayload {
+  type: 'SAFEROUTE_BOARDING';
+  tripId: number;
+  childId: number;
+  boardingState: 'BOARDED';
+}
 
 @Component({
   selector: 'app-active-trip',
@@ -50,6 +58,12 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   simRunning     = signal(false);
   orsLoading     = signal(false);
   currentWpIdx   = signal<number>(-1);
+  boardingDialog = signal(false);
+  boardingChildId = signal<number | null>(null);
+  boardingPayload = signal('');
+  scannerStatus = signal<'idle' | 'starting' | 'ready' | 'error'>('idle');
+  scannerError = signal('');
+  scannerMessage = signal('');
 
   // ── Emergency dialog ──
   emergencyDialog = signal(false);
@@ -114,6 +128,11 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     return idx >= 0 ? (this.waypoints()[idx]?.name ?? '—') : (this.selectedTrip()?.currentStop ?? '—');
   });
 
+  currentBoardingLabel = computed(() => {
+    const id = this.boardingChildId();
+    return id ? `Alumno #${id}` : 'Alumno';
+  });
+
   tripTypeLabel(type?: string): string {
     return type === 'RETURN' ? 'Retorno' : 'Recojo';
   }
@@ -134,6 +153,11 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   private roadPath: L.LatLngTuple[] = [];
   private wpIndices: number[] = [];
   private lastLoadedTripId: number | null = null;
+  private html5QrCode: Html5Qrcode | null = null;
+  private qrHandlingSuccess = false;
+  private qrErrorCooldown = false;
+  private boardingAutoContinueTimer: ReturnType<typeof setTimeout> | null = null;
+  private resumingAfterBoarding = false;
 
   private readonly busIcon = L.divIcon({
     html: `<div class="at-bus-wrap" style="position:relative;width:44px;height:44px">
@@ -171,6 +195,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.pauseSim();
+    this.stopBoardingCamera();
     this.map?.remove();
     this.map = null;
   }
@@ -284,9 +309,9 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
 
   private getBearing(a: L.LatLngTuple, b: L.LatLngTuple): number {
     const r = (d: number) => d * Math.PI / 180;
-    const dL = r(b[1] - a[1]), φ1 = r(a[0]), φ2 = r(b[0]);
-    const y = Math.sin(dL) * Math.cos(φ2);
-    const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(dL);
+    const dL = r(b[1] - a[1]), phi1 = r(a[0]), phi2 = r(b[0]);
+    const y = Math.sin(dL) * Math.cos(phi2);
+    const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(dL);
     return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
   }
 
@@ -346,6 +371,11 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     if (n > 0 && idx === n - 2) {
       this.snack.open(`¡Próxima parada final: ${this.waypoints()[n - 1]?.name}!`, 'OK', { duration: 4000 });
     }
+    if (n > 0 && idx === n - 1) {
+      this.finishTrip(true);
+      return;
+    }
+    this.prepareBoardingAtStop(idx);
   }
 
   private scheduleNext(): void {
@@ -378,9 +408,20 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     this.subStepTimer = null;
     this.setBusMoving(false);
   }
-
   resetSim(): void {
     this.pauseSim();
+    const trip = this.selectedTrip();
+    if (trip?.status === 'COMPLETED') {
+      const route = this.selectedRoute();
+      if (!route) return;
+      this.store.startDemoTripFromRoute(route, created => {
+        this.selectedTripId.set(created.id);
+        this.currentWpIdx.set(0);
+        setTimeout(() => this.loadRoadAndBuild(), 0);
+        this.snack.open('Demo reiniciado con un nuevo viaje activo', 'OK', { duration: 3000 });
+      });
+      return;
+    }
     this.currentWpIdx.set(0);
     const wps = this.waypoints();
     if (!wps.length) return;
@@ -407,16 +448,191 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     this.snack.open(`Viaje iniciado — ${updated.routeName}`, 'OK', { duration: 3000 });
   }
 
-  finishTrip(): void {
+  prepareBoardingAtStop(stopIndex: number): void {
     const trip = this.selectedTrip();
-    if (!trip || !confirm('¿Confirmas la finalización del viaje?')) return;
+    if (!trip || stopIndex <= 0) return;
+    if (stopIndex >= this.waypoints().length - 1) return;
+    const childId = this.childIdForStop(stopIndex);
+    if (!childId) return;
     this.pauseSim();
-    this.store.updateTrip({
-      ...trip, status: 'COMPLETED',
+    const payload = JSON.stringify({
+      type: 'SAFEROUTE_BOARDING',
+      tripId: trip.id,
+      childId,
+      boardingState: 'BOARDED',
+    });
+    this.boardingChildId.set(childId);
+    this.boardingPayload.set(payload);
+    this.boardingDialog.set(true);
+    this.scannerStatus.set('starting');
+    this.boardingAutoContinueTimer = setTimeout(() => this.resumeAfterBoardingPause(childId), 3000);
+    setTimeout(() => this.startBoardingCamera(), 0);
+  }
+
+  markBoarding(state: 'BOARDED' | 'ABSENT'): void {
+    const trip = this.selectedTrip();
+    const childId = this.boardingChildId();
+    if (!trip || !childId) return;
+    this.store.updateBoarding(trip.id, childId, state);
+    this.notifyBoarding(state, childId);
+    this.snack.open(state === 'BOARDED' ? 'Asistencia marcada por QR' : 'Alumno marcado ausente', 'OK', { duration: 3000 });
+    setTimeout(() => this.resumeAfterBoardingPause(childId), 450);
+  }
+
+  continueAfterBoarding(): void {
+    this.resumeAfterBoardingPause();
+  }
+
+  fallbackBoarding(): void {
+    this.markBoarding('BOARDED');
+  }
+
+  private async startBoardingCamera(): Promise<void> {
+    this.stopBoardingCamera();
+    try {
+      this.qrHandlingSuccess = false;
+      this.qrErrorCooldown = false;
+      this.html5QrCode = new Html5Qrcode('boarding-qr-reader');
+      this.scannerStatus.set('ready');
+      this.scannerError.set('');
+      this.scannerMessage.set('Apunta la camara al QR del alumno.');
+      await this.html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 30, qrbox: { width: 220, height: 220 } },
+        decodedText => this.handleQrValue(decodedText),
+        () => undefined,
+      );
+    } catch (error) {
+      this.scannerStatus.set('error');
+      this.scannerError.set('No se pudo activar la camara. Permite el acceso o usa el boton de respaldo.');
+      console.warn('Camera access failed', error);
+    }
+  }
+
+  private handleQrValue(rawValue: string): void {
+    if (this.qrHandlingSuccess) return;
+    const payload = this.parseBoardingQr(rawValue);
+    if (!payload) {
+      this.showQrError('QR no reconocido para SafeRoute.');
+      return;
+    }
+
+    const trip = this.selectedTrip();
+    const expectedChildId = this.boardingChildId();
+    if (!trip || payload.tripId !== trip.id || payload.childId !== expectedChildId) {
+      this.showQrError('El QR pertenece a otro viaje o alumno.');
+      return;
+    }
+
+    this.scannerMessage.set('QR valido. Marcando abordaje...');
+    this.qrHandlingSuccess = true;
+    this.markBoarding('BOARDED');
+  }
+
+  private parseBoardingQr(rawValue: string): BoardingQrPayload | null {
+    const expectedChildId = this.boardingChildId();
+    const trip = this.selectedTrip();
+    if (/^\d+$/.test(rawValue.trim()) && expectedChildId && trip) {
+      return {
+        type: 'SAFEROUTE_BOARDING',
+        tripId: trip.id,
+        childId: Number(rawValue.trim()),
+        boardingState: 'BOARDED',
+      };
+    }
+    try {
+      const parsed = JSON.parse(rawValue) as Partial<BoardingQrPayload>;
+      if (
+        parsed.type === 'SAFEROUTE_BOARDING' &&
+        Number.isFinite(Number(parsed.tripId)) &&
+        Number.isFinite(Number(parsed.childId)) &&
+        parsed.boardingState === 'BOARDED'
+      ) {
+        return {
+          type: 'SAFEROUTE_BOARDING',
+          tripId: Number(parsed.tripId),
+          childId: Number(parsed.childId),
+          boardingState: 'BOARDED',
+        };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  private showQrError(message: string): void {
+    this.scannerMessage.set(message);
+    if (this.qrErrorCooldown) return;
+    this.qrErrorCooldown = true;
+    this.snack.open(message, 'OK', { duration: 3000 });
+    setTimeout(() => { this.qrErrorCooldown = false; }, 3000);
+  }
+
+  private stopBoardingCamera(): void {
+    if (this.html5QrCode) {
+      this.html5QrCode.stop()
+        .then(() => this.html5QrCode?.clear())
+        .catch(() => undefined)
+        .finally(() => { this.html5QrCode = null; });
+    }
+    this.qrHandlingSuccess = false;
+    this.qrErrorCooldown = false;
+  }
+
+  private closeBoardingScanner(): void {
+    if (this.boardingAutoContinueTimer) {
+      clearTimeout(this.boardingAutoContinueTimer);
+      this.boardingAutoContinueTimer = null;
+    }
+    this.stopBoardingCamera();
+    this.boardingDialog.set(false);
+    this.scannerStatus.set('idle');
+  }
+
+  private resumeAfterBoardingPause(expectedChildId?: number): void {
+    if (this.resumingAfterBoarding) return;
+    if (expectedChildId && this.boardingChildId() !== expectedChildId) return;
+    this.resumingAfterBoarding = true;
+    this.closeBoardingScanner();
+    if (this.isEnRoute()) {
+      this.simRunning.set(true);
+      this.scheduleNext();
+    }
+    setTimeout(() => { this.resumingAfterBoarding = false; }, 0);
+  }
+
+  private async notifyBoarding(state: 'BOARDED' | 'ABSENT', childId: number): Promise<void> {
+    const title = state === 'BOARDED' ? 'Abordaje confirmado' : 'Alumno ausente';
+    const body = state === 'BOARDED'
+      ? `Alumno #${childId} abordo el bus. Se notificara al correo del apoderado.`
+      : `Alumno #${childId} fue marcado como ausente.`;
+    if (!('Notification' in window)) return;
+    const permission = Notification.permission === 'default'
+      ? await Notification.requestPermission()
+      : Notification.permission;
+    if (permission === 'granted') new Notification(title, { body });
+  }
+
+  private childIdForStop(stopIndex: number): number | null {
+    const trip = this.selectedTrip();
+    const waypointChild = this.waypoints()[stopIndex]?.studentId;
+    if (waypointChild) return waypointChild;
+    const ids = trip?.studentIds ?? [];
+    return ids[stopIndex - 1] ?? null;
+  }
+
+  finishTrip(auto = false): void {
+    const trip = this.selectedTrip();
+    if (!trip || (!auto && !confirm('¿Confirmas la finalización del viaje?'))) return;
+    this.pauseSim();
+    this.store.completeTripAtDestination({
+      ...trip,
+      status: 'COMPLETED',
       endTime: new Date().toISOString(),
       studentsBoarded: trip.studentsTotal ?? trip.studentsBoarded
     });
-    this.snack.open('Viaje finalizado', 'OK', { duration: 3000 });
+    this.snack.open(auto ? 'Llegada a destino: viaje finalizado automaticamente' : 'Viaje finalizado', 'OK', { duration: 3000 });
   }
 
   // ── Emergency ──
@@ -449,20 +665,8 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
       date:     new Date().toISOString(),
       tripId:   trip?.id,
     });
-    // Also persist to localStorage as fallback
-    const stored = JSON.parse(localStorage.getItem('saferoute.incidents') ?? '[]');
-    stored.unshift({
-      id:          `i-${Date.now()}`,
-      tripId:      trip?.id ?? null,
-      type:        this.emergencyType,
-      severity:    'HIGH',
-      description: this.emergencyDesc.trim(),
-      reportedBy:  this.auth.currentUser()?.id ?? 'DRIVER',
-      timestamp:   new Date().toISOString(),
-      status:      'OPEN',
-    });
-    localStorage.setItem('saferoute.incidents', JSON.stringify(stored));
     this.snack.open('Reporte enviado', 'OK', { duration: 3000 });
     this.emergencyDialog.set(false);
   }
 }
+

@@ -1,9 +1,10 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TripEntity } from '../domain/model/trip-entity';
 import { RouteEntity } from '../domain/model/route-entity';
 import { TripApi } from '../infrastructure/trip-api';
+import { AttendanceResource } from '../infrastructure/trip-response';
 
 // Re-export the domain models so existing consumers that import them from the store keep working.
 export type { TripEntity } from '../domain/model/trip-entity';
@@ -17,7 +18,7 @@ export type { RouteEntity, RouteWaypoint } from '../domain/model/route-entity';
  * for the views and adapts their flat calls to the backend use cases:</p>
  * <ul>
  *   <li>{@code createTrip} &rarr; START a trip (POST /trips);</li>
- *   <li>{@code updateTrip}/{@code patchTrip} with status COMPLETED &rarr; COMPLETE the trip;</li>
+ *   <li>{@code updateTrip}/{@code patchTrip} with status COMPLETED/CANCELLED &rarr; transition the trip;</li>
  *   <li>other patches (currentStop, currentLocation, studentsBoarded) &rarr; local UI state only
  *       (the backend Trip does not model live tracking);</li>
  *   <li>{@code deleteTrip} &rarr; DELETE /trips/{id}.</li>
@@ -122,19 +123,52 @@ export class TripStore {
     });
   }
 
+  startDemoTripFromRoute(
+    route: RouteEntity,
+    onCreated?: (trip: TripEntity) => void,
+    onFinished?: () => void
+  ): void {
+    const organizationId = route.organizationId ?? this._currentOrgId ?? 1;
+    if (!route.id || !route.driverId) {
+      this._error.set('La ruta necesita conductor asignado para reiniciar el demo.');
+      onFinished?.();
+      return;
+    }
+    this.api.startTrip({ organizationId, routeId: route.id, driverId: route.driverId }).subscribe({
+      next: created => {
+        const trip = this.enrich(created);
+        this._trips.update(ts => [trip, ...ts]);
+        onCreated?.(trip);
+        onFinished?.();
+      },
+      error: err => {
+        this._error.set(err?.message ?? 'No se pudo reiniciar el viaje demo');
+        onFinished?.();
+      }
+    });
+  }
+
   /** Flat "update": status COMPLETED completes the trip on the backend; otherwise local UI update. */
   updateTrip(trip: TripEntity): void {
     if (trip.status === 'COMPLETED') {
       this.completeTrip(trip.id);
       return;
     }
+    if (trip.status === 'CANCELLED') {
+      this.cancelTrip(trip.id);
+      return;
+    }
     this._trips.update(ts => ts.map(t => t.id === trip.id ? this.enrich({ ...t, ...trip }) : t));
   }
 
-  /** Flat "patch": status COMPLETED completes the trip; other fields are local UI state only. */
+  /** Flat "patch": status COMPLETED/CANCELLED transitions the trip; other fields are local UI state only. */
   patchTrip(id: number, patch: Partial<TripEntity>): void {
     if (patch.status === 'COMPLETED') {
       this.completeTrip(id);
+      return;
+    }
+    if (patch.status === 'CANCELLED') {
+      this.cancelTrip(id);
       return;
     }
     this._trips.update(ts => ts.map(t => t.id === id ? { ...t, ...patch } : t));
@@ -142,7 +176,41 @@ export class TripStore {
 
   completeTrip(id: number): void {
     this.api.completeTrip(id).subscribe({
+      next: updated => this._trips.update(ts => ts.map(t => t.id === id ? this.enrich({
+        ...t,
+        ...updated,
+        status: 'COMPLETED',
+        currentStop: updated.currentStop ?? t.currentStop,
+        currentLocation: updated.currentLocation ?? t.currentLocation,
+        endTime: updated.endTime ?? t.endTime ?? new Date().toISOString()
+      }) : t)),
+      error: err => this._error.set(err?.message ?? 'Failed to complete trip')
+    });
+  }
+
+  cancelTrip(id: number): void {
+    this.api.cancelTrip(id).subscribe({
       next: updated => this._trips.update(ts => ts.map(t => t.id === id ? this.enrich({ ...t, ...updated }) : t)),
+      error: err => this._error.set(err?.message ?? 'Failed to cancel trip')
+    });
+  }
+
+  activateTrip(id: number): void {
+    this.api.activateTrip(id).subscribe({
+      next: updated => this._trips.update(ts => ts.map(t => t.id === id ? this.enrich({ ...t, ...updated }) : t)),
+      error: err => this._error.set(err?.message ?? 'Failed to activate trip')
+    });
+  }
+
+  completeTripAtDestination(trip: TripEntity): void {
+    const studentIds = trip.studentIds ?? [];
+    const dropOffs = studentIds.length
+      ? forkJoin(studentIds.map(childId =>
+          this.api.updateBoarding(trip.id, { childId, boardingState: 'DROPPED_OFF' })
+            .pipe(catchError(() => of(null)))))
+      : of([]);
+    dropOffs.subscribe({
+      next: () => this.completeTrip(trip.id),
       error: err => this._error.set(err?.message ?? 'Failed to complete trip')
     });
   }
@@ -150,7 +218,12 @@ export class TripStore {
   /** Marks a child's boarding status on the backend (US-11). */
   updateBoarding(tripId: number, childId: number, boardingState: string): void {
     this.api.updateBoarding(tripId, { childId, boardingState }).subscribe({
-      next: updated => this._trips.update(ts => ts.map(t => t.id === tripId ? this.enrich({ ...t, ...updated }) : t)),
+      next: updated => this._trips.update(ts => ts.map(t => {
+        if (t.id !== tripId) return t;
+        const boardedDelta = boardingState === 'BOARDED' ? 1 : 0;
+        const nextBoarded = Math.min(t.studentsTotal ?? t.studentsBoarded ?? 0, (t.studentsBoarded ?? 0) + boardedDelta);
+        return this.enrich({ ...t, ...updated, studentsBoarded: nextBoarded });
+      })),
       error: err => this._error.set(err?.message ?? 'Failed to update boarding')
     });
   }
@@ -160,6 +233,10 @@ export class TripStore {
     this.api.reportIncident(tripId, { description }).subscribe({
       error: err => this._error.set(err?.message ?? 'Failed to report incident')
     });
+  }
+
+  getAttendances(tripId: number): Observable<AttendanceResource[]> {
+    return this.api.getAttendances(tripId);
   }
 
   deleteTrip(id: number): void {

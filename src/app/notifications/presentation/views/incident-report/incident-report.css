@@ -3,6 +3,7 @@
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
 .page-title  { font-size: 1.6rem; font-weight: 800; color: var(--dark, #1a1a2e); margin: 0 0 0.25rem; }
 .page-sub    { font-size: 0.875rem; color: #64748b; margin: 0; }
+.header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; }
 
 .ac-tabs { display: flex; gap: 0; margin-bottom: 1.25rem; border-bottom: 2px solid #e5e7eb; }
 .ac-tab {

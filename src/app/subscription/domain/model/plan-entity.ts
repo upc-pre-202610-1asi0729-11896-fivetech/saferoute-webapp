@@ -6,4 +6,6 @@ export interface PlanEntity extends BaseEntity {
   maxRoutes: number;
   maxDrivers: number;
   features: string[];
+  tier?: string;
+  advancedFeaturesEnabled?: boolean;
 }

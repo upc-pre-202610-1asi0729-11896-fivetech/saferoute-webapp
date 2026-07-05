@@ -6,9 +6,16 @@
       <h1 class="page-title">Centro de Alertas</h1>
       <p class="page-sub">Incidencias y notificaciones del transporte escolar</p>
     </div>
-    <button mat-raised-button color="primary" (click)="openDialog()">
-      <mat-icon>add</mat-icon> Reportar Incidencia
-    </button>
+    <div class="header-actions">
+      @if (isAdmin()) {
+        <a mat-stroked-button routerLink="/notifications/alerts/new">
+          <mat-icon>campaign</mat-icon> Nueva Alerta
+        </a>
+      }
+      <button mat-raised-button color="primary" (click)="openDialog()">
+        <mat-icon>add</mat-icon> Reportar Incidencia
+      </button>
+    </div>
   </div>
 
   <!-- Tabs -->

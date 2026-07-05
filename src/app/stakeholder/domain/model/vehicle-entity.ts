@@ -5,6 +5,6 @@ export interface VehicleEntity extends BaseEntity {
   model: string;
   capacity: number;
   status?: string;
-  driverId?: number;
-  organizationId?: number;
+  driverId?: number | string;
+  organizationId?: number | string;
 }

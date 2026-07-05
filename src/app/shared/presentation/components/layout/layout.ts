@@ -50,8 +50,8 @@ export class Layout {
       const orgId = this.auth.currentUser()?.organizationId;
       if (orgId) {
         this.stakeholder.loadAll(orgId);
-        this.tripStore.loadAll(orgId);
-        this.routesStore.loadRoutes(orgId);
+        this.tripStore.loadAll(Number(orgId));
+        this.routesStore.loadRoutes(Number(orgId));
         this.subStore.loadSubscription(orgId);
       }
     });
@@ -68,6 +68,7 @@ export class Layout {
         { link: '/trip/monitor', label: 'option.trips', icon: 'directions_bus' },
         { link: '/subscription/status', label: 'option.subscription', icon: 'workspace_premium' },
         { link: '/notifications/alerts', label: 'option.alerts', icon: 'notifications' },
+        { link: '/iam/organization', label: 'option.organization', icon: 'business' },
         { link: '/iam/profile', label: 'option.profile', icon: 'person' },
       ];
     }

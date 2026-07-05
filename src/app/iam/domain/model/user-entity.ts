@@ -6,11 +6,12 @@ export interface UserEntity extends BaseEntity {
   lastName: string;
   email: string;
   role: Role;
-  organizationId?: number;
+  organizationId?: number | string;
 }
 
 export interface OrganizationEntity extends BaseEntity {
   name: string;
+  legalIdentifier?: string;
   status: string;
   createdAt: string;
 }

@@ -11,7 +11,7 @@
         <mat-spinner diameter="18" style="margin-right:8px"/>
       }
       <button mat-stroked-button class="btn-reiniciar" (click)="resetSim()">
-        <mat-icon>refresh</mat-icon> Reiniciar
+        <mat-icon>refresh</mat-icon> Reiniciar demo
       </button>
       @if (isEnRoute()) {
         @if (!simRunning()) {
@@ -116,17 +116,17 @@
           <div class="dvs-num"
                [style.background]="stop.done ? '#22c55e' : stop.current ? '#ffb74d' : i === 0 ? '#16a34a' : last ? '#dc2626' : '#e2e8f0'"
                [style.color]="stop.done || stop.current || i === 0 || last ? '#fff' : '#64748b'">
-            @if (stop.done && i !== 0) {
+            @if (stop.done) {
               <mat-icon style="font-size:.85rem;width:.85rem;height:.85rem">check</mat-icon>
             } @else {
-              {{ i === 0 ? '✓' : i + 1 }}
+              {{ i + 1 }}
             }
           </div>
           <div class="dvs-info">
-            <span class="dvs-name">{{ i === 0 ? 'Origen' : stop.name }}</span>
+            <span class="dvs-name">{{ stop.name }}</span>
             @if (i === 0 && stop.done) { <span class="dvs-sub green">Completada</span> }
             @else if (i === 0 && !stop.done) { <span class="dvs-sub muted">Punto de inicio</span> }
-            @if (stop.current) { <span class="dvs-sub amber">● Aquí ahora</span> }
+            @if (stop.current) { <span class="dvs-sub amber">Aqui ahora</span> }
           </div>
           @if (!stop.current && !stop.done) {
             <mat-icon class="dvs-arrow">chevron_right</mat-icon>
@@ -164,6 +164,44 @@
   </div>
 
 </div>
+
+@if (boardingDialog()) {
+  <div class="em-backdrop" (click)="continueAfterBoarding()">
+    <div class="em-dialog boarding-dialog scanner-dialog" (click)="$event.stopPropagation()">
+      <div class="em-dialog-header">
+        <mat-icon class="em-header-icon">qr_code_scanner</mat-icon>
+        <span class="em-header-title">Escaner de abordaje</span>
+        <button class="em-close-btn" (click)="continueAfterBoarding()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="boarding-body">
+        <p class="em-mode-hint">El conductor escanea el QR que presenta {{ currentBoardingLabel() }}.</p>
+
+        <div class="scanner-frame" [class.scanner-ready]="scannerStatus() === 'ready'">
+          <div id="boarding-qr-reader" class="qr-reader-box"></div>
+          @if (scannerStatus() === 'starting') {
+            <div class="scanner-overlay">Activando camara...</div>
+          }
+          @if (scannerStatus() === 'ready') {
+            <div class="scanner-autodetect">{{ scannerMessage() || 'Detectando QR automaticamente...' }}</div>
+          }
+          @if (scannerStatus() === 'error') {
+            <div class="scanner-overlay scanner-error">{{ scannerError() }}</div>
+          }
+        </div>
+      </div>
+      <div class="em-mild-actions boarding-actions">
+        <button class="em-back-btn" (click)="markBoarding('ABSENT')">Marcar ausencia</button>
+        <button class="em-submit-btn" (click)="fallbackBoarding()">
+          <mat-icon>how_to_reg</mat-icon>
+          Marcar abordaje
+        </button>
+        <button class="em-back-btn" (click)="continueAfterBoarding()">Continuar simulacion</button>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- ── Emergency dialog overlay ── -->
 @if (emergencyDialog()) {
