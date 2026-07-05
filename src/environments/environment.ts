@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://URLBACKEND/api/v1',
-  platformProviderApiBaseUrl: 'https://URLBACKEND/api/v1',
-  platformProviderJavaApiBaseUrl: 'https://URLBACKEND/api/v1',
+  apiBaseUrl: 'https://saferoute-os.azurewebsites.net/api/v1',
+  platformProviderApiBaseUrl: 'https://saferoute-os.azurewebsites.net/api/v1',
+  platformProviderJavaApiBaseUrl: 'https://saferoute-os.azurewebsites.net/api/v1',
   platformProviderRoutesEndpointPath: '/routes',
   platformProviderStopsEndpointPath: '/stops',
   platformProviderUsersEndpointPath: '/users',
