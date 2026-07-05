@@ -112,19 +112,24 @@ export class Checkout implements AfterViewInit, OnDestroy {
 
       onApprove: async (_data: any, actions: any) => {
         await actions.order.capture();
-        if (this.orgId) {
-          if (this.mode() === 'upgrade') {
-            this.subStore.upgradeFromCheckout(this.orgId, this.planName(), this.planTier());
-          } else {
-            this.subStore.createFromCheckout(this.orgId, this.planName(), amount, this.planTier());
-          }
+        if (!this.orgId) {
+          this.status.set('error');
+          return;
         }
-        this.status.set('success');
+        const onSuccess = () => {
+          this.status.set('success');
+          if (this.mode() === 'upgrade') {
+            setTimeout(() => this.router.navigate(['/subscription/status']), 1800);
+          } else {
+            this.auth.clearSession();
+            setTimeout(() => this.router.navigate(['/iam/sign-in']), 2500);
+          }
+        };
+        const onError = () => this.status.set('error');
         if (this.mode() === 'upgrade') {
-          setTimeout(() => this.router.navigate(['/subscription/status']), 1800);
+          this.subStore.upgradeFromCheckout(this.orgId, this.planName(), this.planTier(), onSuccess, onError);
         } else {
-          this.auth.clearSession();
-          setTimeout(() => this.router.navigate(['/iam/sign-in']), 2500);
+          this.subStore.createFromCheckout(this.orgId, this.planName(), amount, this.planTier(), onSuccess, onError);
         }
       },
 

@@ -192,9 +192,10 @@
 
       <div class="cm-subtabs">
         <button class="cm-subtab" [class.active]="logisticaTab() === 'conductores'" (click)="logisticaTab.set('conductores')">
-          ðŸ§‘â€âœˆï¸ {{ 'stakeholder.driver.title' | translate }} ({{ drivers().length }})
+          <mat-icon>badge</mat-icon> {{ 'stakeholder.driver.title' | translate }} ({{ drivers().length }})
         </button>
-        <button class="cm-subtab" [class.active]="logisticaTab() === 'vehiculos'" (click)="logisticaTab.set('vehiculos')">{{ 'stakeholder.vehicle.title' | translate }} ({{ vehicles().length }})
+        <button class="cm-subtab" [class.active]="logisticaTab() === 'vehiculos'" (click)="logisticaTab.set('vehiculos')">
+          <mat-icon>directions_bus</mat-icon> {{ 'stakeholder.vehicle.title' | translate }} ({{ vehicles().length }})
         </button>
       </div>
 
@@ -367,7 +368,7 @@
         </div>
         <div class="field"><label>{{ 'iam.fields.email' | translate }}</label><input formControlName="email" type="email" [placeholder]="'stakeholder.placeholders.driver-email' | translate"></div>
         @if (!isDriverEdit()) {
-          <div class="field"><label>{{ 'iam.fields.password' | translate }}</label><input formControlName="password" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"></div>
+          <div class="field"><label>{{ 'iam.fields.password' | translate }}</label><input formControlName="password" type="password" [placeholder]="'iam.fields.password' | translate"></div>
         }
         <div class="dialog-actions">
           <button type="button" class="btn-cancel" (click)="showDriverDialog.set(false)">{{ 'general.cancel' | translate }}</button>

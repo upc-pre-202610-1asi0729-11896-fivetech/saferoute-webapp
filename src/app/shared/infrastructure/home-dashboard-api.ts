@@ -19,6 +19,9 @@ export class HomeDashboardApi {
   constructor(private readonly http: HttpClient) {}
 
   load(organizationId?: number | string): Observable<HomeDashboardSnapshot> {
+    if (!organizationId) {
+      return of({ routes: [], trips: [], users: [], parents: [], children: [] });
+    }
     const q = organizationId ? `?organizationId=${organizationId}` : '';
     return forkJoin({
       routes: this.http.get<any[]>(`${this.base}/routes${q}`).pipe(catchError(() => of([]))),
@@ -28,19 +31,21 @@ export class HomeDashboardApi {
       parents: this.http.get<any[]>(`${this.base}/parents`).pipe(catchError(() => of([]))),
     }).pipe(
       map(data => {
-        const parents = organizationId
-          ? (data.parents ?? []).filter((p: any) => p.organizationId?.toString() === organizationId.toString())
-          : (data.parents ?? []);
+        const belongsToOrganization = (item: any) =>
+          item?.organizationId?.toString() === organizationId.toString();
+        const parents = (data.parents ?? []).filter(belongsToOrganization);
+        const users = [...(data.users ?? []), ...(data.drivers ?? [])].filter(belongsToOrganization);
         return {
-          routes: data.routes ?? [],
-          trips: data.trips ?? [],
-          users: [...(data.users ?? []), ...(data.drivers ?? [])],
+          routes: (data.routes ?? []).filter(belongsToOrganization),
+          trips: (data.trips ?? []).filter(belongsToOrganization),
+          users,
           parents,
           children: parents.flatMap((p: any) => (p.children ?? []).map((c: any) => ({
             id: c.id,
             name: c.fullName,
             grade: c.school,
             parentId: p.id,
+            organizationId,
           }))),
         };
       })

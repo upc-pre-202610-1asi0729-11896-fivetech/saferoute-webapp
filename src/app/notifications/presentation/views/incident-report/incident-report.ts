@@ -113,7 +113,7 @@ export class IncidentReport implements OnInit {
   });
 
   ngOnInit(): void {
-    this.store.loadNotifications(this.auth.currentUser()?.id);
+    this.store.loadNotifications(this.auth.currentUser()?.email);
   }
 
   openDialog(): void {

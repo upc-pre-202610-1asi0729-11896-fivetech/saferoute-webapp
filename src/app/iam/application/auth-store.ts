@@ -88,14 +88,34 @@ export class AuthStore {
         const req: SignUpRequest = { ...userReq, role: Role.ADMIN, organizationId: org.id };
         this.api.signUp(req).subscribe({
           next: () => {
-            this._loading.set(false);
             if (redirectUrl) {
-              // Append the real orgId so checkout can create the subscription
-              const sep = redirectUrl.includes('?') ? '&' : '?';
-              this.router.navigateByUrl(`${redirectUrl}${sep}orgId=${org.id}`).then();
-            } else {
-              this.router.navigate(['/iam/sign-in']).then();
+              this.api.signIn({ email: req.email, password: req.password }).subscribe({
+                next: res => {
+                  this._token.set(res.token);
+                  localStorage.setItem(TOKEN_KEY, res.token);
+                  const user: UserEntity = {
+                    id: res.id,
+                    firstName: userReq.firstName || res.username,
+                    lastName: userReq.lastName || '',
+                    email: res.username,
+                    role: (res.role ?? Role.ADMIN) as Role,
+                    organizationId: res.organizationId ?? org.id,
+                  };
+                  this._currentUser.set(user);
+                  localStorage.setItem(USER_KEY, JSON.stringify(user));
+                  this._loading.set(false);
+                  const sep = redirectUrl.includes('?') ? '&' : '?';
+                  this.router.navigateByUrl(`${redirectUrl}${sep}orgId=${org.id}`).then();
+                },
+                error: err => {
+                  this._error.set(err.message ?? 'iam.errors.registration-failed');
+                  this._loading.set(false);
+                },
+              });
+              return;
             }
+            this._loading.set(false);
+            this.router.navigate(['/iam/sign-in']).then();
           },
           error: err => {
             this._error.set(err.message ?? 'iam.errors.registration-failed');

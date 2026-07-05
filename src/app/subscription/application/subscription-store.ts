@@ -48,7 +48,13 @@ export class SubscriptionStore {
     this.api.getSubscriptionsByOrganization(organizationId).subscribe({
       next: data => {
         const active = (data ?? []).find(s => s.state === 'ACTIVE');
-        this._subscription.set(active ? this.subscriptionAssembler.toEntityFromResource(active, this._plans()) : null);
+        const pending = (data ?? []).find(s => s.state === 'PENDING');
+        const current = active ?? pending;
+        this._subscription.set(current ? this.subscriptionAssembler.toEntityFromResource(current, this._plans()) : null);
+        if (!active && pending) {
+          this.activateSubscription(pending.id);
+          return;
+        }
         this._loading.set(false);
       },
       error: err => {
@@ -62,29 +68,32 @@ export class SubscriptionStore {
     this._selectedPlan.set(plan);
   }
 
-  subscribe(organizationId: number | string): void {
+  subscribe(organizationId: number | string, onSuccess?: () => void, onError?: () => void): void {
     const plan = this._selectedPlan();
     if (!plan) {
       this._error.set('subscription.errors.no-plan-selected');
+      onError?.();
       return;
     }
     this._loading.set(true);
     this.api.createSubscription(organizationId, plan.id).subscribe({
       next: sub => {
         this._subscription.set(this.subscriptionAssembler.toEntityFromResource(sub, this._plans()));
-        this.activateSubscription(sub.id);
+        this.activateSubscription(sub.id, onSuccess, onError);
       },
       error: err => {
         this._error.set(this.errorMessage(err));
         this._loading.set(false);
+        onError?.();
       },
     });
   }
 
-  upgradeSubscription(plan: PlanEntity): void {
+  upgradeSubscription(plan: PlanEntity, onSuccess?: () => void, onError?: () => void): void {
     const sub = this._subscription();
     if (!sub) {
       this.selectPlan(plan);
+      onError?.();
       return;
     }
     this._loading.set(true);
@@ -94,10 +103,12 @@ export class SubscriptionStore {
         this._subscription.set(this.subscriptionAssembler.toEntityFromResource(updated, this._plans()));
         this._selectedPlan.set(plan);
         this._loading.set(false);
+        onSuccess?.();
       },
       error: err => {
         this._error.set(this.errorMessage(err));
         this._loading.set(false);
+        onError?.();
       },
     });
   }
@@ -111,25 +122,70 @@ export class SubscriptionStore {
     });
   }
 
-  createFromCheckout(organizationId: number | string, planName: string, _priceStr: string, planTier?: string): void {
+  createFromCheckout(
+    organizationId: number | string,
+    planName: string,
+    _priceStr: string,
+    planTier?: string,
+    onSuccess?: () => void,
+    onError?: () => void
+  ): void {
+    if (!this._plans().length) {
+      this._loading.set(true);
+      this.api.getPlans().subscribe({
+        next: data => {
+          this._plans.set(this.planAssembler.toEntitiesFromResponse(data));
+          this.createFromCheckout(organizationId, planName, _priceStr, planTier, onSuccess, onError);
+        },
+        error: err => {
+          this._error.set(this.errorMessage(err));
+          this._loading.set(false);
+          onError?.();
+        },
+      });
+      return;
+    }
     const plan = this.findPlanForCheckout(planName, planTier) ?? this._plans()[0];
     if (!plan) {
       this._error.set('No hay planes cargados desde el backend real.');
+      onError?.();
       return;
     }
     this.selectPlan(plan);
-    this.subscribe(organizationId);
+    this.subscribe(organizationId, onSuccess, onError);
   }
 
-  upgradeFromCheckout(organizationId: number | string, planName: string, planTier?: string): void {
+  upgradeFromCheckout(
+    organizationId: number | string,
+    planName: string,
+    planTier?: string,
+    onSuccess?: () => void,
+    onError?: () => void
+  ): void {
+    if (!this._plans().length) {
+      this._loading.set(true);
+      this.api.getPlans().subscribe({
+        next: data => {
+          this._plans.set(this.planAssembler.toEntitiesFromResponse(data));
+          this.upgradeFromCheckout(organizationId, planName, planTier, onSuccess, onError);
+        },
+        error: err => {
+          this._error.set(this.errorMessage(err));
+          this._loading.set(false);
+          onError?.();
+        },
+      });
+      return;
+    }
     const plan = this.findPlanForCheckout(planName, planTier);
     if (!plan) {
       this._error.set('No se encontro el plan seleccionado en el backend real.');
+      onError?.();
       return;
     }
     const current = this._subscription();
     if (current) {
-      this.upgradeSubscription(plan);
+      this.upgradeSubscription(plan, onSuccess, onError);
       return;
     }
     this._loading.set(true);
@@ -138,15 +194,16 @@ export class SubscriptionStore {
         const active = (data ?? []).find(s => s.state === 'ACTIVE');
         if (!active) {
           this._selectedPlan.set(plan);
-          this.subscribe(organizationId);
+          this.subscribe(organizationId, onSuccess, onError);
           return;
         }
         this._subscription.set(this.subscriptionAssembler.toEntityFromResource(active, this._plans()));
-        this.upgradeSubscription(plan);
+        this.upgradeSubscription(plan, onSuccess, onError);
       },
       error: err => {
         this._error.set(this.errorMessage(err));
         this._loading.set(false);
+        onError?.();
       },
     });
   }
@@ -160,27 +217,39 @@ export class SubscriptionStore {
     this._error.set(null);
   }
 
-  private activateSubscription(subscriptionId: string): void {
+  private activateSubscription(subscriptionId: string, onSuccess?: () => void, onError?: () => void): void {
     this.api.activateSubscription(subscriptionId).subscribe({
       next: activated => {
         this._subscription.set(this.subscriptionAssembler.toEntityFromResource(activated, this._plans()));
         this._loading.set(false);
+        onSuccess?.();
       },
       error: err => {
         this._error.set(this.errorMessage(err));
         this._loading.set(false);
+        onError?.();
       },
     });
   }
 
   private findPlanForCheckout(planName: string, planTier?: string): PlanEntity | undefined {
-    const normalizedTier = (planTier ?? '').toUpperCase();
+    const normalizedTier = this.normalizePlanKey(planTier ?? '');
     const normalizedName = planName.toLowerCase();
+    const normalizedNameTier = this.normalizePlanKey(planName);
     return this._plans().find(p =>
-      (normalizedTier && (p.tier ?? p.name).toUpperCase() === normalizedTier) ||
+      (normalizedTier && this.normalizePlanKey(p.tier ?? p.name) === normalizedTier) ||
+      (normalizedNameTier && this.normalizePlanKey(p.tier ?? p.name) === normalizedNameTier) ||
       p.name.toLowerCase() === normalizedName ||
       p.tier?.toLowerCase() === normalizedName,
     );
+  }
+
+  private normalizePlanKey(value: string): string {
+    const normalized = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    if (normalized.includes('BASIC') || normalized.includes('BASICO')) return 'BASIC';
+    if (normalized.includes('INTERMEDIATE') || normalized.includes('INTERMEDIO') || normalized.includes('STANDARD')) return 'INTERMEDIATE';
+    if (normalized.includes('COMPLETE') || normalized.includes('COMPLETO') || normalized.includes('PREMIUM')) return 'COMPLETE';
+    return normalized;
   }
 
   private errorMessage(error: HttpErrorResponse): string {

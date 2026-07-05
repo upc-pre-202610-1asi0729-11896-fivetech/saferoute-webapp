@@ -25,9 +25,7 @@ export class NotificationStore {
   private readonly incidentAssembler = new IncidentAssembler();
   private readonly notificationAssembler = new NotificationAssembler();
 
-  constructor(private readonly api: CommunicationsApi) {
-    this.loadNotifications();
-  }
+  constructor(private readonly api: CommunicationsApi) {}
 
   loadIncidents(_tripId?: number | string): void {
     if (!_tripId) {
@@ -48,6 +46,10 @@ export class NotificationStore {
   }
 
   loadNotifications(recipientId?: number | string): void {
+    if (!recipientId) {
+      this._notifications.set([]);
+      return;
+    }
     this.api.getNotifications(recipientId).subscribe({
       next: data => this._notifications.set((data ?? []).map(item => this.notificationAssembler.toEntityFromResource(item))),
       error: err => this._error.set(this.errorMessage(err)),
@@ -91,7 +93,6 @@ export class NotificationStore {
     this._error.set(null);
     this.api.createAlert(alert).subscribe({
       next: () => {
-        this.loadNotifications();
         this._loading.set(false);
         onSuccess?.();
       },
