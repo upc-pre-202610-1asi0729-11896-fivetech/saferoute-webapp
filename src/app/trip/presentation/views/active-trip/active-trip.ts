@@ -64,6 +64,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   scannerStatus = signal<'idle' | 'starting' | 'ready' | 'error'>('idle');
   scannerError = signal('');
   scannerMessage = signal('');
+  completedBoardingStops = signal<Set<number>>(new Set());
 
   // ── Emergency dialog ──
   emergencyDialog = signal(false);
@@ -111,8 +112,8 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
 
   stops = computed(() => this.waypoints().map((wp, i) => ({
     ...wp,
-    done:    i < this.currentWpIdx(),
-    current: i === this.currentWpIdx()
+    done:    this.isStopDone(i),
+    current: i === this.currentWpIdx() && !this.isStopDone(i)
   })));
 
   statusLabel = computed(() => {
@@ -156,7 +157,6 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   private html5QrCode: Html5Qrcode | null = null;
   private qrHandlingSuccess = false;
   private qrErrorCooldown = false;
-  private boardingAutoContinueTimer: ReturnType<typeof setTimeout> | null = null;
   private resumingAfterBoarding = false;
 
   private readonly busIcon = L.divIcon({
@@ -175,6 +175,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
         this.lastLoadedTripId = id;
         this.pauseSim();
         this.currentWpIdx.set(-1);
+        this.completedBoardingStops.set(new Set());
         this.loadRoadAndBuild();
       }
     });
@@ -286,7 +287,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     this.stopCircles.forEach((c, i) => {
       const n = this.waypoints().length;
       const isFirst = i === 0, isLast = i === n - 1;
-      const color = i < this.currentWpIdx()    ? '#22c55e'
+      const color = this.isStopDone(i)         ? '#22c55e'
                   : i === this.currentWpIdx()  ? '#ffb74d'
                   : isFirst                    ? '#16a34a'
                   : isLast                     ? '#dc2626'
@@ -443,6 +444,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     };
     this.store.updateTrip(updated);
     this.currentWpIdx.set(0);
+    this.completedBoardingStops.set(new Set());
     if (this.waypoints()[0]) this.placeBusAt(this.waypoints()[0]);
     this.refreshStopColors();
     this.snack.open(`Viaje iniciado — ${updated.routeName}`, 'OK', { duration: 3000 });
@@ -465,7 +467,6 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     this.boardingPayload.set(payload);
     this.boardingDialog.set(true);
     this.scannerStatus.set('starting');
-    this.boardingAutoContinueTimer = setTimeout(() => this.resumeAfterBoardingPause(childId), 3000);
     setTimeout(() => this.startBoardingCamera(), 0);
   }
 
@@ -473,6 +474,7 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
     const trip = this.selectedTrip();
     const childId = this.boardingChildId();
     if (!trip || !childId) return;
+    this.markCurrentBoardingStopDone();
     this.store.updateBoarding(trip.id, childId, state);
     this.notifyBoarding(state, childId);
     this.snack.open(state === 'BOARDED' ? 'Asistencia marcada por QR' : 'Alumno marcado ausente', 'OK', { duration: 3000 });
@@ -581,13 +583,27 @@ export class ActiveTrip implements AfterViewInit, OnDestroy {
   }
 
   private closeBoardingScanner(): void {
-    if (this.boardingAutoContinueTimer) {
-      clearTimeout(this.boardingAutoContinueTimer);
-      this.boardingAutoContinueTimer = null;
-    }
     this.stopBoardingCamera();
     this.boardingDialog.set(false);
     this.scannerStatus.set('idle');
+  }
+
+  private markCurrentBoardingStopDone(): void {
+    const idx = this.currentWpIdx();
+    if (idx <= 0 || idx >= this.waypoints().length - 1) return;
+    this.completedBoardingStops.update(done => {
+      const next = new Set(done);
+      next.add(idx);
+      return next;
+    });
+    this.refreshStopColors();
+  }
+
+  private isStopDone(index: number): boolean {
+    const lastIndex = this.waypoints().length - 1;
+    if (index === 0) return this.currentWpIdx() > 0;
+    if (index === lastIndex) return this.isCompleted();
+    return index < this.currentWpIdx() || this.completedBoardingStops().has(index);
   }
 
   private resumeAfterBoardingPause(expectedChildId?: number): void {

@@ -166,14 +166,11 @@
 </div>
 
 @if (boardingDialog()) {
-  <div class="em-backdrop" (click)="continueAfterBoarding()">
+  <div class="em-backdrop">
     <div class="em-dialog boarding-dialog scanner-dialog" (click)="$event.stopPropagation()">
       <div class="em-dialog-header">
         <mat-icon class="em-header-icon">qr_code_scanner</mat-icon>
         <span class="em-header-title">Escaner de abordaje</span>
-        <button class="em-close-btn" (click)="continueAfterBoarding()">
-          <mat-icon>close</mat-icon>
-        </button>
       </div>
       <div class="boarding-body">
         <p class="em-mode-hint">El conductor escanea el QR que presenta {{ currentBoardingLabel() }}.</p>
@@ -197,7 +194,6 @@
           <mat-icon>how_to_reg</mat-icon>
           Marcar abordaje
         </button>
-        <button class="em-back-btn" (click)="continueAfterBoarding()">Continuar simulacion</button>
       </div>
     </div>
   </div>

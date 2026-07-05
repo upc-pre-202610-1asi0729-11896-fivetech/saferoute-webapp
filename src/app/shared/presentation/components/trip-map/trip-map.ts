@@ -13,6 +13,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const LIMA: L.LatLngTuple = [-12.046374, -77.042793];
+const WAYPOINT_WAIT_MS = 5000;
 
 const CAR_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#1a1a2e">
@@ -42,6 +43,7 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
   private roadLine: L.Polyline | null = null;
   private renderToken = 0;
   private simulationTimer: ReturnType<typeof setInterval> | null = null;
+  private simulationWaitTimer: ReturnType<typeof setTimeout> | null = null;
   private simulationPath: L.LatLngTuple[] = [];
   private simulationWaypointIndices: number[] = [];
   private simulationProgress = 0;
@@ -115,20 +117,22 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   pauseRouteSimulation(): boolean {
-    if (!this.simulationTimer) return false;
+    if (!this.simulationTimer && !this.simulationWaitTimer) return false;
     this.clearSimulationTimer();
+    this.clearSimulationWaitTimer();
     this.setBusMoving(false);
     return true;
   }
 
   resumeRouteSimulation(): boolean {
-    if (!this.busMarker || this.simulationPath.length < 2 || this.simulationTimer) return false;
+    if (!this.busMarker || this.simulationPath.length < 2 || this.simulationTimer || this.simulationWaitTimer) return false;
     this.runSimulationTimer();
     return true;
   }
 
   stopRouteSimulation(): void {
     this.clearSimulationTimer();
+    this.clearSimulationWaitTimer();
     this.setBusMoving(false);
     this.clearSimulationState();
   }
@@ -270,9 +274,30 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
       this.simulationNextWaypoint < this.simulationWaypointIndices.length
       && pathIndex >= this.simulationWaypointIndices[this.simulationNextWaypoint]
     ) {
-      this.simulationWaypointReached?.(this.simulationNextWaypoint);
+      const waypointIndex = this.simulationNextWaypoint;
+      this.simulationWaypointReached?.(waypointIndex);
       this.simulationNextWaypoint += 1;
+      if (this.shouldWaitAtWaypoint(waypointIndex)) {
+        this.waitAtWaypoint();
+        break;
+      }
     }
+  }
+
+  private shouldWaitAtWaypoint(index: number): boolean {
+    return index > 0 && index < (this.waypoints?.length ?? 0) - 1;
+  }
+
+  private waitAtWaypoint(): void {
+    if (this.simulationWaitTimer) return;
+    this.clearSimulationTimer();
+    this.setBusMoving(false);
+    this.simulationWaitTimer = setTimeout(() => {
+      this.simulationWaitTimer = null;
+      if (this.busMarker && this.simulationPath.length >= 2) {
+        this.runSimulationTimer();
+      }
+    }, WAYPOINT_WAIT_MS);
   }
 
   private clearSimulationState(): void {
@@ -292,8 +317,15 @@ export class TripMap implements AfterViewInit, OnChanges, OnDestroy {
     }
   }
 
+  private clearSimulationWaitTimer(): void {
+    if (this.simulationWaitTimer) {
+      clearTimeout(this.simulationWaitTimer);
+      this.simulationWaitTimer = null;
+    }
+  }
+
   private hasSimulationState(): boolean {
-    return !!this.simulationTimer || this.simulationPath.length > 0;
+    return !!this.simulationTimer || !!this.simulationWaitTimer || this.simulationPath.length > 0;
   }
 
   private setBusMoving(moving: boolean): void {
