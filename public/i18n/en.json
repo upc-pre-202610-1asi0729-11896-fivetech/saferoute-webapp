@@ -44,7 +44,15 @@
       "drivers": "Drivers & Profiles",
       "drivers-desc": "Manage drivers and parents",
       "subscription": "Subscription",
-      "subscription-desc": "View and manage your plan"
+      "subscription-desc": "View and manage your organization plan.",
+      "register-drivers": "Register Drivers",
+      "register-drivers-desc": "Manage drivers, licenses, assigned vehicle and status.",
+      "register-routes": "Register Routes",
+      "register-routes-desc": "Create routes with stops, driver, vehicle and schedule.",
+      "register-students": "Register Students",
+      "register-students-desc": "Register students and link them with parents.",
+      "register-parent": "Register Parent",
+      "register-parent-desc": "Manage parents and contact details."
     },
     "driver": {
       "trips": "My Trips",
@@ -60,7 +68,24 @@
       "alerts": "Alerts",
       "alerts-desc": "View notifications and messages",
       "plans": "Plans",
-      "plans-desc": "See available subscription plans"
+      "plans-desc": "See available subscription plans",
+      "my-child": "My Child",
+      "my-child-desc": "Track your child's trip and location in real time.",
+      "incident-report": "Incident Report",
+      "incident-report-desc": "Review incident reports from trips.",
+      "check-assistance": "Check Attendance",
+      "check-assistance-desc": "Verify your child's attendance and boarding status."
+    },
+    "actions-title": "What would you like to do?",
+    "metrics": {
+      "my-routes": "My Routes",
+      "trips-active": "Trips Active",
+      "students-served": "Students Served",
+      "my-children": "My Children",
+      "routes-assigned": "Routes Assigned",
+      "routes": "Routes",
+      "trips-in-route": "Trips in Route",
+      "users": "Users"
     }
   },
   "page-not-found": {
@@ -88,7 +113,18 @@
     "actions": "Actions",
     "confirm": "Confirm",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "status": "Status",
+    "name-required": "Name is required",
+    "add": "Add",
+    "update": "Update",
+    "save-changes": "Save changes",
+    "next": "Next",
+    "back": "Back",
+    "required-field": "Required field",
+    "active": "Active",
+    "inactive": "Inactive",
+    "unassigned": "Unassigned"
   },
   "iam": {
     "sign-in": {
@@ -110,9 +146,15 @@
         "admin": "Administrator"
       }
     },
-    "admin-login": { "title": "Administrator sign in" },
-    "user-login": { "title": "Sign in" },
-    "admin-register": { "title": "Register administrator" },
+    "admin-login": {
+      "title": "Administrator sign in"
+    },
+    "user-login": {
+      "title": "Sign in"
+    },
+    "admin-register": {
+      "title": "Register administrator"
+    },
     "user-register": {
       "title": "Create a Parent or Driver account",
       "role": "Account type",
@@ -129,11 +171,23 @@
     },
     "organization-management": {
       "title": "My organization",
-      "empty": "No organization linked to your account."
+      "empty": "No organization linked to your account.",
+      "subtitle": "Manage the institution main data.",
+      "empty-current": "There is no organization associated with the current user."
     },
     "organization": {
-      "status": { "active": "Active", "suspended": "Suspended" },
-      "field": { "id": "ID", "created-at": "Created at" }
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "field": {
+        "id": "ID",
+        "created-at": "Created at"
+      },
+      "legal-id": "Legal identifier",
+      "load-error": "Could not load the organization.",
+      "updated": "Organization updated",
+      "update-error": "Could not update the organization."
     },
     "fields": {
       "first-name": "First name",
@@ -142,7 +196,8 @@
       "password": "Password",
       "confirm-password": "Confirm password",
       "organization-name": "Organization name",
-      "organization-id": "Organization ID"
+      "organization-id": "Organization ID",
+      "phone": "Phone"
     },
     "actions": {
       "sign-in": "Sign In",
@@ -159,7 +214,26 @@
       "use-admin-tab": "This is an administrator account. Use the Administrator tab.",
       "password-mismatch": "Passwords do not match.",
       "registration-failed": "Registration failed. Please try again.",
-      "organization-create-failed": "Could not create the organization."
+      "organization-create-failed": "Could not create the organization.",
+      "password-required": "Password is required",
+      "invalid-email": "Invalid email",
+      "min-password": "Minimum 6 characters",
+      "email-required": "Email is required"
+    },
+    "profile": {
+      "notifications": "Notifications",
+      "current-password": "Current password",
+      "new-password": "New password",
+      "security": "Security",
+      "active-account": "Active account",
+      "organization-code": "Organization code",
+      "organization-code-help": "Share this code with parents and drivers so they can register.",
+      "general-notifications": "General",
+      "personal-information": "Personal information",
+      "update-password": "Update password",
+      "profile-updated": "Profile updated",
+      "passwords-do-not-match": "Passwords do not match",
+      "password-updated": "Password updated"
     }
   },
   "routes": {
@@ -182,9 +256,9 @@
     "cancel": "Cancel",
     "management": {
       "title": "Route Management",
-      "subtitle": "Configure school bus routes",
+      "subtitle": "Configure and assign school routes",
       "new": "New Route",
-      "edit": "Edit Route",
+      "edit": "Edit route",
       "empty": "No routes configured yet."
     },
     "fields": {
@@ -193,11 +267,46 @@
       "destination": "Destination",
       "stops": "Number of stops",
       "driver": "Driver",
-      "schedule": "Schedule"
+      "schedule": "Schedule",
+      "name-required": "Route name *",
+      "assigned-driver": "Assigned driver",
+      "type": "Type",
+      "departure-time": "Departure time"
     },
     "error": {
       "title-required": "Title is required",
       "description-required": "Description is required"
+    },
+    "type": {
+      "pickup": "Pickup",
+      "return": "Return",
+      "outbound": "Pickup"
+    },
+    "form": {
+      "route-data": "Route Data",
+      "stops-map": "Stops Map",
+      "calculating-road": "Calculating road route...",
+      "map-help": "First click: start. Second click: destination. Then intermediate stops are added.",
+      "clear-intermediate": "Clear intermediate stops",
+      "click-map-start": "Click on the map to define the route start",
+      "fixed-endpoint": "Fixed route endpoint",
+      "no-student-assigned": "No student assigned",
+      "intermediate-stop": "Intermediate stop"
+    },
+    "placeholders": {
+      "route-name": "e.g. North Route - Comas",
+      "stop-name": "Stop name"
+    },
+    "confirm": {
+      "delete-route": "Delete \"{{ name }}\"?"
+    },
+    "feedback": {
+      "assign-driver-before-trip": "Assign a driver to the route before creating a trip",
+      "trip-scheduled-for": "Trip scheduled for {{ route }} - {{ date }}",
+      "define-start-end": "Define the route start and arrival before saving",
+      "updated": "Route updated",
+      "created": "Route created",
+      "created-and-trip-scheduled": "Route created and trip scheduled"
     }
   },
   "stops": {
@@ -251,14 +360,58 @@
       "title": "Trip Monitor",
       "subtitle": "Real-time overview of active trips",
       "active": "Active Trips",
-      "no-active": "No active trips at the moment."
+      "no-active": "No active trips at the moment.",
+      "empty-all": "No trips registered.",
+      "select-detail": "Select a trip to view details"
     },
     "active": {
       "title": "My Active Trip",
       "start": "Start Trip",
-      "end": "End Trip",
+      "end": "Finish Trip",
       "emergency": "Emergency",
-      "no-trip": "No active trip assigned."
+      "no-trip": "No active trip assigned.",
+      "driver-title": "Trips",
+      "boarding": {
+        "title": "Boarding scanner",
+        "student": "Student",
+        "student-with-id": "Student #{{ id }}",
+        "description": "The driver scans the QR shown by {{ student }}.",
+        "activating-camera": "Activating camera...",
+        "detecting": "Detecting QR automatically...",
+        "mark-absent": "Mark absent",
+        "mark-boarded": "Mark boarded",
+        "scan-hint": "Point the camera at the student QR.",
+        "camera-error": "Could not activate the camera. Allow access or use the fallback button.",
+        "qr-unknown": "QR not recognized for SafeRoute.",
+        "qr-mismatch": "The QR belongs to another trip or student.",
+        "qr-valid": "Valid QR. Marking boarding..."
+      },
+      "feedback": {
+        "calculating-route": "Calculating route...",
+        "demo-restarted": "Demo restarted with a new active trip",
+        "trip-started": "Trip started - {{ route }}",
+        "boarded": "Attendance marked by QR",
+        "absent": "Student marked absent",
+        "trip-auto-finished": "Arrived at destination: trip finished automatically",
+        "trip-finished": "Trip finished",
+        "next-final-stop": "Next final stop: {{ stop }}!"
+      },
+      "notification": {
+        "boarded-title": "Boarding confirmed",
+        "absent-title": "Student absent",
+        "boarded-body": "Student #{{ childId }} boarded the bus. The parent email will be notified.",
+        "absent-body": "Student #{{ childId }} was marked absent."
+      },
+      "select-trip-help": "Select a trip to start or continue the simulation",
+      "progress": "Progress",
+      "departure": "Departure",
+      "current-stop": "Current stop",
+      "available-trips": "Available trips",
+      "no-assigned-trips": "No assigned trips",
+      "end-time": "End",
+      "confirm": {
+        "finish-trip": "Confirm trip completion?"
+      }
     },
     "tracking": {
       "title": "Track My Child's Bus",
@@ -266,15 +419,92 @@
     },
     "status": {
       "scheduled": "Scheduled",
-      "en-route": "En Route",
+      "en-route": "En route",
       "completed": "Completed",
       "cancelled": "Cancelled"
+    },
+    "demo": {
+      "start": "Start demo",
+      "simulate": "Simulate",
+      "simulate-trip": "Simulate trip",
+      "starting": "Starting...",
+      "restart": "Restart demo",
+      "pause": "Pause demo",
+      "resume": "Resume demo"
+    },
+    "stops": {
+      "title": "Stops",
+      "completed": "Completed",
+      "pending": "Pending",
+      "start-point": "Start point",
+      "current": "Here now",
+      "route-stops": "Route stops",
+      "empty": "No stops"
+    },
+    "parent": {
+      "title": "Track My Child's Bus",
+      "subtitle": "Real-time tracking of your child's school transport",
+      "eta": "ETA",
+      "empty": "There are no active trips assigned to your children right now.",
+      "driver": "Driver",
+      "current-location": "Current location",
+      "route": "Route",
+      "qr-title": "Student QRs",
+      "qr-alt": "QR for {{ name }}",
+      "bus-on-way": "Bus on the way",
+      "arrival-time": "Estimated arrival time",
+      "timeline": {
+        "title": "Today's route",
+        "started": "Bus left the starting point",
+        "stop": "Stop {{ order }} - {{ name }}"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Situation",
+      "select-type": "Select emergency type:",
+      "urgent": "Urgent",
+      "call-emergency": "Call emergency services",
+      "mild": "Mild",
+      "report-incident": "Report incident",
+      "line": "Emergency line",
+      "call-now": "Call now"
+    },
+    "actions": {
+      "create-trip": "Create Trip",
+      "create-trip-today": "Create trip for today",
+      "cancel-trip": "Cancel trip",
+      "activate-trip": "Activate trip",
+      "delete-trip": "Delete trip"
+    },
+    "attendance": {
+      "title": "Attendance History",
+      "subtitle": "View student check-in and check-out records",
+      "total-trips": "Total Trips",
+      "this-month": "This month",
+      "present-rate": "Present Rate",
+      "vs-last-month": "+2.1% vs last month",
+      "late-checkins": "Late Check-ins",
+      "absences": "Absences",
+      "legend": "Legend",
+      "all-present": "All Present",
+      "late-checkin": "Late Check-in",
+      "absence-recorded": "Absence Recorded",
+      "export-report": "Export Report",
+      "check-in": "Check-in",
+      "check-out": "Check-out",
+      "empty-day": "No records for this day"
+    },
+    "confirm": {
+      "cancel-trip": "Cancel trip #{{ id }}?",
+      "activate-trip": "Activate trip #{{ id }}?",
+      "delete-trip": "Delete trip #{{ id }}?"
     }
   },
   "notification": {
     "list": {
       "title": "Notifications",
-      "empty": "No notifications."
+      "empty": "No notifications.",
+      "mark-all-read": "Mark all as read"
     },
     "alert": {
       "title": "Alert Center",
@@ -283,7 +513,14 @@
       "message": "Message",
       "date": "Date",
       "empty": "No alerts.",
-      "new": "Report Incident"
+      "new": "Report Incident",
+      "new-alert": "New alert",
+      "form-subtitle": "Register an operational alert for the organization.",
+      "recipient-email": "Resend recipient email",
+      "recipient-help": "Optional. If empty, the administrator email will be used.",
+      "message-required": "Message is required",
+      "message-placeholder": "Describe the alert in more detail",
+      "high-priority": "High priority"
     },
     "message": {
       "new-title": "New Message",
@@ -299,15 +536,49 @@
       "high": "High"
     },
     "type": {
-      "incident": "Incident",
+      "incident": "Incidents",
       "info": "Information",
       "warning": "Warning"
+    },
+    "incident": {
+      "subtitle": "School transport incidents and notifications",
+      "report": "Report Incident",
+      "type": "Type",
+      "severity": "Severity",
+      "all-severity": "All severity",
+      "low": "Low",
+      "medium": "Moderate",
+      "high": "High",
+      "all-statuses": "All statuses",
+      "open": "Open",
+      "resolved": "Resolved",
+      "empty-filtered": "No incidents match the current filters.",
+      "resolve": "Resolve",
+      "description": "Description",
+      "description-required": "Description *",
+      "placeholder": "Describe the incident in detail...",
+      "delay": "Delay",
+      "breakdown": "Vehicle breakdown",
+      "accident": "Accident",
+      "behavior": "Behavior",
+      "other": "Other",
+      "send-report": "Send report",
+      "short-placeholder": "Briefly describe the situation...",
+      "all-types": "All types",
+      "breakdown-short": "Breakdown",
+      "emergency": "Emergency",
+      "type-of-incident": "Incident type",
+      "describe-incident": "Describe the incident",
+      "report-sent": "Report sent"
     }
   },
   "stakeholder": {
     "management": {
       "title": "People Management",
-      "new": "Add Person"
+      "new": "Add Person",
+      "subtitle": "Manage users, drivers and fleet",
+      "users-tab": "Users",
+      "logistics-tab": "Logistics"
     },
     "profile": {
       "list-title": "Profiles",
@@ -330,18 +601,79 @@
         "name": "Name",
         "grade": "Grade",
         "parent": "Parent"
-      }
+      },
+      "name": "Student name",
+      "boarding-status": "Boarding status",
+      "singular": "Student",
+      "grade-section": "Grade/Section",
+      "boarding": "Boarding"
     },
     "vehicle": {
       "title": "Vehicles",
       "new": "New Vehicle",
-      "empty": "No vehicles found.",
+      "empty": "No vehicles registered",
       "fields": {
         "plate": "License Plate",
         "model": "Model",
         "capacity": "Capacity",
         "driver": "Driver"
-      }
+      },
+      "management-title": "Vehicle Management",
+      "plate": "Plate",
+      "capacity": "Capacity",
+      "capacity-pax": "Capacity (pax)",
+      "management-subtitle": "Manage your organization fleet",
+      "singular": "Vehicle",
+      "model": "Model",
+      "empty-add-first": "No vehicles registered. Add the first one."
+    },
+    "actions": {
+      "add-parent": "Add Parent",
+      "add-student": "Add Student",
+      "add-driver": "Add Driver",
+      "add-vehicle": "Add vehicle"
+    },
+    "parent": {
+      "title": "Parent",
+      "assigned": "Assigned parent"
+    },
+    "driver": {
+      "title": "Drivers",
+      "singular": "Driver",
+      "empty": "No drivers registered"
+    },
+    "fields": {
+      "full-name": "Full name"
+    },
+    "children": {
+      "title": "Children"
+    },
+    "boarding": {
+      "boarded": "Boarded",
+      "waiting": "Waiting",
+      "absent": "Absent",
+      "of-boarding": "boarding"
+    },
+    "placeholders": {
+      "parent-name": "e.g. Rosita Nery",
+      "email": "email@example.com",
+      "initial-password": "Initial password",
+      "student-name": "e.g. Lucia Nery",
+      "grade": "e.g. 3rd B",
+      "first-name": "e.g. Carlos",
+      "last-name": "e.g. Ramirez",
+      "driver-email": "driver@saferoute.pe",
+      "plate": "e.g. ABC-123",
+      "model": "e.g. Toyota Coaster",
+      "plate-short": "ABC-123",
+      "vehicle-model": "Mercedes Sprinter"
+    },
+    "assigned": "assigned",
+    "confirm": {
+      "delete-parent": "Delete this parent and their children?",
+      "delete-student": "Delete this student?",
+      "delete-driver": "Delete this driver?",
+      "delete-vehicle": "Delete this vehicle?"
     }
   },
   "subscription": {
@@ -358,11 +690,18 @@
     },
     "plan-selection": {
       "title": "Choose your plan",
-      "subtitle": "Pick the plan that best fits your operation."
+      "subtitle": "Pick the plan that best fits your operation.",
+      "eyebrow": "PLANS & PRICING",
+      "title-main": "Choose the ideal plan",
+      "title-tail": "for your operation",
+      "hero-copy": "Digitize your school transport. No hidden costs. Cancel anytime.",
+      "popular": "Most Popular"
     },
     "status-view": {
       "title": "My subscription",
-      "empty": "You don't have an active subscription yet."
+      "empty": "You don't have an active subscription yet.",
+      "subtitle": "Current plan, validity and plan changes",
+      "no-other-plans": "No other plans are available from the backend."
     },
     "status-card": {
       "title": "Subscription",
@@ -370,7 +709,12 @@
       "price": "Price",
       "start-date": "Start date",
       "end-date": "End date",
-      "remaining-days": "Remaining days"
+      "remaining-days": "Remaining days",
+      "current-plan": "Current plan",
+      "subscription-id": "Subscription ID",
+      "expires": "Expires",
+      "included-features": "Included features",
+      "organization-info": "Organization information"
     },
     "status": {
       "active": "Active",
@@ -382,7 +726,11 @@
       "clear": "Clear",
       "upgrade": "Change plan",
       "cancel": "Cancel subscription",
-      "choose-plan": "Choose a plan"
+      "choose-plan": "Choose a plan",
+      "view-all-plans": "View all plans",
+      "not-available-upgrade": "Not available for upgrade",
+      "upgrade-now": "Upgrade now",
+      "subscribe-now": "Subscribe now"
     },
     "feedback": {
       "subscribed": "Subscription created.",
@@ -390,11 +738,68 @@
     },
     "confirm": {
       "cancel-header": "Cancel subscription",
-      "cancel-message": "Are you sure you want to cancel your subscription?"
+      "cancel-message": "Are you sure you want to cancel your subscription?",
+      "cancel-active": "Cancel the active subscription?"
     },
     "errors": {
       "no-plan-selected": "Please select a plan first.",
       "no-org": "You must belong to an organization to subscribe."
+    },
+    "selected-plan": "Selected plan",
+    "current-plan": "Current Plan",
+    "checkout": {
+      "success": "Payment completed successfully",
+      "cancelled": "Payment cancelled",
+      "sandbox": "Sandbox - test environment",
+      "subtitle": "Review your plan and complete payment securely.",
+      "order-summary": "Order summary",
+      "updating": "Updating your account in a few seconds...",
+      "try-again": "You can try again whenever you want.",
+      "error": "Error processing payment",
+      "error-help": "Try again with PayPal sandbox.",
+      "pay-paypal": "Pay with PayPal",
+      "loading-options": "Loading payment options..."
+    },
+    "billing": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "credit-applied": "Credit applied: -${{ credit }} ({{ days }} days remaining)",
+      "annual-option": "or $ {{ price }} yearly with 20% off",
+      "annual-saving": "Annual billing - save $ {{ saving }}/year"
+    },
+    "monthly-suffix": "/ month",
+    "plan-card": {
+      "basic-subtitle": "Ideal for small organized parent groups",
+      "intermediate-subtitle": "For medium fleets seeking more visibility",
+      "complete-subtitle": "Complete solution for school transport companies",
+      "all-included": "All included"
+    },
+    "features": {
+      "routes-2": "Up to 2 active routes",
+      "drivers-2": "Up to 2 drivers",
+      "students": "Student registration",
+      "digital-boarding": "Digital boarding marking",
+      "trip-lifecycle": "Trip start and closure",
+      "incidents": "Incident reporting",
+      "trip-log": "Trip log",
+      "boarding-notifications": "Boarding notifications",
+      "proximity-alerts": "Proximity alerts",
+      "live-camera": "Live bus camera",
+      "monthly-attendance": "Monthly attendance history",
+      "realtime-gps": "Real-time GPS",
+      "routes-6": "Up to 6 active routes",
+      "drivers-6": "Up to 6 drivers",
+      "attendance-history": "Attendance history",
+      "routes-20": "Up to 20 active routes",
+      "drivers-20": "Up to 20 drivers",
+      "active-routes-by-plan": "Active routes according to plan limit",
+      "drivers-by-plan": "Drivers according to plan limit",
+      "student-registration": "Student registration",
+      "trip-start-end": "Trip start and closure",
+      "incident-reporting": "Incident reporting"
     }
+  },
+  "language": {
+    "preferred": "Preferred language"
   }
 }

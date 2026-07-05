@@ -44,7 +44,15 @@
       "drivers": "Conductores y Perfiles",
       "drivers-desc": "Administra conductores y padres",
       "subscription": "Suscripción",
-      "subscription-desc": "Visualiza y gestiona tu plan"
+      "subscription-desc": "Visualiza y gestiona el plan de tu organizacion.",
+      "register-drivers": "Registrar conductores",
+      "register-drivers-desc": "Gestiona conductores: licencias, vehiculo asignado y estado.",
+      "register-routes": "Registrar rutas",
+      "register-routes-desc": "Crea rutas con paradas, conductor, vehiculo y horario.",
+      "register-students": "Registrar alumnos",
+      "register-students-desc": "Registra alumnos y vinculalos con sus padres.",
+      "register-parent": "Registrar padre",
+      "register-parent-desc": "Administra padres de familia y datos de contacto."
     },
     "driver": {
       "trips": "Mis Viajes",
@@ -60,7 +68,24 @@
       "alerts": "Alertas",
       "alerts-desc": "Ver notificaciones y mensajes",
       "plans": "Planes",
-      "plans-desc": "Conoce los planes de suscripción"
+      "plans-desc": "Conoce los planes de suscripción",
+      "my-child": "Mi hijo",
+      "my-child-desc": "Sigue en tiempo real el viaje y la ubicacion de tu hijo.",
+      "incident-report": "Reporte de incidentes",
+      "incident-report-desc": "Revisa reportes de incidentes ocurridos durante los viajes.",
+      "check-assistance": "Ver asistencia",
+      "check-assistance-desc": "Verifica la asistencia y estado de abordaje de tu hijo."
+    },
+    "actions-title": "Que quieres hacer?",
+    "metrics": {
+      "my-routes": "Mis rutas",
+      "trips-active": "Viajes activos",
+      "students-served": "Alumnos atendidos",
+      "my-children": "Mis hijos",
+      "routes-assigned": "Rutas asignadas",
+      "routes": "Rutas",
+      "trips-in-route": "Viajes en ruta",
+      "users": "Usuarios"
     }
   },
   "page-not-found": {
@@ -88,7 +113,18 @@
     "actions": "Acciones",
     "confirm": "Confirmar",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "status": "Estado",
+    "name-required": "Nombre requerido",
+    "add": "Agregar",
+    "update": "Actualizar",
+    "save-changes": "Guardar cambios",
+    "next": "Siguiente",
+    "back": "Atras",
+    "required-field": "Campo requerido",
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "unassigned": "Sin asignar"
   },
   "iam": {
     "sign-in": {
@@ -110,9 +146,15 @@
         "admin": "Administrador"
       }
     },
-    "admin-login": { "title": "Inicio de sesión de administrador" },
-    "user-login": { "title": "Inicio de sesión" },
-    "admin-register": { "title": "Registrar administrador" },
+    "admin-login": {
+      "title": "Inicio de sesión de administrador"
+    },
+    "user-login": {
+      "title": "Inicio de sesión"
+    },
+    "admin-register": {
+      "title": "Registrar administrador"
+    },
     "user-register": {
       "title": "Crear cuenta de Padre o Conductor",
       "role": "Tipo de cuenta",
@@ -129,20 +171,33 @@
     },
     "organization-management": {
       "title": "Mi organización",
-      "empty": "No hay una organización asociada a tu cuenta."
+      "empty": "No hay una organización asociada a tu cuenta.",
+      "subtitle": "Gestiona los datos principales de la institucion.",
+      "empty-current": "No hay una organizacion asociada al usuario actual."
     },
     "organization": {
-      "status": { "active": "Activa", "suspended": "Suspendida" },
-      "field": { "id": "ID", "created-at": "Fecha de creación" }
+      "status": {
+        "active": "Activa",
+        "suspended": "Suspendida"
+      },
+      "field": {
+        "id": "ID",
+        "created-at": "Fecha de creación"
+      },
+      "legal-id": "Identificador legal",
+      "load-error": "No se pudo cargar la organizacion.",
+      "updated": "Organizacion actualizada",
+      "update-error": "No se pudo actualizar la organizacion."
     },
     "fields": {
       "first-name": "Nombres",
-      "last-name": "Apellidos",
+      "last-name": "Apellido",
       "email": "Correo electrónico",
       "password": "Contraseña",
-      "confirm-password": "Confirmar contraseña",
+      "confirm-password": "Confirmar contrasena",
       "organization-name": "Nombre de la organización",
-      "organization-id": "ID de la organización"
+      "organization-id": "ID de la organización",
+      "phone": "Telefono"
     },
     "actions": {
       "sign-in": "Iniciar sesión",
@@ -159,7 +214,26 @@
       "use-admin-tab": "Esta cuenta es de administrador. Usa la pestaña Administrador.",
       "password-mismatch": "Las contraseñas no coinciden.",
       "registration-failed": "El registro falló. Inténtalo de nuevo.",
-      "organization-create-failed": "No se pudo crear la organización."
+      "organization-create-failed": "No se pudo crear la organización.",
+      "password-required": "Contrasena requerida",
+      "invalid-email": "Correo invalido",
+      "min-password": "Minimo 6 caracteres",
+      "email-required": "Email requerido"
+    },
+    "profile": {
+      "notifications": "Notificaciones",
+      "current-password": "Contrasena actual",
+      "new-password": "Nueva contrasena",
+      "security": "Seguridad",
+      "active-account": "Cuenta activa",
+      "organization-code": "Codigo de organizacion",
+      "organization-code-help": "Comparte este codigo con los padres y conductores para que puedan registrarse.",
+      "general-notifications": "Generales",
+      "personal-information": "Informacion personal",
+      "update-password": "Actualizar contrasena",
+      "profile-updated": "Perfil actualizado",
+      "passwords-do-not-match": "Las contrasenas no coinciden",
+      "password-updated": "Contrasena actualizada"
     }
   },
   "routes": {
@@ -182,9 +256,9 @@
     "cancel": "Cancelar",
     "management": {
       "title": "Gestión de Rutas",
-      "subtitle": "Configura las rutas del transporte escolar",
+      "subtitle": "Configura y asigna rutas escolares",
       "new": "Nueva Ruta",
-      "edit": "Editar Ruta",
+      "edit": "Editar ruta",
       "empty": "No hay rutas configuradas aún."
     },
     "fields": {
@@ -193,11 +267,46 @@
       "destination": "Destino",
       "stops": "Número de paradas",
       "driver": "Conductor",
-      "schedule": "Horario"
+      "schedule": "Horario",
+      "name-required": "Nombre de la ruta *",
+      "assigned-driver": "Conductor asignado",
+      "type": "Tipo",
+      "departure-time": "Hora de salida"
     },
     "error": {
       "title-required": "El título es requerido",
       "description-required": "La descripción es requerida"
+    },
+    "type": {
+      "pickup": "Recojo (ida)",
+      "return": "Retorno",
+      "outbound": "Recojo"
+    },
+    "form": {
+      "route-data": "Datos de la ruta",
+      "stops-map": "Mapa de paradas",
+      "calculating-road": "Calculando ruta vial...",
+      "map-help": "Primer clic: inicio. Segundo clic: llegada. Luego se agregan paradas intermedias.",
+      "clear-intermediate": "Limpiar intermedias",
+      "click-map-start": "Haz clic en el mapa para definir el inicio de la ruta",
+      "fixed-endpoint": "Extremo fijo de la ruta",
+      "no-student-assigned": "Sin alumno asignado",
+      "intermediate-stop": "Parada intermedia"
+    },
+    "placeholders": {
+      "route-name": "Ej. Ruta Norte - Comas",
+      "stop-name": "Nombre de parada"
+    },
+    "confirm": {
+      "delete-route": "Eliminar \"{{ name }}\"?"
+    },
+    "feedback": {
+      "assign-driver-before-trip": "Asigna un conductor a la ruta antes de crear un viaje",
+      "trip-scheduled-for": "Viaje programado para {{ route }} - {{ date }}",
+      "define-start-end": "Define el inicio y la llegada de la ruta antes de guardar",
+      "updated": "Ruta actualizada",
+      "created": "Ruta creada",
+      "created-and-trip-scheduled": "Ruta creada y viaje programado"
     }
   },
   "stops": {
@@ -251,14 +360,58 @@
       "title": "Monitor de Viajes",
       "subtitle": "Resumen en tiempo real de los viajes activos",
       "active": "Viajes Activos",
-      "no-active": "No hay viajes activos en este momento."
+      "no-active": "No hay viajes activos en este momento.",
+      "empty-all": "No hay viajes registrados.",
+      "select-detail": "Selecciona un viaje para ver el detalle"
     },
     "active": {
       "title": "Mi Viaje Activo",
-      "start": "Iniciar Viaje",
-      "end": "Finalizar Viaje",
+      "start": "Iniciar viaje",
+      "end": "Finalizar viaje",
       "emergency": "Emergencia",
-      "no-trip": "No tienes un viaje activo asignado."
+      "no-trip": "No tienes un viaje activo asignado.",
+      "driver-title": "Viajes",
+      "boarding": {
+        "title": "Escaner de abordaje",
+        "student": "Alumno",
+        "student-with-id": "Alumno #{{ id }}",
+        "description": "El conductor escanea el QR que presenta {{ student }}.",
+        "activating-camera": "Activando camara...",
+        "detecting": "Detectando QR automaticamente...",
+        "mark-absent": "Marcar ausencia",
+        "mark-boarded": "Marcar abordaje",
+        "scan-hint": "Apunta la camara al QR del alumno.",
+        "camera-error": "No se pudo activar la camara. Permite el acceso o usa el boton de respaldo.",
+        "qr-unknown": "QR no reconocido para SafeRoute.",
+        "qr-mismatch": "El QR pertenece a otro viaje o alumno.",
+        "qr-valid": "QR valido. Marcando abordaje..."
+      },
+      "feedback": {
+        "calculating-route": "Calculando ruta...",
+        "demo-restarted": "Demo reiniciado con un nuevo viaje activo",
+        "trip-started": "Viaje iniciado - {{ route }}",
+        "boarded": "Asistencia marcada por QR",
+        "absent": "Alumno marcado ausente",
+        "trip-auto-finished": "Llegada a destino: viaje finalizado automaticamente",
+        "trip-finished": "Viaje finalizado",
+        "next-final-stop": "Proxima parada final: {{ stop }}!"
+      },
+      "notification": {
+        "boarded-title": "Abordaje confirmado",
+        "absent-title": "Alumno ausente",
+        "boarded-body": "Alumno #{{ childId }} abordo el bus. Se notificara al correo del apoderado.",
+        "absent-body": "Alumno #{{ childId }} fue marcado como ausente."
+      },
+      "select-trip-help": "Selecciona un viaje para iniciar o continuar la simulacion",
+      "progress": "Progreso",
+      "departure": "Salida",
+      "current-stop": "Parada actual",
+      "available-trips": "Viajes disponibles",
+      "no-assigned-trips": "Sin viajes asignados",
+      "end-time": "Fin",
+      "confirm": {
+        "finish-trip": "Confirmas la finalizacion del viaje?"
+      }
     },
     "tracking": {
       "title": "Seguimiento del Bus",
@@ -266,15 +419,92 @@
     },
     "status": {
       "scheduled": "Programado",
-      "en-route": "En Ruta",
+      "en-route": "En ruta",
       "completed": "Completado",
       "cancelled": "Cancelado"
+    },
+    "demo": {
+      "start": "Iniciar demo",
+      "simulate": "Simular",
+      "simulate-trip": "Simular viaje",
+      "starting": "Iniciando...",
+      "restart": "Reiniciar demo",
+      "pause": "Pausar demo",
+      "resume": "Continuar demo"
+    },
+    "stops": {
+      "title": "Paradas",
+      "completed": "Completada",
+      "pending": "Pendiente",
+      "start-point": "Punto de inicio",
+      "current": "Aqui ahora",
+      "route-stops": "Paradas de la ruta",
+      "empty": "Sin paradas"
+    },
+    "parent": {
+      "title": "Seguimiento del bus",
+      "subtitle": "Seguimiento en tiempo real del transporte de tu hijo/a",
+      "eta": "ETA",
+      "empty": "No hay viajes activos asignados a tus hijos en este momento.",
+      "driver": "Conductor",
+      "current-location": "Ubicacion actual",
+      "route": "Ruta",
+      "qr-title": "QR de estudiantes",
+      "qr-alt": "QR de {{ name }}",
+      "bus-on-way": "Bus en camino",
+      "arrival-time": "Tiempo estimado de llegada",
+      "timeline": {
+        "title": "Recorrido del dia",
+        "started": "Bus salio del punto inicial",
+        "stop": "Parada {{ order }} - {{ name }}"
+      }
+    },
+    "emergency": {
+      "title": "Situacion de emergencia",
+      "select-type": "Selecciona el tipo de emergencia:",
+      "urgent": "Urgente",
+      "call-emergency": "Llamar a emergencias",
+      "mild": "Leve",
+      "report-incident": "Reportar incidente",
+      "line": "Linea de emergencia",
+      "call-now": "Llamar ahora"
+    },
+    "actions": {
+      "create-trip": "Crear viaje",
+      "create-trip-today": "Crear viaje para hoy",
+      "cancel-trip": "Cancelar viaje",
+      "activate-trip": "Activar viaje",
+      "delete-trip": "Eliminar viaje"
+    },
+    "attendance": {
+      "title": "Historial de asistencia",
+      "subtitle": "Consulta registros de abordaje y bajada de alumnos",
+      "total-trips": "Viajes totales",
+      "this-month": "Este mes",
+      "present-rate": "Tasa de asistencia",
+      "vs-last-month": "+2.1% vs mes anterior",
+      "late-checkins": "Abordajes tarde",
+      "absences": "Ausencias",
+      "legend": "Leyenda",
+      "all-present": "Todos presentes",
+      "late-checkin": "Abordaje tarde",
+      "absence-recorded": "Ausencia registrada",
+      "export-report": "Exportar reporte",
+      "check-in": "Abordaje",
+      "check-out": "Bajada",
+      "empty-day": "Sin registros para este dia"
+    },
+    "confirm": {
+      "cancel-trip": "Cancelar viaje #{{ id }}?",
+      "activate-trip": "Activar viaje #{{ id }}?",
+      "delete-trip": "Eliminar viaje #{{ id }}?"
     }
   },
   "notification": {
     "list": {
       "title": "Notificaciones",
-      "empty": "No hay notificaciones."
+      "empty": "No hay notificaciones.",
+      "mark-all-read": "Marcar todas leidas"
     },
     "alert": {
       "title": "Centro de Alertas",
@@ -283,7 +513,14 @@
       "message": "Mensaje",
       "date": "Fecha",
       "empty": "No hay alertas.",
-      "new": "Reportar Incidente"
+      "new": "Reportar Incidente",
+      "new-alert": "Nueva alerta",
+      "form-subtitle": "Registra una alerta operacional para la organizacion.",
+      "recipient-email": "Email destinatario para Resend",
+      "recipient-help": "Opcional. Si lo dejas vacio, se usara el email del administrador.",
+      "message-required": "El mensaje es obligatorio",
+      "message-placeholder": "Describe la alerta con mas detalle",
+      "high-priority": "Prioridad alta"
     },
     "message": {
       "new-title": "Nuevo Mensaje",
@@ -294,20 +531,54 @@
       "cancel": "Cancelar"
     },
     "severity": {
-      "low": "Baja",
-      "medium": "Media",
-      "high": "Alta"
+      "low": "Leve",
+      "medium": "Moderado",
+      "high": "Grave"
     },
     "type": {
-      "incident": "Incidente",
+      "incident": "Incidentes",
       "info": "Información",
       "warning": "Advertencia"
+    },
+    "incident": {
+      "subtitle": "Incidencias y notificaciones del transporte escolar",
+      "report": "Reportar incidencia",
+      "type": "Tipo",
+      "severity": "Gravedad",
+      "all-severity": "Toda gravedad",
+      "low": "Leve",
+      "medium": "Moderado",
+      "high": "Grave",
+      "all-statuses": "Todos los estados",
+      "open": "Abierto",
+      "resolved": "Resuelto",
+      "empty-filtered": "No hay incidencias con los filtros actuales.",
+      "resolve": "Resolver",
+      "description": "Descripcion",
+      "description-required": "Descripcion *",
+      "placeholder": "Describe la incidencia con detalle...",
+      "delay": "Retraso",
+      "breakdown": "Averia del vehiculo",
+      "accident": "Accidente",
+      "behavior": "Comportamiento",
+      "other": "Otro",
+      "send-report": "Enviar reporte",
+      "short-placeholder": "Describe brevemente la situacion...",
+      "all-types": "Todos los tipos",
+      "breakdown-short": "Averia",
+      "emergency": "Emergencia",
+      "type-of-incident": "Tipo de incidencia",
+      "describe-incident": "Describe el incidente",
+      "report-sent": "Reporte enviado"
     }
   },
   "stakeholder": {
     "management": {
       "title": "Gestión de Personas",
-      "new": "Agregar Persona"
+      "new": "Agregar Persona",
+      "subtitle": "Administra usuarios, conductores y flota",
+      "users-tab": "Usuarios",
+      "logistics-tab": "Logistica"
     },
     "profile": {
       "list-title": "Perfiles",
@@ -330,18 +601,79 @@
         "name": "Nombre",
         "grade": "Grado",
         "parent": "Padre"
-      }
+      },
+      "name": "Nombre del alumno",
+      "boarding-status": "Estado de abordaje",
+      "singular": "Alumno",
+      "grade-section": "Grado/Seccion",
+      "boarding": "Abordaje"
     },
     "vehicle": {
-      "title": "Vehículos",
+      "title": "Vehiculos",
       "new": "Nuevo Vehículo",
-      "empty": "No se encontraron vehículos.",
+      "empty": "Sin vehiculos registrados",
       "fields": {
         "plate": "Placa",
         "model": "Modelo",
         "capacity": "Capacidad",
         "driver": "Conductor"
-      }
+      },
+      "management-title": "Gestion de Vehiculos",
+      "plate": "Placa",
+      "capacity": "Capacidad",
+      "capacity-pax": "Capacidad (pax)",
+      "management-subtitle": "Administra la flota de tu organizacion",
+      "singular": "Vehiculo",
+      "model": "Modelo",
+      "empty-add-first": "No hay vehiculos registrados. Agrega el primero."
+    },
+    "actions": {
+      "add-parent": "Agregar Padre",
+      "add-student": "Agregar Alumno",
+      "add-driver": "Agregar Conductor",
+      "add-vehicle": "Agregar vehiculo"
+    },
+    "parent": {
+      "title": "Padre / Madre",
+      "assigned": "Padre/Madre asignado"
+    },
+    "driver": {
+      "title": "Conductores",
+      "singular": "Conductor",
+      "empty": "Sin conductores registrados"
+    },
+    "fields": {
+      "full-name": "Nombre completo"
+    },
+    "children": {
+      "title": "Hijos"
+    },
+    "boarding": {
+      "boarded": "Abordado",
+      "waiting": "En espera",
+      "absent": "Ausente",
+      "of-boarding": "de abordaje"
+    },
+    "placeholders": {
+      "parent-name": "Ej. Rosita Nery",
+      "email": "correo@ejemplo.com",
+      "initial-password": "Contrasena inicial",
+      "student-name": "Ej. Lucia Nery",
+      "grade": "Ej. 3ro B",
+      "first-name": "Ej. Carlos",
+      "last-name": "Ej. Ramirez",
+      "driver-email": "conductor@saferoute.pe",
+      "plate": "Ej. ABC-123",
+      "model": "Ej. Toyota Coaster",
+      "plate-short": "ABC-123",
+      "vehicle-model": "Mercedes Sprinter"
+    },
+    "assigned": "asignado",
+    "confirm": {
+      "delete-parent": "Eliminar este padre/madre y sus hijos?",
+      "delete-student": "Eliminar este alumno?",
+      "delete-driver": "Eliminar este conductor?",
+      "delete-vehicle": "Eliminar este vehiculo?"
     }
   },
   "subscription": {
@@ -358,11 +690,18 @@
     },
     "plan-selection": {
       "title": "Elige tu plan",
-      "subtitle": "Selecciona el plan que mejor se ajuste a tu operación."
+      "subtitle": "Selecciona el plan que mejor se ajuste a tu operación.",
+      "eyebrow": "PLANES Y PRECIOS",
+      "title-main": "Elige el plan ideal",
+      "title-tail": "para tu operacion",
+      "hero-copy": "Digitaliza tu transporte escolar. Sin costos ocultos. Cancela cuando quieras.",
+      "popular": "Mas popular"
     },
     "status-view": {
       "title": "Mi suscripción",
-      "empty": "Aún no tienes una suscripción activa."
+      "empty": "Aún no tienes una suscripción activa.",
+      "subtitle": "Plan actual, vigencia y cambios de plan",
+      "no-other-plans": "No hay otros planes disponibles desde el backend."
     },
     "status-card": {
       "title": "Suscripción",
@@ -370,7 +709,12 @@
       "price": "Precio",
       "start-date": "Fecha de inicio",
       "end-date": "Fecha de fin",
-      "remaining-days": "Días restantes"
+      "remaining-days": "Días restantes",
+      "current-plan": "Plan actual",
+      "subscription-id": "ID Suscripcion",
+      "expires": "Vence",
+      "included-features": "Funcionalidades incluidas",
+      "organization-info": "Informacion de organizacion"
     },
     "status": {
       "active": "Activa",
@@ -382,7 +726,11 @@
       "clear": "Limpiar",
       "upgrade": "Cambiar de plan",
       "cancel": "Cancelar suscripción",
-      "choose-plan": "Elegir un plan"
+      "choose-plan": "Elegir un plan",
+      "view-all-plans": "Ver todos los planes",
+      "not-available-upgrade": "No disponible para upgrade",
+      "upgrade-now": "Upgradear ahora",
+      "subscribe-now": "Contratar ahora"
     },
     "feedback": {
       "subscribed": "Suscripción creada.",
@@ -390,11 +738,68 @@
     },
     "confirm": {
       "cancel-header": "Cancelar suscripción",
-      "cancel-message": "¿Estás seguro de cancelar tu suscripción?"
+      "cancel-message": "¿Estás seguro de cancelar tu suscripción?",
+      "cancel-active": "Cancelar la suscripcion activa?"
     },
     "errors": {
       "no-plan-selected": "Selecciona un plan primero.",
       "no-org": "Debes pertenecer a una organización para suscribirte."
+    },
+    "selected-plan": "Plan seleccionado",
+    "current-plan": "Plan Actual",
+    "checkout": {
+      "success": "Pago realizado con exito",
+      "cancelled": "Pago cancelado",
+      "sandbox": "Sandbox - entorno de prueba",
+      "subtitle": "Revisa tu plan y completa el pago de forma segura.",
+      "order-summary": "Resumen de orden",
+      "updating": "Actualizando tu cuenta en unos segundos...",
+      "try-again": "Puedes intentarlo de nuevo cuando quieras.",
+      "error": "Error al procesar el pago",
+      "error-help": "Intenta nuevamente con PayPal sandbox.",
+      "pay-paypal": "Pagar con PayPal",
+      "loading-options": "Cargando opciones de pago..."
+    },
+    "billing": {
+      "monthly": "Mensual",
+      "annual": "Anual",
+      "credit-applied": "Credito aplicado: -${{ credit }} ({{ days }} dias restantes)",
+      "annual-option": "o $ {{ price }} al ano con 20% off",
+      "annual-saving": "Facturacion anual - ahorras $ {{ saving }}/ano"
+    },
+    "monthly-suffix": "/ mes",
+    "plan-card": {
+      "basic-subtitle": "Ideal para grupos pequenos de padres organizados",
+      "intermediate-subtitle": "Para flotas medianas que buscan mayor visibilidad",
+      "complete-subtitle": "Solucion total para empresas de transporte escolar",
+      "all-included": "Todo incluido"
+    },
+    "features": {
+      "routes-2": "Hasta 2 rutas activas",
+      "drivers-2": "Hasta 2 conductores",
+      "students": "Registro de alumnos",
+      "digital-boarding": "Marcacion de abordaje digital",
+      "trip-lifecycle": "Inicio y cierre de trayecto",
+      "incidents": "Reporte de incidencias",
+      "trip-log": "Bitacora de viajes",
+      "boarding-notifications": "Notificaciones de abordaje",
+      "proximity-alerts": "Alertas de proximidad",
+      "live-camera": "Camara en vivo del bus",
+      "monthly-attendance": "Historial de asistencia mensual",
+      "realtime-gps": "GPS en tiempo real",
+      "routes-6": "Hasta 6 rutas activas",
+      "drivers-6": "Hasta 6 conductores",
+      "attendance-history": "Historial de asistencia",
+      "routes-20": "Hasta 20 rutas activas",
+      "drivers-20": "Hasta 20 conductores",
+      "active-routes-by-plan": "Rutas activas segun limite del plan",
+      "drivers-by-plan": "Conductores segun limite del plan",
+      "student-registration": "Registro de alumnos",
+      "trip-start-end": "Inicio y cierre de trayecto",
+      "incident-reporting": "Reporte de incidencias"
     }
+  },
+  "language": {
+    "preferred": "Idioma preferido"
   }
 }
