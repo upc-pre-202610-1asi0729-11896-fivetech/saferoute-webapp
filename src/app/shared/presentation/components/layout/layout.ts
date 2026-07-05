@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -39,6 +39,7 @@ interface NavItem {
 })
 export class Layout {
   protected auth        = inject(AuthStore);
+  private router        = inject(Router);
   private stakeholder   = inject(StakeholderStore);
   private tripStore     = inject(TripStore);
   private routesStore   = inject(RoutesManagementStore);
@@ -48,6 +49,7 @@ export class Layout {
     // Reload all org-scoped data whenever the logged-in user changes
     effect(() => {
       const orgId = this.auth.currentUser()?.organizationId;
+      if (this.auth.isCheckoutPending()) return;
       if (orgId) {
         this.stakeholder.loadAll(orgId);
         this.tripStore.loadAll(Number(orgId));
@@ -58,7 +60,7 @@ export class Layout {
   }
 
   navItems = computed<NavItem[]>(() => {
-    if (!this.auth.isAuthenticated()) return [];
+    if (!this.showSidebar()) return [];
     const role = this.auth.currentUser()?.role;
     if (role === Role.ADMIN) {
       return [
@@ -94,5 +96,11 @@ export class Layout {
 
   signOut(): void {
     this.auth.signOut();
+  }
+
+  showSidebar(): boolean {
+    return this.auth.isAuthenticated()
+      && !this.auth.isCheckoutPending()
+      && !this.router.url.startsWith('/checkout');
   }
 }

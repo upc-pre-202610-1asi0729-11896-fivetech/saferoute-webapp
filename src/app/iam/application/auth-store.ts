@@ -7,6 +7,8 @@ import { SignInRequest, SignUpRequest, CreateOrganizationRequest } from '../infr
 
 const TOKEN_KEY = 'saferoute.token';
 const USER_KEY = 'saferoute.user';
+const CHECKOUT_PENDING_KEY = 'saferoute.checkoutPending';
+const CHECKOUT_URL_KEY = 'saferoute.checkoutUrl';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
@@ -77,6 +79,8 @@ export class AuthStore {
     this._organization.set(null);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(CHECKOUT_PENDING_KEY);
+    localStorage.removeItem(CHECKOUT_URL_KEY);
     this.router.navigate(['/iam/sign-in']).then();
   }
 
@@ -105,7 +109,10 @@ export class AuthStore {
                   localStorage.setItem(USER_KEY, JSON.stringify(user));
                   this._loading.set(false);
                   const sep = redirectUrl.includes('?') ? '&' : '?';
-                  this.router.navigateByUrl(`${redirectUrl}${sep}orgId=${org.id}`).then();
+                  const checkoutUrl = `${redirectUrl}${sep}orgId=${org.id}`;
+                  localStorage.setItem(CHECKOUT_PENDING_KEY, 'true');
+                  localStorage.setItem(CHECKOUT_URL_KEY, checkoutUrl);
+                  this.router.navigateByUrl(checkoutUrl).then();
                 },
                 error: err => {
                   this._error.set(err.message ?? 'iam.errors.registration-failed');
@@ -169,6 +176,21 @@ export class AuthStore {
     this._organization.set(null);
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(CHECKOUT_PENDING_KEY);
+    localStorage.removeItem(CHECKOUT_URL_KEY);
+  }
+
+  isCheckoutPending(): boolean {
+    return localStorage.getItem(CHECKOUT_PENDING_KEY) === 'true';
+  }
+
+  pendingCheckoutUrl(): string {
+    return localStorage.getItem(CHECKOUT_URL_KEY) ?? '/checkout';
+  }
+
+  completeCheckout(): void {
+    localStorage.removeItem(CHECKOUT_PENDING_KEY);
+    localStorage.removeItem(CHECKOUT_URL_KEY);
   }
 
   clearError(): void {

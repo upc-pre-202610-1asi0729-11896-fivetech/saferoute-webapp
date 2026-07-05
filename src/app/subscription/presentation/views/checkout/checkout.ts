@@ -117,6 +117,7 @@ export class Checkout implements AfterViewInit, OnDestroy {
           return;
         }
         const onSuccess = () => {
+          this.auth.completeCheckout();
           this.status.set('success');
           if (this.mode() === 'upgrade') {
             setTimeout(() => this.router.navigate(['/subscription/status']), 1800);
@@ -143,6 +144,10 @@ export class Checkout implements AfterViewInit, OnDestroy {
   }
 
   goBack(): void {
+    if (this.auth.isCheckoutPending()) {
+      this.auth.signOut();
+      return;
+    }
     this.router.navigate([this.mode() === 'upgrade' ? '/subscription/status' : '/iam/sign-in']);
   }
 }
